@@ -1,0 +1,1060 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>英语句法 · Sentence Lab</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  background:#fff;color:#1f2937;
+  font-family:'Segoe UI','Microsoft YaHei','PingFang SC',sans-serif;
+  -webkit-font-smoothing:antialiased;
+  padding-top:8px;
+}
+[hidden]{display:none!important}
+
+.back-to-workbench{
+  position:fixed;bottom:12px;right:12px;z-index:9999;
+  padding:6px 14px;background:#fff;
+  border:2px solid #2B7FD8;border-radius:14px;
+  font-size:12px;font-weight:700;color:#2B7FD8;
+  cursor:pointer;font-family:inherit;white-space:nowrap;
+  box-shadow:0 2px 8px rgba(0,0,0,.12);
+  transition:all .2s;text-decoration:none;
+}
+.back-to-workbench:hover{background:#2B7FD8;color:#fff}
+
+header{text-align:center;padding:4px 20px 8px}
+header h1{
+  font-size:22px;font-weight:800;
+  background:linear-gradient(90deg,#2B7FD8,#ff5c5c);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+}
+header p{font-size:11px;color:#64748b;margin-top:2px}
+
+.nav-tabs{
+  display:flex;justify-content:center;gap:4px;
+  padding:0 20px 10px;flex-wrap:wrap;
+}
+.nav-tab{
+  padding:6px 14px;border:2px solid #e2e8f0;border-radius:16px;
+  background:#fff;cursor:pointer;font-size:12px;font-weight:600;
+  color:#64748b;font-family:inherit;transition:all .15s;
+}
+.nav-tab:hover{border-color:#2B7FD8;color:#2B7FD8}
+.nav-tab.active{background:#2B7FD8;color:#fff;border-color:#2B7FD8}
+
+main{max-width:1100px;margin:0 auto;padding:0 16px 50px}
+
+/* 通用卡片 */
+.card{
+  background:#f8fafc;border-radius:14px;padding:16px;margin-bottom:14px;
+}
+.card h3{
+  font-size:15px;font-weight:800;margin-bottom:10px;
+  padding-left:8px;border-left:4px solid #2B7FD8;
+}
+
+/* 连词成句 */
+.build-flow{
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  flex-wrap:wrap;margin:14px 0;padding:16px;background:#fff;border-radius:12px;
+}
+.build-step{
+  padding:10px 16px;border-radius:10px;font-size:15px;font-weight:700;
+  text-align:center;min-width:80px;
+}
+.build-arrow{font-size:20px;color:#94a3b8;font-weight:700}
+.build-word{background:#dbeafe;color:#1e40af}
+.build-phrase{background:#fef3c7;color:#92400e}
+.build-sentence{background:#dcfce7;color:#166534}
+
+.sentence-evolution{
+  margin-top:14px;
+}
+.evo-step{
+  background:#fff;border-radius:10px;padding:12px 16px;margin-bottom:8px;
+  display:flex;align-items:center;gap:12px;
+}
+.evo-num{
+  width:28px;height:28px;border-radius:50%;background:#2B7FD8;color:#fff;
+  display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;
+  flex-shrink:0;
+}
+.evo-content{flex:1}
+.evo-sentence{font-size:17px;font-weight:700;margin-bottom:2px}
+.evo-desc{font-size:12px;color:#64748b}
+.evo-new{background:#fef3c7;padding:1px 4px;border-radius:3px;font-weight:700}
+
+.pattern-grid{
+  display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin:12px 0;
+}
+.pattern-card{
+  background:#fff;border:2px solid #e2e8f0;border-radius:10px;
+  padding:12px;cursor:pointer;text-align:center;transition:all .15s;
+}
+.pattern-card:hover{border-color:#2B7FD8;transform:translateY(-2px)}
+.pattern-card.active{border-color:#2B7FD8;background:#eff6ff}
+.pattern-formula{font-size:14px;font-weight:800;margin-bottom:4px}
+.pattern-name{font-size:11px;color:#64748b}
+.pattern-example{font-size:12px;color:#475569;margin-top:6px;font-style:italic}
+
+/* 图解教学 */
+.lesson-nav{
+  display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;
+}
+.lesson-btn{
+  padding:6px 12px;border:2px solid #e2e8f0;border-radius:8px;
+  background:#fff;cursor:pointer;font-size:12px;font-weight:600;
+  color:#64748b;font-family:inherit;transition:all .15s;
+}
+.lesson-btn:hover{border-color:#2B7FD8;color:#2B7FD8}
+.lesson-btn.active{background:#2B7FD8;color:#fff;border-color:#2B7FD8}
+.lesson-btn.lv2{border-color:#f59e0b}
+.lesson-btn.lv2.active{background:#f59e0b;border-color:#f59e0b}
+.lesson-btn.lv3{border-color:#a855f7}
+.lesson-btn.lv3.active{background:#a855f7;border-color:#a855f7}
+
+.lesson-content{
+  background:#fff;border-radius:12px;padding:16px;
+}
+.lesson-title{
+  font-size:17px;font-weight:800;margin-bottom:6px;color:#1e40af;
+}
+.lesson-desc{
+  font-size:13px;color:#475569;margin-bottom:14px;line-height:1.7;
+}
+.lesson-diagram{
+  background:#f8fafc;border-radius:10px;padding:16px;margin:12px 0;
+  display:flex;align-items:center;justify-content:center;min-height:140px;
+  overflow-x:auto;
+}
+.lesson-rule{
+  background:#eff6ff;border-radius:8px;padding:10px 14px;margin:10px 0;
+  font-size:13px;color:#1e40af;line-height:1.7;
+}
+.lesson-examples{
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px;
+  margin-top:10px;
+}
+.lesson-example{
+  background:#f8fafc;border-radius:8px;padding:10px;
+  font-size:14px;font-weight:600;cursor:pointer;
+}
+.lesson-example:hover{background:#eff6ff}
+
+/* 图解画板 */
+.canvas-section{
+  background:#f8fafc;border-radius:14px;padding:14px;margin-bottom:14px;
+}
+.tool-row{
+  display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-bottom:8px;
+}
+.tool-btn{
+  padding:5px 10px;border:2px solid #e2e8f0;border-radius:6px;
+  background:#fff;cursor:pointer;font-size:12px;font-weight:600;
+  color:#64748b;font-family:inherit;transition:all .15s;
+}
+.tool-btn:hover{border-color:#2B7FD8;color:#2B7FD8}
+.tool-btn.active{background:#2B7FD8;color:#fff;border-color:#2B7FD8}
+.tpl-btn{
+  padding:4px 10px;border:1px solid #cbd5e1;border-radius:6px;
+  background:#fff;cursor:pointer;font-size:12px;font-weight:600;
+  color:#475569;font-family:inherit;
+}
+.tpl-btn:hover{border-color:#2B7FD8;color:#2B7FD8}
+.word-chip{
+  padding:5px 10px;background:#eff6ff;border:2px solid #93c5fd;
+  border-radius:6px;font-size:13px;font-weight:700;color:#1e40af;
+  cursor:grab;text-align:center;user-select:none;
+}
+.word-chip:hover{background:#dbeafe}
+.canvas-word{cursor:move;user-select:none;font-size:18px;font-weight:700}
+.canvas-word:hover{filter:brightness(0.9)}
+.canvas-line{cursor:pointer}
+.canvas-line:hover{stroke-width:4!important}
+
+/* 句型分析结果 */
+.analysis-result{
+  background:#fff;border-radius:12px;padding:16px;margin-top:12px;
+}
+.pattern-label{
+  display:inline-block;padding:4px 12px;border-radius:8px;
+  font-size:14px;font-weight:800;margin-bottom:10px;
+}
+.pattern-sv{background:#dbeafe;color:#1e40af}
+.pattern-svo{background:#dcfce7;color:#166534}
+.pattern-svioo{background:#fef3c7;color:#92400e}
+.pattern-svooc{background:#fce7f3;color:#9d174d}
+.pattern-svlp{background:#f3e8ff;color:#6b21a8}
+
+.sentence-display{
+  font-size:22px;font-weight:700;text-align:center;padding:14px;
+  background:#f8fafc;border-radius:10px;margin-bottom:14px;
+  display:flex;justify-content:center;gap:4px;flex-wrap:wrap;
+}
+.word-token{
+  padding:4px 8px;border-radius:6px;cursor:pointer;transition:all .15s;
+}
+.word-token:hover{transform:scale(1.1)}
+.word-S{background:#dbeafe;color:#1e40af}
+.word-V{background:#fef3c7;color:#92400e}
+.word-O{background:#dcfce7;color:#166534}
+.word-IO{background:#cffafe;color:#155e75}
+.word-DO{background:#dcfce7;color:#166534}
+.word-OC{background:#ffedd5;color:#9a3412}
+.word-LV{background:#fef3c7;color:#92400e}
+.word-P{background:#fce7f3;color:#9d174d}
+.word-mod{background:#f1f5f9;color:#475569}
+
+.component-breakdown{
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));
+  gap:8px;margin-top:10px;
+}
+.component-item{
+  padding:10px;border-radius:8px;text-align:center;
+}
+.component-item .comp-name{font-size:11px;font-weight:600;opacity:0.8}
+.component-item .comp-word{font-size:16px;font-weight:800;margin-top:2px}
+
+@media(max-width:768px){
+  .pattern-grid{grid-template-columns:repeat(2,1fr)}
+  .component-breakdown{grid-template-columns:repeat(2,1fr)}
+  .lesson-examples{grid-template-columns:1fr}
+}
+</style>
+
+
+<style>
+/* ===== v2.0 统一设计语言（Alex 工作台品牌） ===== */
+.wb-topbar{position:sticky;top:0;z-index:99999;display:flex;align-items:center;gap:14px;background:rgba(254,252,246,.97);border-bottom:1px solid #eee7d8;padding:9px clamp(12px,3vw,26px);box-sizing:border-box;}
+.wb-topbar::before{content:'';position:absolute;left:0;top:0;right:0;height:3px;background:linear-gradient(90deg,#2B7FD8,#F4D758,#E84A5F);}
+.wb-back{flex:none;display:inline-flex;align-items:center;gap:5px;background:rgba(43,127,216,.08);color:#1a5fb0;border:1px solid rgba(43,127,216,.28);border-radius:999px;padding:6px 14px;font-size:.8rem;font-weight:600;text-decoration:none;font-family:'Segoe UI','Microsoft YaHei','PingFang SC',sans-serif;line-height:1.4;}
+.wb-back:hover{background:rgba(43,127,216,.18);}
+.wb-title{display:flex;align-items:baseline;gap:10px;min-width:0;}
+.wb-title b{font-size:1rem;font-weight:700;color:#1A1A2E;white-space:nowrap;}
+.wb-title i{font-style:normal;font-size:.72rem;color:#5a5a72;font-family:Georgia,'Times New Roman',serif;letter-spacing:.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+body{background:#fefcf6!important;}
+.back-to-workbench,.back-btn{display:none!important;}
+@media(max-width:560px){.wb-title b{font-size:.92rem;}.wb-title i{display:none;}.wb-topbar{gap:10px;padding:8px 10px;}}
+
+</style>
+</head>
+<body>
+<div class="wb-topbar"><a href="工作台.html#tools" class="wb-back">← 返回</a><div class="wb-title"><b>📊 句法</b><i>Sentence Diagram</i></div></div>
+
+
+<a href="工作台.html#tools" class="back-to-workbench">返回</a>
+
+<header>
+  <h1>英语句法 · Sentence Lab</h1>
+  <p>连词成句 · 图解教学 · 自由画图</p>
+</header>
+
+<div class="nav-tabs">
+  <button class="nav-tab active" data-page="build">连词成句</button>
+  <button class="nav-tab" data-page="diagram-teach">图解教学</button>
+  <button class="nav-tab" data-page="canvas">图解画板</button>
+</div>
+
+<main>
+  <!-- 一、连词成句 -->
+  <div id="page-build">
+    <div class="card">
+      <h3>英语句子是如何构成的？</h3>
+      <div class="build-flow">
+        <span class="build-step build-word">单词</span>
+        <span class="build-arrow">→</span>
+        <span class="build-step build-phrase">短语</span>
+        <span class="build-arrow">→</span>
+        <span class="build-step build-sentence">句子</span>
+      </div>
+      <p style="font-size:13px;color:#475569;line-height:1.8;text-align:center">
+        单词按一定规则组合成短语，短语按五大句型组合成句子。<br>
+        句子 = 主语 + 谓语（+ 宾语/表语/补语），再加上修饰成分（定语/状语）就变成长句。
+      </p>
+    </div>
+
+    <div class="card">
+      <h3>五大基本句型（所有句子的骨架）</h3>
+      <div class="pattern-grid" id="patternGrid"></div>
+      <div class="lesson-diagram">
+        <svg id="patternSVG" width="100%" viewBox="0 0 700 160"></svg>
+      </div>
+      <div id="patternDetail"></div>
+    </div>
+
+    <div class="card">
+      <h3>句子是如何变长的？（逐步添加修饰成分）</h3>
+      <div class="sentence-evolution" id="evolutionList"></div>
+    </div>
+
+    <div class="card">
+      <h3>句型分析仪（输入句子自动识别句型）</h3>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <input type="text" id="sentenceInput" placeholder="输入英语句子，如：The cat chases the mouse" 
+          style="flex:1;min-width:250px;padding:10px 14px;border:2px solid #e2e8f0;border-radius:10px;font-size:15px;font-weight:700;font-family:inherit">
+        <button onclick="analyzeSentence()" style="padding:10px 20px;background:#2B7FD8;color:#fff;border:none;border-radius:10px;cursor:pointer;font-size:14px;font-weight:700;font-family:inherit">分析</button>
+      </div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:10px">
+        <span style="font-size:12px;color:#64748b;align-self:center">试试：</span>
+        <button class="tpl-btn" onclick="testSentence('Birds fly')">S+V</button>
+        <button class="tpl-btn" onclick="testSentence('I love English')">S+V+O</button>
+        <button class="tpl-btn" onclick="testSentence('She is a teacher')">S+LV+P</button>
+        <button class="tpl-btn" onclick="testSentence('Mom gave me a gift')">S+V+IO+DO</button>
+        <button class="tpl-btn" onclick="testSentence('We made him happy')">S+V+O+OC</button>
+      </div>
+      <div id="analysisResult"></div>
+    </div>
+  </div>
+
+  <!-- 二、图解教学 -->
+  <div id="page-diagram-teach" hidden>
+    <div class="card">
+      <h3>Sentence Diagramming 图解教学（从短句到长句）</h3>
+      <p style="font-size:13px;color:#475569;margin-bottom:12px;line-height:1.7">
+        Reed-Kellogg图解法：把句子的单词放在横线上，用竖线分隔主谓、动宾，用斜线挂修饰语。
+        从最简单的"主语+谓语"开始，逐步增加难度。
+      </p>
+      <div class="lesson-nav" id="lessonNav"></div>
+      <div class="lesson-content" id="lessonContent"></div>
+    </div>
+  </div>
+
+  <!-- 三、图解画板 -->
+  <div id="page-canvas" hidden>
+    <div class="canvas-section">
+      <div class="tool-row">
+        <input type="text" id="diagramInput" placeholder="输入句子，点击拆分后拖拽到画布" 
+          style="flex:1;min-width:200px;padding:7px 12px;border:2px solid #e2e8f0;border-radius:8px;font-size:13px;font-family:inherit">
+        <button onclick="splitDiagramWords()" class="tool-btn">拆分单词</button>
+        <button onclick="clearDiagram()" class="tool-btn">清空</button>
+        <button onclick="undoDiagram()" class="tool-btn">撤销</button>
+      </div>
+      <div class="tool-row">
+        <span style="font-size:11px;color:#64748b">句型模板：</span>
+        <button onclick="loadDiagramTemplate('sv')" class="tpl-btn">S+V</button>
+        <button onclick="loadDiagramTemplate('svo')" class="tpl-btn">S+V+O</button>
+        <button onclick="loadDiagramTemplate('svp')" class="tpl-btn">S+LV+P</button>
+        <button onclick="loadDiagramTemplate('svioo')" class="tpl-btn">S+V+IO+DO</button>
+        <button onclick="loadDiagramTemplate('svooc')" class="tpl-btn">S+V+O+OC</button>
+      </div>
+      <div class="tool-row">
+        <span style="font-size:11px;color:#64748b">画图工具：</span>
+        <button id="dtSelect" onclick="setDiagramTool('select')" class="tool-btn active">🖱️选择/移动</button>
+        <button id="dtBaseline" onclick="setDiagramTool('baseline')" class="tool-btn">━基线</button>
+        <button id="dtVLine" onclick="setDiagramTool('vline')" class="tool-btn">┃竖线</button>
+        <button id="dtSLine" onclick="setDiagramTool('sline')" class="tool-btn">╱斜线</button>
+        <button id="dtText" onclick="setDiagramTool('text')" class="tool-btn">📝文字</button>
+        <button id="dtDelete" onclick="setDiagramTool('delete')" class="tool-btn">🗑️删除</button>
+      </div>
+      <div style="display:flex;gap:10px">
+        <div style="width:130px;flex-shrink:0">
+          <div style="font-size:11px;font-weight:700;color:#475569;margin-bottom:6px">单词池</div>
+          <div id="diagramWordPool" style="background:#fff;border:2px dashed #cbd5e1;border-radius:8px;padding:6px;min-height:380px;display:flex;flex-direction:column;gap:5px"></div>
+        </div>
+        <div style="flex:1">
+          <svg id="diagramCanvas" width="100%" height="420"
+            style="background:#fff;border:2px solid #e2e8f0;border-radius:8px;cursor:crosshair"
+            onmousedown="diagramMouseDown(event)" onmousemove="diagramMouseMove(event)" onmouseup="diagramMouseUp(event)">
+            <defs>
+              <pattern id="dgrid" width="25" height="25" patternUnits="userSpaceOnUse">
+                <path d="M 25 0 L 0 0 0 25" fill="none" stroke="#f1f5f9" stroke-width="1"/>
+              </pattern>
+            </defs>
+            <rect width="100%" height="100%" fill="url(#dgrid)"/>
+            <g id="diagramElements"></g>
+            <line id="diagramPreviewLine" x1="0" y1="0" x2="0" y2="0" stroke="#2B7FD8" stroke-width="2" stroke-dasharray="5,5" style="display:none"/>
+          </svg>
+          <div style="margin-top:6px;font-size:11px;color:#94a3b8">
+            操作：拆分单词 → 从左侧拖拽单词到画布 → 选择画线工具拖拽画线 → 选择工具可移动元素
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script>
+// 导航
+document.querySelectorAll('.nav-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    document.querySelectorAll('[id^="page-"]').forEach(p => p.hidden = true);
+    document.getElementById('page-' + tab.dataset.page).hidden = false;
+    if (tab.dataset.page === 'build') initBuildPage();
+    if (tab.dataset.page === 'diagram-teach') initDiagramTeach();
+  });
+});
+
+// ==================== 一、连词成句 ====================
+const patterns = [
+  {type:'sv', formula:'S + V', name:'主语+谓语', example:'Birds fly.', desc:'不及物动词，意思完整', parts:['S','V'], colors:['#3b82f6','#f59e0b']},
+  {type:'svo', formula:'S + V + O', name:'主语+谓语+宾语', example:'I love English.', desc:'及物动词，须接宾语', parts:['S','V','O'], colors:['#3b82f6','#f59e0b','#22c55e']},
+  {type:'svioo', formula:'S + V + IO + DO', name:'主语+谓语+间宾+直宾', example:'Mom gave me a gift.', desc:'双宾语动词', parts:['S','V','IO','DO'], colors:['#3b82f6','#f59e0b','#06b6d4','#22c55e']},
+  {type:'svooc', formula:'S + V + O + OC', name:'主语+谓语+宾语+宾补', example:'We made him happy.', desc:'复合宾语动词', parts:['S','V','O','OC'], colors:['#3b82f6','#f59e0b','#22c55e','#f97316']},
+  {type:'svlp', formula:'S + LV + P', name:'主语+系动词+表语', example:'She is a teacher.', desc:'系动词连接主语和表语', parts:['S','LV','P'], colors:['#3b82f6','#f59e0b','#ec4899']}
+];
+
+let currentPattern = 0;
+
+function initBuildPage() {
+  // 五大句型卡片
+  const grid = document.getElementById('patternGrid');
+  grid.innerHTML = '';
+  patterns.forEach((p, i) => {
+    const card = document.createElement('div');
+    card.className = 'pattern-card' + (i === 0 ? ' active' : '');
+    card.innerHTML = `<div class="pattern-formula">${p.formula}</div><div class="pattern-name">${p.name}</div><div class="pattern-example">${p.example}</div>`;
+    card.onclick = () => {
+      currentPattern = i;
+      document.querySelectorAll('.pattern-card').forEach(c => c.classList.remove('active'));
+      card.classList.add('active');
+      drawPatternDiagram();
+    };
+    grid.appendChild(card);
+  });
+  currentPattern = 0;
+  drawPatternDiagram();
+
+  // 句子演变
+  const evolution = [
+    {num:1, sentence:'The girl reads.', desc:'基础句：主语 + 谓语 + 宾语（S+V+O）', newWords:[]},
+    {num:2, sentence:'The beautiful girl reads.', desc:'+ 定语：形容词beautiful修饰名词girl', newWords:['beautiful']},
+    {num:3, sentence:'The beautiful girl reads quickly.', desc:'+ 状语：副词quickly修饰动词reads', newWords:['quickly']},
+    {num:4, sentence:'The beautiful girl reads English books quickly.', desc:'+ 定语：English修饰books，使宾语更具体', newWords:['English','books']},
+    {num:5, sentence:'The beautiful girl who loves English reads English books quickly.', desc:'+ 定语从句：who loves English修饰girl，句子变长', newWords:['who','loves','English']},
+    {num:6, sentence:'Because she loves English, the beautiful girl reads English books quickly every day.', desc:'+ 状语从句 + 频度状语，完整长难句', newWords:['Because','she','loves','English,','every','day.']},
+  ];
+  const list = document.getElementById('evolutionList');
+  list.innerHTML = '';
+  evolution.forEach(e => {
+    const div = document.createElement('div');
+    div.className = 'evo-step';
+    let sentenceHTML = e.sentence;
+    e.newWords.forEach(w => {
+      sentenceHTML = sentenceHTML.replace(w, `<span class="evo-new">${w}</span>`);
+    });
+    div.innerHTML = `<div class="evo-num">${e.num}</div>
+      <div class="evo-content">
+        <div class="evo-sentence">${sentenceHTML}</div>
+        <div class="evo-desc">${e.desc}</div>
+      </div>`;
+    list.appendChild(div);
+  });
+}
+
+function drawPatternDiagram() {
+  const p = patterns[currentPattern];
+  const svg = document.getElementById('patternSVG');
+  const ns = 'http://www.w3.org/2000/svg';
+  svg.innerHTML = '';
+  const baseY = 80;
+  const partWidth = 100;
+  const totalWidth = p.parts.length * partWidth + (p.parts.length - 1) * 15;
+  const startX = (700 - totalWidth) / 2;
+
+  const line = document.createElementNS(ns, 'line');
+  line.setAttribute('x1', startX - 20);
+  line.setAttribute('y1', baseY);
+  line.setAttribute('x2', startX + totalWidth + 20);
+  line.setAttribute('y2', baseY);
+  line.setAttribute('stroke', '#1f2937');
+  line.setAttribute('stroke-width', '2');
+  svg.appendChild(line);
+
+  const labels = {S:'主语', V:'谓语', O:'宾语', IO:'间接宾语', DO:'直接宾语', OC:'宾补', LV:'系动词', P:'表语'};
+  p.parts.forEach((part, i) => {
+    const x = startX + i * (partWidth + 15) + partWidth / 2;
+    if (i > 0) {
+      const sep = document.createElementNS(ns, 'line');
+      const isSlanted = part === 'P';
+      sep.setAttribute('x1', isSlanted ? startX + i * (partWidth + 15) - 12 : startX + i * (partWidth + 15) - 7);
+      sep.setAttribute('y1', baseY - 35);
+      sep.setAttribute('x2', isSlanted ? startX + i * (partWidth + 15) + 12 : startX + i * (partWidth + 15) - 7);
+      sep.setAttribute('y2', baseY + 5);
+      sep.setAttribute('stroke', '#1f2937');
+      sep.setAttribute('stroke-width', '2');
+      svg.appendChild(sep);
+    }
+    const text = document.createElementNS(ns, 'text');
+    text.setAttribute('x', x);
+    text.setAttribute('y', baseY - 12);
+    text.setAttribute('text-anchor', 'middle');
+    text.setAttribute('fill', p.colors[i]);
+    text.setAttribute('font-size', '20');
+    text.setAttribute('font-weight', '800');
+    text.textContent = part;
+    svg.appendChild(text);
+    const label = document.createElementNS(ns, 'text');
+    label.setAttribute('x', x);
+    label.setAttribute('y', baseY + 25);
+    label.setAttribute('text-anchor', 'middle');
+    label.setAttribute('fill', '#94a3b8');
+    label.setAttribute('font-size', '12');
+    label.textContent = labels[part];
+    svg.appendChild(label);
+  });
+
+  document.getElementById('patternDetail').innerHTML = `
+    <h4 style="font-size:16px;font-weight:800;margin-bottom:6px">${p.formula} · ${p.name}</h4>
+    <p style="font-size:14px;color:#475569;margin-bottom:8px">${p.desc}</p>
+    <p style="font-size:16px;font-weight:700;color:#1e40af">例句：${p.example}</p>
+  `;
+}
+
+// 句型分析
+function testSentence(s) {
+  document.getElementById('sentenceInput').value = s;
+  analyzeSentence();
+}
+
+function analyzeSentence() {
+  const input = document.getElementById('sentenceInput').value.trim();
+  if (!input) return;
+  const words = input.replace(/[.,!?]/g, '').split(/\s+/);
+  const result = detectPattern(words);
+  const patternNames = {
+    sv: {label:'S + V', name:'主语 + 谓语', cls:'pattern-sv'},
+    svo: {label:'S + V + O', name:'主语 + 谓语 + 宾语', cls:'pattern-svo'},
+    svioo: {label:'S + V + IO + DO', name:'主语 + 谓语 + 间接宾语 + 直接宾语', cls:'pattern-svioo'},
+    svooc: {label:'S + V + O + OC', name:'主语 + 谓语 + 宾语 + 宾补', cls:'pattern-svooc'},
+    svlp: {label:'S + LV + P', name:'主语 + 系动词 + 表语', cls:'pattern-svlp'}
+  };
+  const p = patternNames[result.type];
+  let html = `<div class="analysis-result">
+    <span class="pattern-label ${p.cls}">${p.label} · ${p.name}</span>
+    <div class="sentence-display">`;
+  result.tokens.forEach(t => {
+    html += `<span class="word-token word-${t.type}" title="${t.label}">${t.word}</span>`;
+  });
+  html += `</div><div class="component-breakdown">`;
+  result.components.forEach(c => {
+    const colors = {S:'#dbeafe', V:'#fef3c7', O:'#dcfce7', IO:'#cffafe', DO:'#dcfce7', OC:'#ffedd5', LV:'#fef3c7', P:'#fce7f3'};
+    html += `<div class="component-item" style="background:${colors[c.type]||'#f1f5f9'}">
+      <div class="comp-name">${c.label}</div><div class="comp-word">${c.word}</div></div>`;
+  });
+  html += `</div></div>`;
+  document.getElementById('analysisResult').innerHTML = html;
+}
+
+function detectPattern(words) {
+  const linkingVerbs = ['be','is','am','are','was','were','seem','appear','look','sound','smell','taste','feel','become','get','turn','grow'];
+  const ditransitiveVerbs = ['give','tell','buy','send','show','teach','bring','take','pass','read','write','sing','make','leave','pay','offer','promise'];
+  const complexTransitive = ['make','let','have','keep','find','call','name','elect','choose','consider','think','want','wish','expect'];
+  let verbIdx = -1, isLinking = false;
+  for (let i = 1; i < words.length; i++) {
+    const w = words[i].toLowerCase();
+    if (linkingVerbs.includes(w)) { verbIdx = i; isLinking = true; break; }
+    if (!['the','a','an','this','that','these','those','my','your','his','her','its','our','their','some','any'].includes(w)) {
+      verbIdx = i; break;
+    }
+  }
+  if (verbIdx === -1) verbIdx = 1;
+  const subject = words.slice(0, verbIdx).join(' ');
+  const verb = words[verbIdx];
+  const afterVerb = words.slice(verbIdx + 1);
+
+  if (isLinking) {
+    return {type:'svlp',
+      tokens:[...words.slice(0,verbIdx).map(w=>({word:w,type:'S',label:'主语'})),{word:verb,type:'LV',label:'系动词'},...afterVerb.map(w=>({word:w,type:'P',label:'表语'}))],
+      components:[{type:'S',label:'主语',word:subject},{type:'LV',label:'系动词',word:verb},{type:'P',label:'表语',word:afterVerb.join(' ')}]};
+  }
+  if (afterVerb.length === 0) {
+    return {type:'sv',
+      tokens:[...words.slice(0,verbIdx).map(w=>({word:w,type:'S',label:'主语'})),{word:verb,type:'V',label:'谓语'}],
+      components:[{type:'S',label:'主语',word:subject},{type:'V',label:'谓语',word:verb}]};
+  }
+  const v = verb.toLowerCase().replace(/s$/,'').replace(/ed$/,'');
+  if (ditransitiveVerbs.includes(v) && afterVerb.length >= 2) {
+    return {type:'svioo',
+      tokens:[...words.slice(0,verbIdx).map(w=>({word:w,type:'S',label:'主语'})),{word:verb,type:'V',label:'谓语'},{word:afterVerb[0],type:'IO',label:'间接宾语'},...afterVerb.slice(1).map(w=>({word:w,type:'DO',label:'直接宾语'}))],
+      components:[{type:'S',label:'主语',word:subject},{type:'V',label:'谓语',word:verb},{type:'IO',label:'间接宾语',word:afterVerb[0]},{type:'DO',label:'直接宾语',word:afterVerb.slice(1).join(' ')}]};
+  }
+  const commonAdjs = ['happy','sad','angry','tired','excited','beautiful','big','small','tall','short','hot','cold','fast','slow','easy','difficult','busy','free','full','open','clean','healthy','wrong','right','sure','glad','afraid','brave','smart','kind','friendly','polite','calm','quiet','loud','safe','dangerous','careful','lazy','active','alive','asleep','alone'];
+  const lastWord = afterVerb[afterVerb.length - 1].toLowerCase();
+  if (complexTransitive.includes(v) && commonAdjs.includes(lastWord)) {
+    return {type:'svooc',
+      tokens:[...words.slice(0,verbIdx).map(w=>({word:w,type:'S',label:'主语'})),{word:verb,type:'V',label:'谓语'},...afterVerb.slice(0,-1).map(w=>({word:w,type:'O',label:'宾语'})),{word:afterVerb[afterVerb.length-1],type:'OC',label:'宾补'}],
+      components:[{type:'S',label:'主语',word:subject},{type:'V',label:'谓语',word:verb},{type:'O',label:'宾语',word:afterVerb.slice(0,-1).join(' ')},{type:'OC',label:'宾补',word:afterVerb[afterVerb.length-1]}]};
+  }
+  return {type:'svo',
+    tokens:[...words.slice(0,verbIdx).map(w=>({word:w,type:'S',label:'主语'})),{word:verb,type:'V',label:'谓语'},...afterVerb.map(w=>({word:w,type:'O',label:'宾语'}))],
+    components:[{type:'S',label:'主语',word:subject},{type:'V',label:'谓语',word:verb},{type:'O',label:'宾语',word:afterVerb.join(' ')}]};
+}
+
+// ==================== 二、图解教学 ====================
+const lessons = [
+  // Level 1: 基础
+  {lv:1, title:'第1课：简单主语 + 谓语', desc:'最基本的句子结构。主语在左，谓语在右，中间用竖线分隔。',
+    rule:'画一条水平线（基线），中间画一条竖线分隔主语和谓语。主语写在左边，谓语写在右边。',
+    example:'Birds fly.', parts:['Birds','fly'], separators:[1]},
+  {lv:1, title:'第2课：直接宾语', desc:'及物动词后面接宾语。谓语和宾语之间用竖线分隔（竖线不穿过基线）。',
+    rule:'在谓语后面再加一条竖线（不穿过基线），宾语写在竖线右边。',
+    example:'The cat chases the mouse.', parts:['The cat','chases','the mouse'], separators:[1,2]},
+  {lv:1, title:'第3课：形容词（定语）', desc:'形容词修饰名词，用斜线挂在被修饰的名词下方。',
+    rule:'从名词位置向下画一条斜线，形容词写在斜线上。',
+    example:'The red apple is sweet.', parts:['The red apple','is','sweet'], separators:[1,2], modifiers:[{word:'red', target:0, type:'adj'}]},
+  {lv:1, title:'第4课：副词（状语）', desc:'副词修饰动词，用斜线挂在动词下方。',
+    rule:'从动词位置向下画一条斜线，副词写在斜线上。',
+    example:'She runs quickly.', parts:['She','runs','quickly'], separators:[1,2], modifiers:[{word:'quickly', target:1, type:'adv'}]},
+  {lv:1, title:'第5课：表语（系动词+表语）', desc:'系动词后面接表语，用斜线（不穿过基线）分隔系动词和表语。',
+    rule:'系动词和表语之间用斜线分隔（斜线不穿过基线），表语写在斜线右边。',
+    example:'She is a teacher.', parts:['She','is','a teacher'], separators:[1,2], slanted:[2]},
+  // Level 2: 进阶
+  {lv:2, title:'第6课：复合主语', desc:'两个主语用and连接，共用一个谓语。',
+    rule:'两个主语并排写在基线左边，中间用虚线连接，and写在虚线上。',
+    example:'Tom and Jerry are friends.', parts:['Tom','and','Jerry','are','friends'], separators:[3,4], compound:[0,2]},
+  {lv:2, title:'第7课：间接宾语', desc:'双宾语动词后面接"人+物"。间接宾语写在谓语下方的横线上。',
+    rule:'在谓语下方画一条小横线（支架），间接宾语写在上面，直接宾语写在基线上。',
+    example:'Mom gave me a gift.', parts:['Mom','gave','me','a gift'], separators:[1,2], indirect:{word:'me', target:1}},
+  {lv:2, title:'第8课：介词短语', desc:'介词短语作定语或状语，用斜线+横线挂在被修饰的词下方。',
+    rule:'从被修饰的词向下画斜线，斜线上写介词，横线末端写介词宾语。',
+    example:'The book on the desk is mine.', parts:['The book','is','mine'], separators:[1,2], prepPhrase:{word:'on the desk', target:0}},
+  {lv:2, title:'第9课：宾语补足语', desc:'宾语后面接补足语说明宾语的状态。',
+    rule:'宾语和宾补之间用斜线分隔，宾补写在斜线右边。',
+    example:'We made him happy.', parts:['We','made','him','happy'], separators:[1,2,3], slanted:[3]},
+  // Level 3: 高级
+  {lv:3, title:'第10课：定语从句', desc:'从句修饰名词，用虚线连接先行词和从句。',
+    rule:'先行词下方画虚线连接从句的图解，关系词写在虚线上。',
+    example:'The girl who sings is my friend.', parts:['The girl','is','my friend'], separators:[1,2], clause:{word:'who sings', target:0}},
+  {lv:3, title:'第11课：状语从句', desc:'从句修饰动词或全句，表示时间、原因、条件等。',
+    rule:'从句图解放在主句下方，用虚线连接到主句的动词。',
+    example:'When it rains, we stay home.', parts:['we','stay','home'], separators:[1,2], advClause:{word:'When it rains', target:1}},
+  {lv:3, title:'第12课：名词性从句', desc:'从句充当主语、宾语或表语。',
+    rule:'从句图解放在相应的位置（主语位/宾语位），用支架支撑。',
+    example:'What she said is true.', parts:['What she said','is','true'], separators:[1,2], nounClause:{word:'What she said', target:0}},
+];
+
+let currentLesson = 0;
+
+function initDiagramTeach() {
+  const nav = document.getElementById('lessonNav');
+  nav.innerHTML = '';
+  lessons.forEach((l, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'lesson-btn lv' + l.lv + (i === 0 ? ' active' : '');
+    btn.textContent = l.title.replace('第','').replace('课：','课');
+    btn.onclick = () => {
+      currentLesson = i;
+      document.querySelectorAll('.lesson-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      renderLesson();
+    };
+    nav.appendChild(btn);
+  });
+  currentLesson = 0;
+  renderLesson();
+}
+
+function renderLesson() {
+  const l = lessons[currentLesson];
+  const content = document.getElementById('lessonContent');
+  let html = `<div class="lesson-title">${l.title}</div>
+    <div class="lesson-desc">${l.desc}</div>
+    <div class="lesson-rule">📌 ${l.rule}</div>
+    <div class="lesson-diagram">${renderLessonDiagram(l)}</div>
+    <div style="text-align:center;font-size:16px;font-weight:700;color:#1e40af;margin:10px 0">例句：${l.example}</div>`;
+  content.innerHTML = html;
+}
+
+function renderLessonDiagram(l) {
+  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  svg.setAttribute('viewBox', '0 0 600 160');
+  svg.setAttribute('width', '100%');
+  svg.setAttribute('style', 'max-width:550px');
+  const ns = 'http://www.w3.org/2000/svg';
+  const baseY = 80;
+  const partWidth = 120;
+  const totalWidth = l.parts.length * partWidth;
+  const startX = (600 - totalWidth) / 2;
+
+  // 基线
+  const line = document.createElementNS(ns, 'line');
+  line.setAttribute('x1', startX - 20);
+  line.setAttribute('y1', baseY);
+  line.setAttribute('x2', startX + totalWidth + 20);
+  line.setAttribute('y2', baseY);
+  line.setAttribute('stroke', '#1f2937');
+  line.setAttribute('stroke-width', '2');
+  svg.appendChild(line);
+
+  // 分隔线和文字
+  l.parts.forEach((part, i) => {
+    const x = startX + i * partWidth + partWidth / 2;
+    if (i > 0) {
+      const sep = document.createElementNS(ns, 'line');
+      const isSlanted = l.slanted && l.slanted.includes(i);
+      sep.setAttribute('x1', isSlanted ? startX + i * partWidth - 15 : startX + i * partWidth);
+      sep.setAttribute('y1', baseY - 35);
+      sep.setAttribute('x2', isSlanted ? startX + i * partWidth + 15 : startX + i * partWidth);
+      sep.setAttribute('y2', baseY + 5);
+      sep.setAttribute('stroke', '#1f2937');
+      sep.setAttribute('stroke-width', '2');
+      svg.appendChild(sep);
+    }
+    const text = document.createElementNS(ns, 'text');
+    text.setAttribute('x', x);
+    text.setAttribute('y', baseY - 10);
+    text.setAttribute('text-anchor', 'middle');
+    text.setAttribute('fill', '#1f2937');
+    text.setAttribute('font-size', '16');
+    text.setAttribute('font-weight', '700');
+    text.textContent = part;
+    svg.appendChild(text);
+  });
+
+  // 修饰语（斜线）
+  if (l.modifiers) {
+    l.modifiers.forEach(m => {
+      const targetX = startX + m.target * partWidth + partWidth / 2;
+      const sl = document.createElementNS(ns, 'line');
+      sl.setAttribute('x1', targetX);
+      sl.setAttribute('y1', baseY);
+      sl.setAttribute('x2', targetX - 25);
+      sl.setAttribute('y2', baseY + 35);
+      sl.setAttribute('stroke', '#64748b');
+      sl.setAttribute('stroke-width', '1.5');
+      svg.appendChild(sl);
+      const mt = document.createElementNS(ns, 'text');
+      mt.setAttribute('x', targetX - 30);
+      mt.setAttribute('y', baseY + 42);
+      mt.setAttribute('text-anchor', 'middle');
+      mt.setAttribute('fill', '#64748b');
+      mt.setAttribute('font-size', '13');
+      mt.setAttribute('font-style', 'italic');
+      mt.textContent = m.word;
+      svg.appendChild(mt);
+    });
+  }
+
+  // 间接宾语
+  if (l.indirect) {
+    const targetX = startX + l.indirect.target * partWidth + partWidth / 2;
+    const sl = document.createElementNS(ns, 'line');
+    sl.setAttribute('x1', targetX);
+    sl.setAttribute('y1', baseY);
+    sl.setAttribute('x2', targetX);
+    sl.setAttribute('y2', baseY + 25);
+    sl.setAttribute('stroke', '#64748b');
+    sl.setAttribute('stroke-width', '1.5');
+    svg.appendChild(sl);
+    const hl = document.createElementNS(ns, 'line');
+    hl.setAttribute('x1', targetX - 30);
+    hl.setAttribute('y1', baseY + 25);
+    hl.setAttribute('x2', targetX + 30);
+    hl.setAttribute('y2', baseY + 25);
+    hl.setAttribute('stroke', '#64748b');
+    hl.setAttribute('stroke-width', '1.5');
+    svg.appendChild(hl);
+    const it = document.createElementNS(ns, 'text');
+    it.setAttribute('x', targetX);
+    it.setAttribute('y', baseY + 22);
+    it.setAttribute('text-anchor', 'middle');
+    it.setAttribute('fill', '#64748b');
+    it.setAttribute('font-size', '13');
+    it.textContent = l.indirect.word;
+    svg.appendChild(it);
+  }
+
+  // 介词短语
+  if (l.prepPhrase) {
+    const targetX = startX + l.prepPhrase.target * partWidth + partWidth / 2;
+    const sl = document.createElementNS(ns, 'line');
+    sl.setAttribute('x1', targetX);
+    sl.setAttribute('y1', baseY);
+    sl.setAttribute('x2', targetX - 30);
+    sl.setAttribute('y2', baseY + 40);
+    sl.setAttribute('stroke', '#64748b');
+    sl.setAttribute('stroke-width', '1.5');
+    svg.appendChild(sl);
+    const hl = document.createElementNS(ns, 'line');
+    hl.setAttribute('x1', targetX - 30);
+    hl.setAttribute('y1', baseY + 40);
+    hl.setAttribute('x2', targetX + 30);
+    hl.setAttribute('y2', baseY + 40);
+    hl.setAttribute('stroke', '#64748b');
+    hl.setAttribute('stroke-width', '1.5');
+    svg.appendChild(hl);
+    const pt = document.createElementNS(ns, 'text');
+    pt.setAttribute('x', targetX);
+    pt.setAttribute('y', baseY + 37);
+    pt.setAttribute('text-anchor', 'middle');
+    pt.setAttribute('fill', '#64748b');
+    pt.setAttribute('font-size', '12');
+    pt.textContent = l.prepPhrase.word;
+    svg.appendChild(pt);
+  }
+
+  return svg.outerHTML;
+}
+
+// ==================== 三、图解画板 ====================
+let diagramTool = 'select';
+let diagramDrawing = false;
+let diagramDragEl = null;
+let diagramDragOX = 0, diagramDragOY = 0;
+let diagramHistory = [];
+let diagramIdCounter = 0;
+
+function setDiagramTool(tool) {
+  diagramTool = tool;
+  document.querySelectorAll('#page-canvas .tool-btn').forEach(b => b.classList.remove('active'));
+  const map = {select:'dtSelect', baseline:'dtBaseline', vline:'dtVLine', sline:'dtSLine', text:'dtText', delete:'dtDelete'};
+  document.getElementById(map[tool]).classList.add('active');
+  const canvas = document.getElementById('diagramCanvas');
+  canvas.style.cursor = tool === 'select' ? 'default' : tool === 'delete' ? 'not-allowed' : 'crosshair';
+}
+
+function splitDiagramWords() {
+  const input = document.getElementById('diagramInput').value.trim();
+  if (!input) return;
+  const words = input.replace(/[.,!?;:'"]/g, '').split(/\s+/).filter(w => w);
+  const pool = document.getElementById('diagramWordPool');
+  pool.innerHTML = '';
+  words.forEach(word => {
+    const chip = document.createElement('div');
+    chip.className = 'word-chip';
+    chip.textContent = word;
+    chip.draggable = true;
+    chip.ondragstart = (e) => {
+      e.dataTransfer.setData('word', word);
+      e.dataTransfer.setData('type', 'diagramWord');
+    };
+    pool.appendChild(chip);
+  });
+}
+
+function getDiagramPoint(e) {
+  const svg = document.getElementById('diagramCanvas');
+  const rect = svg.getBoundingClientRect();
+  return {
+    x: (e.clientX - rect.left) * (svg.clientWidth || 800) / rect.width,
+    y: (e.clientY - rect.top) * (svg.clientHeight || 420) / rect.height
+  };
+}
+
+function saveDiagramHistory() {
+  const g = document.getElementById('diagramElements');
+  diagramHistory.push(g.innerHTML);
+  if (diagramHistory.length > 30) diagramHistory.shift();
+}
+
+function undoDiagram() {
+  if (diagramHistory.length === 0) return;
+  document.getElementById('diagramElements').innerHTML = diagramHistory.pop();
+}
+
+function clearDiagram() {
+  saveDiagramHistory();
+  document.getElementById('diagramElements').innerHTML = '';
+}
+
+function diagramMouseDown(e) {
+  const pt = getDiagramPoint(e);
+  const target = e.target;
+  if (diagramTool === 'delete') {
+    if (target.classList && (target.classList.contains('canvas-word') || target.classList.contains('canvas-line'))) {
+      saveDiagramHistory();
+      target.remove();
+    }
+    return;
+  }
+  if (diagramTool === 'select' && target.classList && target.classList.contains('canvas-word')) {
+    diagramDragEl = target;
+    diagramDragOX = pt.x - parseFloat(target.getAttribute('x'));
+    diagramDragOY = pt.y - parseFloat(target.getAttribute('y'));
+    return;
+  }
+  if (diagramTool === 'select' && target.classList && target.classList.contains('canvas-line')) {
+    diagramDragEl = target;
+    diagramDragOX = pt.x;
+    diagramDragOY = pt.y;
+    return;
+  }
+  if (diagramTool === 'text') {
+    const text = prompt('输入文字：');
+    if (text) {
+      saveDiagramHistory();
+      addDiagramElement('text', pt.x, pt.y, text, '#64748b', 13, true);
+    }
+    return;
+  }
+  if (['baseline', 'vline', 'sline'].includes(diagramTool)) {
+    diagramDrawing = true;
+    const preview = document.getElementById('diagramPreviewLine');
+    preview.setAttribute('x1', pt.x);
+    preview.setAttribute('y1', pt.y);
+    preview.setAttribute('x2', pt.x);
+    preview.setAttribute('y2', pt.y);
+    preview.style.display = 'block';
+  }
+}
+
+function diagramMouseMove(e) {
+  const pt = getDiagramPoint(e);
+  if (diagramDragEl && diagramTool === 'select') {
+    if (diagramDragEl.tagName === 'text') {
+      diagramDragEl.setAttribute('x', pt.x - diagramDragOX);
+      diagramDragEl.setAttribute('y', pt.y - diagramDragOY);
+    } else if (diagramDragEl.tagName === 'line') {
+      const dx = pt.x - diagramDragOX;
+      const dy = pt.y - diagramDragOY;
+      diagramDragEl.setAttribute('x1', parseFloat(diagramDragEl.getAttribute('x1')) + dx);
+      diagramDragEl.setAttribute('y1', parseFloat(diagramDragEl.getAttribute('y1')) + dy);
+      diagramDragEl.setAttribute('x2', parseFloat(diagramDragEl.getAttribute('x2')) + dx);
+      diagramDragEl.setAttribute('y2', parseFloat(diagramDragEl.getAttribute('y2')) + dy);
+      diagramDragOX = pt.x;
+      diagramDragOY = pt.y;
+    }
+    return;
+  }
+  if (diagramDrawing) {
+    const preview = document.getElementById('diagramPreviewLine');
+    if (diagramTool === 'vline') {
+      preview.setAttribute('x2', parseFloat(preview.getAttribute('x1')));
+      preview.setAttribute('y2', pt.y);
+    } else if (diagramTool === 'baseline') {
+      preview.setAttribute('x2', pt.x);
+      preview.setAttribute('y2', parseFloat(preview.getAttribute('y1')));
+    } else {
+      preview.setAttribute('x2', pt.x);
+      preview.setAttribute('y2', pt.y);
+    }
+  }
+}
+
+function diagramMouseUp(e) {
+  if (diagramDragEl) { diagramDragEl = null; return; }
+  if (diagramDrawing) {
+    diagramDrawing = false;
+    const preview = document.getElementById('diagramPreviewLine');
+    preview.style.display = 'none';
+    const x1 = parseFloat(preview.getAttribute('x1'));
+    const y1 = parseFloat(preview.getAttribute('y1'));
+    const x2 = parseFloat(preview.getAttribute('x2'));
+    const y2 = parseFloat(preview.getAttribute('y2'));
+    if (Math.abs(x2 - x1) > 5 || Math.abs(y2 - y1) > 5) {
+      saveDiagramHistory();
+      addDiagramElement('line', x1, y1, x2, y2, diagramTool);
+    }
+  }
+}
+
+function addDiagramElement(type, x1, y1, x2OrText, y2OrColor, size, italic) {
+  const ns = 'http://www.w3.org/2000/svg';
+  const g = document.getElementById('diagramElements');
+  if (type === 'text') {
+    const el = document.createElementNS(ns, 'text');
+    el.setAttribute('x', x1);
+    el.setAttribute('y', y1);
+    el.setAttribute('class', 'canvas-word');
+    el.setAttribute('fill', x2OrText);
+    el.setAttribute('font-size', y2OrColor || 18);
+    if (italic) el.setAttribute('font-style', 'italic');
+    el.textContent = size;
+    el.dataset.id = 't_' + (++diagramIdCounter);
+    g.appendChild(el);
+  } else if (type === 'word') {
+    const el = document.createElementNS(ns, 'text');
+    el.setAttribute('x', x1);
+    el.setAttribute('y', y1);
+    el.setAttribute('class', 'canvas-word');
+    el.setAttribute('fill', '#1f2937');
+    el.setAttribute('font-size', '18');
+    el.setAttribute('font-weight', '700');
+    el.textContent = x2OrText;
+    el.dataset.id = 'w_' + (++diagramIdCounter);
+    g.appendChild(el);
+  } else if (type === 'line') {
+    const el = document.createElementNS(ns, 'line');
+    el.setAttribute('x1', x1);
+    el.setAttribute('y1', y1);
+    el.setAttribute('x2', x2OrText);
+    el.setAttribute('y2', y2OrColor);
+    el.setAttribute('class', 'canvas-line');
+    el.setAttribute('stroke', size === 'sline' ? '#64748b' : '#1f2937');
+    el.setAttribute('stroke-width', '2');
+    el.dataset.id = 'l_' + (++diagramIdCounter);
+    g.appendChild(el);
+  }
+}
+
+function loadDiagramTemplate(type) {
+  clearDiagram();
+  const g = document.getElementById('diagramElements');
+  const ns = 'http://www.w3.org/2000/svg';
+  const baseY = 200;
+  const startX = 120;
+  const templates = {
+    sv: {parts:['主语','谓语'], width:180},
+    svo: {parts:['主语','谓语','宾语'], width:320},
+    svp: {parts:['主语','系动词','表语'], width:320, slanted:true},
+    svioo: {parts:['主语','谓语','间接宾语','直接宾语'], width:460},
+    svooc: {parts:['主语','谓语','宾语','宾补'], width:460}
+  };
+  const tpl = templates[type];
+  if (!tpl) return;
+  saveDiagramHistory();
+  const baseline = document.createElementNS(ns, 'line');
+  baseline.setAttribute('x1', startX);
+  baseline.setAttribute('y1', baseY);
+  baseline.setAttribute('x2', startX + tpl.width);
+  baseline.setAttribute('y2', baseY);
+  baseline.setAttribute('class', 'canvas-line');
+  baseline.setAttribute('stroke', '#1f2937');
+  baseline.setAttribute('stroke-width', '2');
+  g.appendChild(baseline);
+  const pw = tpl.width / tpl.parts.length;
+  tpl.parts.forEach((part, i) => {
+    if (i > 0) {
+      const vline = document.createElementNS(ns, 'line');
+      const sl = type === 'svp' && i === 2;
+      vline.setAttribute('x1', sl ? startX + i * pw - 12 : startX + i * pw - 7);
+      vline.setAttribute('y1', baseY - 35);
+      vline.setAttribute('x2', sl ? startX + i * pw + 12 : startX + i * pw - 7);
+      vline.setAttribute('y2', baseY + 5);
+      vline.setAttribute('class', 'canvas-line');
+      vline.setAttribute('stroke', '#1f2937');
+      vline.setAttribute('stroke-width', '2');
+      g.appendChild(vline);
+    }
+    const label = document.createElementNS(ns, 'text');
+    label.setAttribute('x', startX + i * pw + pw / 2);
+    label.setAttribute('y', baseY - 12);
+    label.setAttribute('text-anchor', 'middle');
+    label.setAttribute('class', 'canvas-word');
+    label.setAttribute('fill', '#94a3b8');
+    label.setAttribute('font-size', '12');
+    label.setAttribute('font-style', 'italic');
+    label.textContent = part;
+    g.appendChild(label);
+  });
+}
+
+// 拖放单词到画布
+document.addEventListener('DOMContentLoaded', () => {
+  const canvas = document.getElementById('diagramCanvas');
+  if (canvas) {
+    canvas.addEventListener('dragover', (e) => e.preventDefault());
+    canvas.addEventListener('drop', (e) => {
+      e.preventDefault();
+      const word = e.dataTransfer.getData('word');
+      const type = e.dataTransfer.getData('type');
+      if (word && type === 'diagramWord') {
+        const pt = getDiagramPoint(e);
+        saveDiagramHistory();
+        addDiagramElement('word', pt.x, pt.y, word);
+      }
+    });
+  }
+  // 初始化
+  initBuildPage();
+});
+</script>
+
+</body>
+</html>

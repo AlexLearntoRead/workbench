@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>英语词法 · Morphology Lab</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  background:#fff;color:#1f2937;
+  font-family:'Segoe UI','Microsoft YaHei','PingFang SC',sans-serif;
+  -webkit-font-smoothing:antialiased;
+  padding-top:8px;
+}
+[hidden]{display:none!important}
+
+.back-to-workbench{
+  position:fixed;bottom:12px;right:12px;z-index:9999;
+  padding:6px 14px;background:#fff;
+  border:2px solid #2B7FD8;border-radius:14px;
+  font-size:12px;font-weight:700;color:#2B7FD8;
+  cursor:pointer;font-family:inherit;white-space:nowrap;
+  box-shadow:0 2px 8px rgba(0,0,0,.12);
+  transition:all .2s;text-decoration:none;
+}
+.back-to-workbench:hover{background:#2B7FD8;color:#fff}
+
+header{text-align:center;padding:4px 20px 8px}
+header h1{
+  font-size:22px;font-weight:800;
+  background:linear-gradient(90deg,#2B7FD8,#ff5c5c);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+}
+header p{font-size:11px;color:#64748b;margin-top:2px}
+
+.nav-tabs{
+  display:flex;justify-content:center;gap:4px;
+  padding:0 20px 10px;flex-wrap:wrap;
+}
+.nav-tab{
+  padding:6px 12px;border:2px solid #e2e8f0;border-radius:16px;
+  background:#fff;cursor:pointer;font-size:12px;font-weight:600;
+  color:#64748b;font-family:inherit;transition:all .15s;
+}
+.nav-tab:hover{border-color:#2B7FD8;color:#2B7FD8}
+.nav-tab.active{background:#2B7FD8;color:#fff;border-color:#2B7FD8}
+
+main{max-width:1100px;margin:0 auto;padding:0 16px 50px}
+
+/* 变化分析仪 */
+.analyzer{
+  background:#f8fafc;border-radius:14px;padding:16px;margin-bottom:14px;
+}
+.analyzer-input{
+  display:flex;gap:8px;align-items:center;margin-bottom:14px;flex-wrap:wrap;
+}
+.analyzer-input input{
+  flex:1;min-width:200px;padding:10px 14px;
+  border:2px solid #e2e8f0;border-radius:10px;
+  font-size:16px;font-weight:700;font-family:inherit;
+}
+.analyzer-input input:focus{outline:none;border-color:#2B7FD8}
+.analyzer-input select{
+  padding:10px 12px;border:2px solid #e2e8f0;border-radius:10px;
+  font-size:14px;font-weight:600;font-family:inherit;background:#fff;
+}
+.analyzer-input button{
+  padding:10px 20px;background:#2B7FD8;color:#fff;border:none;
+  border-radius:10px;cursor:pointer;font-size:14px;font-weight:700;
+  font-family:inherit;
+}
+
+/* 变化结果展示 */
+.result-grid{
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));
+  gap:10px;margin-top:12px;
+}
+.result-card{
+  background:#fff;border-radius:10px;padding:12px;
+  text-align:center;border:2px solid #e2e8f0;
+  transition:all .15s;
+}
+.result-card:hover{border-color:#2B7FD8;transform:translateY(-2px)}
+.result-label{
+  font-size:11px;color:#64748b;font-weight:600;margin-bottom:4px;
+}
+.result-word{
+  font-size:20px;font-weight:800;color:#1e40af;
+  cursor:pointer;
+}
+.result-word:hover{color:#2B7FD8}
+.result-rule{
+  font-size:10px;color:#94a3b8;margin-top:4px;
+}
+
+/* 规则可视化 */
+.rules-section{
+  background:#f8fafc;border-radius:14px;padding:16px;margin-bottom:14px;
+}
+.rules-section h3{
+  font-size:15px;font-weight:800;margin-bottom:10px;
+  padding-left:8px;border-left:4px solid #2B7FD8;
+}
+.rule-flow{
+  display:flex;align-items:center;gap:6px;flex-wrap:wrap;
+  margin:10px 0;padding:12px;background:#fff;border-radius:10px;
+}
+.rule-step{
+  padding:8px 14px;border-radius:8px;font-size:14px;font-weight:700;
+  text-align:center;min-width:60px;
+}
+.rule-arrow{font-size:18px;color:#94a3b8;font-weight:700}
+.rule-base{background:#dbeafe;color:#1e40af}
+.rule-change{background:#fef3c7;color:#92400e}
+.rule-result{background:#dcfce7;color:#166534}
+
+.rule-table{
+  width:100%;border-collapse:collapse;margin:10px 0;
+  background:#fff;border-radius:10px;overflow:hidden;font-size:12px;
+}
+.rule-table th{
+  background:#2B7FD8;color:#fff;padding:8px 10px;font-weight:700;text-align:left;
+}
+.rule-table td{
+  padding:8px 10px;border-bottom:1px solid #f1f5f9;
+}
+.rule-table tr:last-child td{border-bottom:none}
+.rule-table tr:hover td{background:#f8fafc}
+
+/* 实词卡片 */
+.pos-cards{
+  display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:14px;
+}
+.pos-card{
+  background:#fff;border:2px solid #e2e8f0;border-radius:12px;
+  padding:14px;cursor:pointer;text-align:center;transition:all .15s;
+}
+.pos-card:hover{border-color:#2B7FD8;transform:translateY(-2px)}
+.pos-card.active{border-color:#2B7FD8;background:#eff6ff}
+.pos-icon{font-size:28px;margin-bottom:4px}
+.pos-name{font-size:14px;font-weight:800}
+.pos-en{font-size:10px;color:#94a3b8}
+.pos-changes{font-size:11px;color:#64748b;margin-top:6px}
+
+/* 不规则变化 */
+.irregular-list{
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));
+  gap:8px;margin-top:10px;
+}
+.irregular-item{
+  background:#fff;border-radius:8px;padding:10px;
+  display:flex;align-items:center;gap:8px;border:1px solid #f1f5f9;
+}
+.irregular-base{font-weight:700;color:#1e40af;min-width:60px}
+.irregular-arrow{color:#94a3b8}
+.irregular-form{color:#166534;font-weight:600}
+
+@media(max-width:768px){
+  .pos-cards{grid-template-columns:repeat(2,1fr)}
+  .result-grid{grid-template-columns:repeat(2,1fr)}
+}
+</style>
+
+
+<style>
+/* ===== v2.0 统一设计语言（Alex 工作台品牌） ===== */
+.wb-topbar{position:sticky;top:0;z-index:99999;display:flex;align-items:center;gap:14px;background:rgba(254,252,246,.97);border-bottom:1px solid #eee7d8;padding:9px clamp(12px,3vw,26px);box-sizing:border-box;}
+.wb-topbar::before{content:'';position:absolute;left:0;top:0;right:0;height:3px;background:linear-gradient(90deg,#2B7FD8,#F4D758,#E84A5F);}
+.wb-back{flex:none;display:inline-flex;align-items:center;gap:5px;background:rgba(43,127,216,.08);color:#1a5fb0;border:1px solid rgba(43,127,216,.28);border-radius:999px;padding:6px 14px;font-size:.8rem;font-weight:600;text-decoration:none;font-family:'Segoe UI','Microsoft YaHei','PingFang SC',sans-serif;line-height:1.4;}
+.wb-back:hover{background:rgba(43,127,216,.18);}
+.wb-title{display:flex;align-items:baseline;gap:10px;min-width:0;}
+.wb-title b{font-size:1rem;font-weight:700;color:#1A1A2E;white-space:nowrap;}
+.wb-title i{font-style:normal;font-size:.72rem;color:#5a5a72;font-family:Georgia,'Times New Roman',serif;letter-spacing:.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+body{background:#fefcf6!important;}
+.back-to-workbench,.back-btn{display:none!important;}
+@media(max-width:560px){.wb-title b{font-size:.92rem;}.wb-title i{display:none;}.wb-topbar{gap:10px;padding:8px 10px;}}
+
+</style>
+</head>
+<body>
+<div class="wb-topbar"><a href="工作台.html#tools" class="wb-back">← 返回</a><div class="wb-title"><b>🔬 词法</b><i>Morphology</i></div></div>
+
+
+<a href="工作台.html#tools" class="back-to-workbench">返回</a>
+
+<header>
+  <h1>英语词法 · Morphology Lab</h1>
+  <p>5种实词变化分析仪 · 输入单词，一键生成所有变化形式</p>
+</header>
+
+<div class="nav-tabs">
+  <button class="nav-tab active" data-page="analyzer">变化分析仪</button>
+  <button class="nav-tab" data-page="noun">名词</button>
+  <button class="nav-tab" data-page="verb">动词</button>
+  <button class="nav-tab" data-page="adjective">形容词</button>
+  <button class="nav-tab" data-page="adverb">副词</button>
+  <button class="nav-tab" data-page="pronoun">代词</button>
+</div>
+
+<main>
+  <!-- 变化分析仪 -->
+  <div id="page-analyzer">
+    <div class="analyzer">
+      <div class="analyzer-input">
+        <input type="text" id="wordInput" placeholder="输入单词，如：book / run / happy" value="book">
+        <select id="posSelect">
+          <option value="noun">名词</option>
+          <option value="verb">动词</option>
+          <option value="adjective">形容词</option>
+          <option value="adverb">副词</option>
+        </select>
+        <button onclick="analyzeWord()">分析变化</button>
+      </div>
+      <div id="analyzerResult"></div>
+    </div>
+
+    <div class="rules-section">
+      <h3>5种实词变化总览</h3>
+      <div class="pos-cards">
+        <div class="pos-card" onclick="switchPage('noun')">
+          <div class="pos-icon">📦</div>
+          <div class="pos-name">名词</div>
+          <div class="pos-en">noun</div>
+          <div class="pos-changes">单复数 · 所有格</div>
+        </div>
+        <div class="pos-card" onclick="switchPage('verb')">
+          <div class="pos-icon">🏃</div>
+          <div class="pos-name">动词</div>
+          <div class="pos-en">verb</div>
+          <div class="pos-changes">三单 · ing · 过去式 · 过去分词</div>
+        </div>
+        <div class="pos-card" onclick="switchPage('adjective')">
+          <div class="pos-icon">🎨</div>
+          <div class="pos-name">形容词</div>
+          <div class="pos-en">adjective</div>
+          <div class="pos-changes">比较级 · 最高级</div>
+        </div>
+        <div class="pos-card" onclick="switchPage('adverb')">
+          <div class="pos-icon">⚡</div>
+          <div class="pos-name">副词</div>
+          <div class="pos-en">adverb</div>
+          <div class="pos-changes">构成 · 比较级 · 最高级</div>
+        </div>
+        <div class="pos-card" onclick="switchPage('pronoun')">
+          <div class="pos-icon">👤</div>
+          <div class="pos-name">代词</div>
+          <div class="pos-en">pronoun</div>
+          <div class="pos-changes">主格 · 宾格 · 所有格</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 名词 -->
+  <div id="page-noun" hidden>
+    <div class="rules-section">
+      <h3>名词变化：单复数 + 所有格</h3>
+      <div class="rule-flow">
+        <span class="rule-step rule-base">原形</span>
+        <span class="rule-arrow">→</span>
+        <span class="rule-step rule-change">+s / +es / 变y为i+es</span>
+        <span class="rule-arrow">→</span>
+        <span class="rule-step rule-result">复数</span>
+        <span class="rule-arrow">+</span>
+        <span class="rule-step rule-change">+'s / +'</span>
+        <span class="rule-arrow">→</span>
+        <span class="rule-step rule-result">所有格</span>
+      </div>
+      <table class="rule-table">
+        <tr><th>规则</th><th>原形</th><th>复数</th><th>所有格</th></tr>
+        <tr><td>一般加-s</td><td>book</td><td>books</td><td>book's</td></tr>
+        <tr><td>s/x/ch/sh结尾加-es</td><td>bus / box / watch</td><td>buses / boxes / watches</td><td>bus's</td></tr>
+        <tr><td>辅音+y结尾，变y为i加-es</td><td>city / baby</td><td>cities / babies</td><td>city's</td></tr>
+        <tr><td>f/fe结尾，变f/fe为v加-es</td><td>leaf / knife</td><td>leaves / knives</td><td>leaf's</td></tr>
+        <tr><td>有生命o结尾加-es</td><td>tomato / potato</td><td>tomatoes / potatoes</td><td>tomato's</td></tr>
+        <tr><td>无生命o结尾加-s</td><td>photo / piano</td><td>photos / pianos</td><td>photo's</td></tr>
+      </table>
+    </div>
+    <div class="rules-section">
+      <h3>不规则名词复数（必须记忆）</h3>
+      <div class="irregular-list">
+        <div class="irregular-item"><span class="irregular-base">man</span><span class="irregular-arrow">→</span><span class="irregular-form">men</span></div>
+        <div class="irregular-item"><span class="irregular-base">woman</span><span class="irregular-arrow">→</span><span class="irregular-form">women</span></div>
+        <div class="irregular-item"><span class="irregular-base">child</span><span class="irregular-arrow">→</span><span class="irregular-form">children</span></div>
+        <div class="irregular-item"><span class="irregular-base">foot</span><span class="irregular-arrow">→</span><span class="irregular-form">feet</span></div>
+        <div class="irregular-item"><span class="irregular-base">tooth</span><span class="irregular-arrow">→</span><span class="irregular-form">teeth</span></div>
+        <div class="irregular-item"><span class="irregular-base">mouse</span><span class="irregular-arrow">→</span><span class="irregular-form">mice</span></div>
+        <div class="irregular-item"><span class="irregular-base">goose</span><span class="irregular-arrow">→</span><span class="irregular-form">geese</span></div>
+        <div class="irregular-item"><span class="irregular-base">sheep</span><span class="irregular-arrow">→</span><span class="irregular-form">sheep</span></div>
+        <div class="irregular-item"><span class="irregular-base">deer</span><span class="irregular-arrow">→</span><span class="irregular-form">deer</span></div>
+        <div class="irregular-item"><span class="irregular-base">fish</span><span class="irregular-arrow">→</span><span class="irregular-form">fish</span></div>
+        <div class="irregular-item"><span class="irregular-base">Chinese</span><span class="irregular-arrow">→</span><span class="irregular-form">Chinese</span></div>
+        <div class="irregular-item"><span class="irregular-base">person</span><span class="irregular-arrow">→</span><span class="irregular-form">people</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 动词 -->
+  <div id="page-verb" hidden>
+    <div class="rules-section">
+      <h3>动词变化：三单 + ing + 过去式 + 过去分词</h3>
+      <div class="rule-flow">
+        <span class="rule-step rule-base">原形</span>
+        <span class="rule-arrow">→</span>
+        <span class="rule-step rule-change">+s/es</span>
+        <span class="rule-arrow">→</span>
+        <span class="rule-step rule-result">三单</span>
+        <span class="rule-arrow">+</span>
+        <span class="rule-step rule-change">+ing</span>
+        <span class="rule-arrow">→</span>
+        <span class="rule-step rule-result">现在分词</span>
+      </div>
+      <div class="rule-flow">
+        <span class="rule-step rule-base">原形</span>
+        <span class="rule-arrow">→</span>
+        <span class="rule-step rule-change">+ed</span>
+        <span class="rule-arrow">→</span>
+        <span class="rule-step rule-result">过去式</span>
+        <span class="rule-arrow">=</span>
+        <span class="rule-step rule-result">过去分词</span>
+        <span style="font-size:11px;color:#94a3b8;margin-left:8px">（规则动词过去式=过去分词）</span>
+      </div>
+      <table class="rule-table">
+        <tr><th>变化类型</th><th>规则</th><th>原形</th><th>三单</th><th>ing</th><th>过去式</th></tr>
+        <tr><td>一般</td><td>加-s / -ing / -ed</td><td>play</td><td>plays</td><td>playing</td><td>played</td></tr>
+        <tr><td>e结尾</td><td>加-s / 去e加-ing / 加-d</td><td>make</td><td>makes</td><td>making</td><td>made</td></tr>
+        <tr><td>s/x/ch/sh/o结尾</td><td>三单加-es</td><td>go / watch</td><td>goes / watches</td><td>going / watching</td><td>went / watched</td></tr>
+        <tr><td>辅音+y结尾</td><td>变y为i加-es/-ed</td><td>study</td><td>studies</td><td>studying</td><td>studied</td></tr>
+        <tr><td>重读闭音节</td><td>双写末尾辅音</td><td>run / sit</td><td>runs / sits</td><td>running / sitting</td><td>ran / sat</td></tr>
+        <tr><td>ie结尾</td><td>变ie为y加-ing</td><td>lie / die</td><td>lies / dies</td><td>lying / dying</td><td>lay / died</td></tr>
+      </table>
+    </div>
+    <div class="rules-section">
+      <h3>常见不规则动词（过去式 ≠ 过去分词）</h3>
+      <table class="rule-table">
+        <tr><th>原形</th><th>过去式</th><th>过去分词</th><th>三单</th><th>ing</th></tr>
+        <tr><td>be</td><td>was/were</td><td>been</td><td>is</td><td>being</td></tr>
+        <tr><td>have</td><td>had</td><td>had</td><td>has</td><td>having</td></tr>
+        <tr><td>do</td><td>did</td><td>done</td><td>does</td><td>doing</td></tr>
+        <tr><td>go</td><td>went</td><td>gone</td><td>goes</td><td>going</td></tr>
+        <tr><td>see</td><td>saw</td><td>seen</td><td>sees</td><td>seeing</td></tr>
+        <tr><td>eat</td><td>ate</td><td>eaten</td><td>eats</td><td>eating</td></tr>
+        <tr><td>take</td><td>took</td><td>taken</td><td>takes</td><td>taking</td></tr>
+        <tr><td>write</td><td>wrote</td><td>written</td><td>writes</td><td>writing</td></tr>
+        <tr><td>speak</td><td>spoke</td><td>spoken</td><td>speaks</td><td>speaking</td></tr>
+        <tr><td>break</td><td>broke</td><td>broken</td><td>breaks</td><td>breaking</td></tr>
+        <tr><td>drink</td><td>drank</td><td>drunk</td><td>drinks</td><td>drinking</td></tr>
+        <tr><td>sing</td><td>sang</td><td>sung</td><td>sings</td><td>singing</td></tr>
+        <tr><td>swim</td><td>swam</td><td>swum</td><td>swims</td><td>swimming</td></tr>
+        <tr><td>begin</td><td>began</td><td>begun</td><td>begins</td><td>beginning</td></tr>
+        <tr><td>fly</td><td>flew</td><td>flown</td><td>flies</td><td>flying</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <!-- 形容词 -->
+  <div id="page-adjective" hidden>
+    <div class="rules-section">
+      <h3>形容词变化：比较级 + 最高级</h3>
+      <div class="rule-flow">
+        <span class="rule-step rule-base">原级</span>
+        <span class="rule-arrow">→</span>
+        <span class="rule-step rule-change">+er / more</span>
+        <span class="rule-arrow">→</span>
+        <span class="rule-step rule-result">比较级</span>
+        <span class="rule-arrow">→</span>
+        <span class="rule-step rule-change">+est / most</span>
+        <span class="rule-arrow">→</span>
+        <span class="rule-step rule-result">最高级</span>
+      </div>
+      <table class="rule-table">
+        <tr><th>规则</th><th>原级</th><th>比较级</th><th>最高级</th></tr>
+        <tr><td>一般加-er/-est</td><td>tall</td><td>taller</td><td>tallest</td></tr>
+        <tr><td>e结尾加-r/-st</td><td>nice</td><td>nicer</td><td>nicest</td></tr>
+        <tr><td>辅音+y结尾，变y为i加-er/-est</td><td>happy</td><td>happier</td><td>happiest</td></tr>
+        <tr><td>重读闭音节，双写末尾辅音加-er/-est</td><td>big</td><td>bigger</td><td>biggest</td></tr>
+        <tr><td>多音节词前加more/most</td><td>beautiful</td><td>more beautiful</td><td>most beautiful</td></tr>
+      </table>
+    </div>
+    <div class="rules-section">
+      <h3>不规则形容词比较级最高级（必须记忆）</h3>
+      <div class="irregular-list">
+        <div class="irregular-item"><span class="irregular-base">good/well</span><span class="irregular-arrow">→</span><span class="irregular-form">better → best</span></div>
+        <div class="irregular-item"><span class="irregular-base">bad/badly</span><span class="irregular-arrow">→</span><span class="irregular-form">worse → worst</span></div>
+        <div class="irregular-item"><span class="irregular-base">many/much</span><span class="irregular-arrow">→</span><span class="irregular-form">more → most</span></div>
+        <div class="irregular-item"><span class="irregular-base">little</span><span class="irregular-arrow">→</span><span class="irregular-form">less → least</span></div>
+        <div class="irregular-item"><span class="irregular-base">far</span><span class="irregular-arrow">→</span><span class="irregular-form">farther/further → farthest/furthest</span></div>
+        <div class="irregular-item"><span class="irregular-base">old</span><span class="irregular-arrow">→</span><span class="irregular-form">older/elder → oldest/eldest</span></div>
+      </div>
+    </div>
+    <div class="rules-section">
+      <h3>形容词→副词（加-ly）</h3>
+      <table class="rule-table">
+        <tr><th>规则</th><th>形容词</th><th>副词</th></tr>
+        <tr><td>一般加-ly</td><td>quick / slow</td><td>quickly / slowly</td></tr>
+        <tr><td>辅音+y结尾，变y为i加-ly</td><td>happy / easy</td><td>happily / easily</td></tr>
+        <tr><td>le结尾，去e加-y</td><td>possible / probable</td><td>possibly / probably</td></tr>
+        <tr><td>ic结尾，加-ally</td><td>basic / automatic</td><td>basically / automatically</td></tr>
+        <tr><td>形容词副词同形</td><td>fast / hard / early / late</td><td>fast / hard / early / late</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <!-- 副词 -->
+  <div id="page-adverb" hidden>
+    <div class="rules-section">
+      <h3>副词构成：形容词 → 副词</h3>
+      <div class="rule-flow">
+        <span class="rule-step rule-base">形容词</span>
+        <span class="rule-arrow">→</span>
+        <span class="rule-step rule-change">+ly / 变y为i+ly</span>
+        <span class="rule-arrow">→</span>
+        <span class="rule-step rule-result">副词</span>
+      </div>
+      <table class="rule-table">
+        <tr><th>构成方式</th><th>形容词</th><th>副词</th></tr>
+        <tr><td>一般加-ly</td><td>quick / careful / slow</td><td>quickly / carefully / slowly</td></tr>
+        <tr><td>辅音+y结尾，变y为i加-ly</td><td>happy / easy / busy</td><td>happily / easily / busily</td></tr>
+        <tr><td>le结尾，去e加-y</td><td>possible / probable / gentle</td><td>possibly / probably / gently</td></tr>
+        <tr><td>ic结尾，加-ally</td><td>basic / automatic / economic</td><td>basically / automatically / economically</td></tr>
+        <tr><td>形容词副词同形</td><td>fast / hard / early / late / high</td><td>fast / hard / early / late / high</td></tr>
+        <tr><td>特殊变化</td><td>good</td><td>well</td></tr>
+      </table>
+    </div>
+    <div class="rules-section">
+      <h3>副词比较级最高级</h3>
+      <table class="rule-table">
+        <tr><th>规则</th><th>原级</th><th>比较级</th><th>最高级</th></tr>
+        <tr><td>单音节副词加-er/-est</td><td>fast / hard / high</td><td>faster / harder / higher</td><td>fastest / hardest / highest</td></tr>
+        <tr><td>ly结尾副词前加more/most</td><td>quickly / carefully</td><td>more quickly / more carefully</td><td>most quickly / most carefully</td></tr>
+        <tr><td>不规则</td><td>well / badly / much / little</td><td>better / worse / more / less</td><td>best / worst / most / least</td></tr>
+      </table>
+    </div>
+    <div class="rules-section">
+      <h3>副词分类</h3>
+      <div class="irregular-list">
+        <div class="irregular-item"><span class="irregular-base">方式</span><span class="irregular-form">quickly, slowly, carefully</span></div>
+        <div class="irregular-item"><span class="irregular-base">时间</span><span class="irregular-form">now, then, today, already</span></div>
+        <div class="irregular-item"><span class="irregular-base">地点</span><span class="irregular-form">here, there, everywhere</span></div>
+        <div class="irregular-item"><span class="irregular-base">程度</span><span class="irregular-form">very, quite, too, almost</span></div>
+        <div class="irregular-item"><span class="irregular-base">频度</span><span class="irregular-form">always, often, usually, never</span></div>
+        <div class="irregular-item"><span class="irregular-base">疑问</span><span class="irregular-form">when, where, how, why</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 代词 -->
+  <div id="page-pronoun" hidden>
+    <div class="rules-section">
+      <h3>代词变化：主格 → 宾格 → 所有格 → 反身代词</h3>
+      <div class="rule-flow">
+        <span class="rule-step rule-base">主格</span>
+        <span class="rule-arrow">→</span>
+        <span class="rule-step rule-change">作宾语</span>
+        <span class="rule-arrow">→</span>
+        <span class="rule-step rule-result">宾格</span>
+        <span class="rule-arrow">→</span>
+        <span class="rule-step rule-change">+名词</span>
+        <span class="rule-arrow">→</span>
+        <span class="rule-step rule-result">形容词性物主代词</span>
+      </div>
+      <table class="rule-table">
+        <tr><th>人称</th><th>主格</th><th>宾格</th><th>形容词性物主代词</th><th>名词性物主代词</th><th>反身代词</th></tr>
+        <tr><td>我</td><td>I</td><td>me</td><td>my</td><td>mine</td><td>myself</td></tr>
+        <tr><td>你</td><td>you</td><td>you</td><td>your</td><td>yours</td><td>yourself</td></tr>
+        <tr><td>他</td><td>he</td><td>him</td><td>his</td><td>his</td><td>himself</td></tr>
+        <tr><td>她</td><td>she</td><td>her</td><td>her</td><td>hers</td><td>herself</td></tr>
+        <tr><td>它</td><td>it</td><td>it</td><td>its</td><td>its</td><td>itself</td></tr>
+        <tr><td>我们</td><td>we</td><td>us</td><td>our</td><td>ours</td><td>ourselves</td></tr>
+        <tr><td>你们</td><td>you</td><td>you</td><td>your</td><td>yours</td><td>yourselves</td></tr>
+        <tr><td>他们</td><td>they</td><td>them</td><td>their</td><td>theirs</td><td>themselves</td></tr>
+      </table>
+    </div>
+    <div class="rules-section">
+      <h3>记忆公式</h3>
+      <div class="rule-flow" style="justify-content:center">
+        <span class="rule-step rule-base">名词性物主代词</span>
+        <span class="rule-arrow">=</span>
+        <span class="rule-step rule-change">形容词性物主代词</span>
+        <span class="rule-arrow">+</span>
+        <span class="rule-step rule-result">名词</span>
+      </div>
+      <p style="text-align:center;font-size:13px;color:#475569;margin-top:8px">
+        This is <b>my book</b>. = This book is <b>mine</b>.
+      </p>
+    </div>
+    <div class="rules-section">
+      <h3>指示代词 & 不定代词</h3>
+      <table class="rule-table">
+        <tr><th>类型</th><th>单数</th><th>复数</th><th>用法</th></tr>
+        <tr><td>近指</td><td>this（这个）</td><td>these（这些）</td><td>距离近</td></tr>
+        <tr><td>远指</td><td>that（那个）</td><td>those（那些）</td><td>距离远</td></tr>
+      </table>
+      <div class="irregular-list" style="margin-top:10px">
+        <div class="irregular-item"><span class="irregular-base">some/any</span><span class="irregular-form">一些（肯定/否定疑问）</span></div>
+        <div class="irregular-item"><span class="irregular-base">both/all</span><span class="irregular-form">两者都/三者及以上都</span></div>
+        <div class="irregular-item"><span class="irregular-base">either/neither</span><span class="irregular-form">任一/都不</span></div>
+        <div class="irregular-item"><span class="irregular-base">much/many</span><span class="irregular-form">不可数/可数</span></div>
+        <div class="irregular-item"><span class="irregular-base">little/a little</span><span class="irregular-form">几乎没有/有一点（不可数）</span></div>
+        <div class="irregular-item"><span class="irregular-base">few/a few</span><span class="irregular-form">几乎没有/有几个（可数）</span></div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script>
+// 导航切换
+document.querySelectorAll('.nav-tab').forEach(tab => {
+  tab.addEventListener('click', () => switchPage(tab.dataset.page));
+});
+
+function switchPage(page) {
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.querySelector(`.nav-tab[data-page="${page}"]`)?.classList.add('active');
+  document.querySelectorAll('[id^="page-"]').forEach(p => p.hidden = true);
+  document.getElementById(`page-${page}`).hidden = false;
+}
+
+// 变化分析仪
+const irregularNouns = {
+  man:'men', woman:'women', child:'children', foot:'feet',
+  tooth:'teeth', mouse:'mice', goose:'geese', sheep:'sheep',
+  deer:'deer', fish:'fish', chinese:'Chinese', person:'people'
+};
+
+const irregularVerbs = {
+  be:{s:'is', ing:'being', past:'was/were', pp:'been'},
+  have:{s:'has', ing:'having', past:'had', pp:'had'},
+  do:{s:'does', ing:'doing', past:'did', pp:'done'},
+  go:{s:'goes', ing:'going', past:'went', pp:'gone'},
+  see:{s:'sees', ing:'seeing', past:'saw', pp:'seen'},
+  eat:{s:'eats', ing:'eating', past:'ate', pp:'eaten'},
+  take:{s:'takes', ing:'taking', past:'took', pp:'taken'},
+  write:{s:'writes', ing:'writing', past:'wrote', pp:'written'},
+  speak:{s:'speaks', ing:'speaking', past:'spoke', pp:'spoken'},
+  break:{s:'breaks', ing:'breaking', past:'broke', pp:'broken'},
+  drink:{s:'drinks', ing:'drinking', past:'drank', pp:'drunk'},
+  sing:{s:'sings', ing:'singing', past:'sang', pp:'sung'},
+  swim:{s:'swims', ing:'swimming', past:'swam', pp:'swum'},
+  begin:{s:'begins', ing:'beginning', past:'began', pp:'begun'},
+  fly:{s:'flies', ing:'flying', past:'flew', pp:'flown'},
+  run:{s:'runs', ing:'running', past:'ran', pp:'run'},
+  sit:{s:'sits', ing:'sitting', past:'sat', pp:'sat'},
+  come:{s:'comes', ing:'coming', past:'came', pp:'come'},
+  make:{s:'makes', ing:'making', past:'made', pp:'made'},
+  know:{s:'knows', ing:'knowing', past:'knew', pp:'known'},
+  think:{s:'thinks', ing:'thinking', past:'thought', pp:'thought'},
+  buy:{s:'buys', ing:'buying', past:'bought', pp:'bought'},
+  catch:{s:'catches', ing:'catching', past:'caught', pp:'caught'},
+  teach:{s:'teaches', ing:'teaching', past:'taught', pp:'taught'},
+  find:{s:'finds', ing:'finding', past:'found', pp:'found'},
+  get:{s:'gets', ing:'getting', past:'got', pp:'got/gotten'},
+  give:{s:'gives', ing:'giving', past:'gave', pp:'given'},
+  tell:{s:'tells', ing:'telling', past:'told', pp:'told'},
+  say:{s:'says', ing:'saying', past:'said', pp:'said'},
+  read:{s:'reads', ing:'reading', past:'read', pp:'read'}
+};
+
+const irregularAdjectives = {
+  good:{comp:'better', super:'best'},
+  well:{comp:'better', super:'best'},
+  bad:{comp:'worse', super:'worst'},
+  badly:{comp:'worse', super:'worst'},
+  many:{comp:'more', super:'most'},
+  much:{comp:'more', super:'most'},
+  little:{comp:'less', super:'least'},
+  far:{comp:'farther/further', super:'farthest/furthest'},
+  old:{comp:'older/elder', super:'oldest/eldest'}
+};
+
+function analyzeWord() {
+  const word = document.getElementById('wordInput').value.trim().toLowerCase();
+  const pos = document.getElementById('posSelect').value;
+  if (!word) return;
+
+  let html = '';
+
+  if (pos === 'noun') {
+    const plural = pluralizeNoun(word);
+    const possessive = word + "'s";
+    const pluralPossessive = plural.endsWith('s') ? plural + "'" : plural + "'s";
+    html = `
+      <div class="result-grid">
+        <div class="result-card">
+          <div class="result-label">单数（原形）</div>
+          <div class="result-word" onclick="playWord('${word}')">${word}</div>
+        </div>
+        <div class="result-card">
+          <div class="result-label">复数</div>
+          <div class="result-word" onclick="playWord('${plural.split('/')[0]}')">${plural}</div>
+          <div class="result-rule">${getNounRule(word)}</div>
+        </div>
+        <div class="result-card">
+          <div class="result-label">单数所有格</div>
+          <div class="result-word">${possessive}</div>
+        </div>
+        <div class="result-card">
+          <div class="result-label">复数所有格</div>
+          <div class="result-word">${pluralPossessive}</div>
+        </div>
+      </div>
+    `;
+  } else if (pos === 'verb') {
+    const v = conjugateVerb(word);
+    html = `
+      <div class="result-grid">
+        <div class="result-card">
+          <div class="result-label">原形</div>
+          <div class="result-word" onclick="playWord('${word}')">${word}</div>
+        </div>
+        <div class="result-card">
+          <div class="result-label">第三人称单数</div>
+          <div class="result-word" onclick="playWord('${v.s.split('/')[0]}')">${v.s}</div>
+          <div class="result-rule">${v.rule}</div>
+        </div>
+        <div class="result-card">
+          <div class="result-label">现在分词（ing）</div>
+          <div class="result-word" onclick="playWord('${v.ing}')">${v.ing}</div>
+        </div>
+        <div class="result-card">
+          <div class="result-label">过去式</div>
+          <div class="result-word" onclick="playWord('${v.past.split('/')[0]}')">${v.past}</div>
+          ${v.irregular ? '<div class="result-rule">不规则</div>' : '<div class="result-rule">规则变化</div>'}
+        </div>
+        <div class="result-card">
+          <div class="result-label">过去分词</div>
+          <div class="result-word" onclick="playWord('${v.pp.split('/')[0]}')">${v.pp}</div>
+        </div>
+      </div>
+    `;
+  } else if (pos === 'adjective') {
+    const a = compareAdjective(word);
+    const adverb = adjectiveToAdverb(word);
+    html = `
+      <div class="result-grid">
+        <div class="result-card">
+          <div class="result-label">原级</div>
+          <div class="result-word" onclick="playWord('${word}')">${word}</div>
+        </div>
+        <div class="result-card">
+          <div class="result-label">比较级</div>
+          <div class="result-word" onclick="playWord('${a.comp.split('/')[0].replace('more ','')}')">${a.comp}</div>
+          <div class="result-rule">${a.rule}</div>
+        </div>
+        <div class="result-card">
+          <div class="result-label">最高级</div>
+          <div class="result-word">${a.super}</div>
+        </div>
+        <div class="result-card">
+          <div class="result-label">副词形式</div>
+          <div class="result-word" onclick="playWord('${adverb}')">${adverb}</div>
+          <div class="result-rule">形容词→副词</div>
+        </div>
+      </div>
+    `;
+  } else if (pos === 'adverb') {
+    const a = compareAdverb(word);
+    html = `
+      <div class="result-grid">
+        <div class="result-card">
+          <div class="result-label">原级</div>
+          <div class="result-word" onclick="playWord('${word}')">${word}</div>
+        </div>
+        <div class="result-card">
+          <div class="result-label">比较级</div>
+          <div class="result-word">${a.comp}</div>
+          <div class="result-rule">${a.rule}</div>
+        </div>
+        <div class="result-card">
+          <div class="result-label">最高级</div>
+          <div class="result-word">${a.super}</div>
+        </div>
+      </div>
+    `;
+  }
+
+  document.getElementById('analyzerResult').innerHTML = html;
+}
+
+function pluralizeNoun(word) {
+  if (irregularNouns[word]) return irregularNouns[word];
+  if (/[sxz]$/.test(word) || /[cs]h$/.test(word)) return word + 'es';
+  if (/[bcdfghjklmnpqrstvwxyz]y$/.test(word)) return word.slice(0, -1) + 'ies';
+  if (/[f]$/.test(word)) return word.slice(0, -1) + 'ves';
+  if (/fe$/.test(word)) return word.slice(0, -2) + 'ves';
+  if (/o$/.test(word) && ['tomato','potato','hero','negro'].includes(word)) return word + 'es';
+  return word + 's';
+}
+
+function getNounRule(word) {
+  if (irregularNouns[word]) return '不规则变化';
+  if (/[sxz]$/.test(word) || /[cs]h$/.test(word)) return 's/x/ch/sh结尾 +es';
+  if (/[bcdfghjklmnpqrstvwxyz]y$/.test(word)) return '辅音+y → 变y为i +es';
+  if (/f$/.test(word) || /fe$/.test(word)) return 'f/fe → 变f/fe为v +es';
+  if (/o$/.test(word)) return 'o结尾';
+  return '一般 +s';
+}
+
+function conjugateVerb(word) {
+  if (irregularVerbs[word]) return {...irregularVerbs[word], irregular:true};
+  let s, ing, past, rule;
+  if (/[sxz]$/.test(word) || /[cs]h$/.test(word) || /o$/.test(word)) {
+    s = word + 'es'; rule = 's/x/ch/sh/o结尾 +es';
+  } else if (/[bcdfghjklmnpqrstvwxyz]y$/.test(word)) {
+    s = word.slice(0, -1) + 'ies'; rule = '辅音+y → 变y为i +es';
+  } else {
+    s = word + 's'; rule = '一般 +s';
+  }
+  if (/ie$/.test(word)) ing = word.slice(0, -2) + 'ying';
+  else if (/e$/.test(word) && !/ee$/.test(word) && !/ye$/.test(word)) ing = word.slice(0, -1) + 'ing';
+  else if (isCVC(word)) ing = word + word.slice(-1) + 'ing';
+  else ing = word + 'ing';
+  if (/e$/.test(word)) past = word + 'd';
+  else if (/[bcdfghjklmnpqrstvwxyz]y$/.test(word)) past = word.slice(0, -1) + 'ied';
+  else if (isCVC(word)) past = word + word.slice(-1) + 'ed';
+  else past = word + 'ed';
+  return {s, ing, past, pp:past, irregular:false, rule};
+}
+
+function isCVC(word) {
+  if (word.length < 3) return false;
+  const vowels = 'aeiou';
+  return !vowels.includes(word[0]) && vowels.includes(word[1]) && !vowels.includes(word[2]) && word.slice(-1) !== 'w' && word.slice(-1) !== 'x';
+}
+
+function compareAdjective(word) {
+  if (irregularAdjectives[word]) return {...irregularAdjectives[word], rule:'不规则变化'};
+  if (word.length >= 3 && !/e$/.test(word) && !/y$/.test(word) && !isCVC(word)) {
+    return {comp:'more ' + word, super:'most ' + word, rule:'多音节 → more/most'};
+  }
+  if (/e$/.test(word)) return {comp:word + 'r', super:word + 'st', rule:'e结尾 +r/st'};
+  if (/[bcdfghjklmnpqrstvwxyz]y$/.test(word)) return {comp:word.slice(0,-1)+'ier', super:word.slice(0,-1)+'iest', rule:'辅音+y → 变y为i +er/est'};
+  if (isCVC(word)) return {comp:word+word.slice(-1)+'er', super:word+word.slice(-1)+'est', rule:'重读闭音节 双写+er/est'};
+  return {comp:word+'er', super:word+'est', rule:'一般 +er/est'};
+}
+
+function adjectiveToAdverb(word) {
+  if (word === 'good') return 'well';
+  if (/le$/.test(word)) return word.slice(0, -1) + 'y';
+  if (/ic$/.test(word)) return word + 'ally';
+  if (/[bcdfghjklmnpqrstvwxyz]y$/.test(word)) return word.slice(0, -1) + 'ily';
+  if (['fast','hard','early','late','high','low','straight','wrong'].includes(word)) return word;
+  return word + 'ly';
+}
+
+function compareAdverb(word) {
+  const irregular = {well:['better','best'], badly:['worse','worst'], much:['more','most'], little:['less','least'], far:['farther/further','farthest/furthest']};
+  if (irregular[word]) return {comp:irregular[word][0], super:irregular[word][1], rule:'不规则变化'};
+  if (word.endsWith('ly') && word !== 'early') return {comp:'more ' + word, super:'most ' + word, rule:'ly结尾 → more/most'};
+  if (isCVC(word) || word.length <= 4) return {comp:word+'er', super:word+'est', rule:'单音节 +er/est'};
+  return {comp:'more ' + word, super:'most ' + word, rule:'多音节 → more/most'};
+}
+
+function playWord(word) {
+  if (!word) return;
+  const w = word.replace(/^more /,'').replace(/^most /,'').split('/')[0].trim();
+  const audio = new Audio(`https://dict.youdao.com/dictvoice?type=0&audio=${encodeURIComponent(w)}`);
+  audio.play().catch(() => {});
+}
+
+// 初始化
+analyzeWord();
+</script>
+
+</body>
+</html>

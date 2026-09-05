@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>了解 LTR · 虫妈家庭英语伴学系统</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700;900&family=Noto+Serif+SC:wght@700;900&family=Fraunces:ital,wght@0,600;0,900;1,600;1,900&display=swap" rel="stylesheet">
+<style>
+:root{
+  /* 品牌标准三色（以蓝色为主） */
+  --blue:#2B7FD8;        /* 主色-蓝 60% */
+  --blue-light:#5BA3EC;  /* 亮蓝 */
+  --blue-soft:#EFF6FF;   /* 浅蓝背景 */
+  --blue-deep:#1E5BA8;   /* 更深蓝 */
+  --yellow:#F4D758;      /* 强调色-黄 30% */
+  --yellow-soft:#FFF8E1; /* 浅黄背景 */
+  --red:#E84A5F;         /* 点缀色-红 10% */
+  --red-soft:#FDE8EC;    /* 浅红背景 */
+  /* 中性色 */
+  --ink:#1A1A2E;
+  --ink-light:#4A4A5A;
+  --ink-faint:#8A8A9A;
+  --cream:#fefcf6;
+  --white:#fff;
+  --border:rgba(26,26,46,.08);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Noto Sans SC',-apple-system,'PingFang SC','Microsoft YaHei',sans-serif;
+  font-size:16px;line-height:1.75;color:var(--ink);background:var(--cream);overflow-x:hidden;}
+a{color:inherit;text-decoration:none;}
+img{max-width:100%;display:block;}
+
+/* Alex卡通形象背景装饰 - 半透明，和背景融为一体 */
+.alex-bg{position:fixed;z-index:0;pointer-events:none;opacity:.05;}
+.alex-bg img{width:100%;height:auto;border-radius:50%;}
+.alex-bg-1{top:10%;right:-50px;width:260px;transform:rotate(6deg);}
+.alex-bg-2{top:45%;left:-60px;width:220px;transform:rotate(-5deg);}
+.alex-bg-3{top:72%;right:-40px;width:200px;transform:rotate(4deg);}
+.alex-bg-4{bottom:5%;left:-30px;width:180px;transform:rotate(-3deg);}
+.top-nav,.hero,.section,.cta-section,.footer{position:relative;z-index:1;}
+
+/* 顶部导航 */
+.top-nav{position:sticky;top:0;z-index:100;background:rgba(255,255,255,.95);backdrop-filter:blur(12px);
+  border-bottom:3px solid var(--blue);}
+.top-nav-inner{max-width:1200px;margin:0 auto;padding:.7rem 1.5rem;display:flex;align-items:center;justify-content:space-between;}
+.nav-brand{display:flex;align-items:center;gap:10px;font-weight:900;font-size:1.05rem;color:var(--ink);}
+.nav-brand .dot{width:12px;height:12px;border-radius:50%;background:var(--blue);flex:none;box-shadow:0 0 0 3px var(--yellow);}
+.nav-links{display:flex;gap:1.5rem;}
+.nav-links a{font-size:.82rem;color:var(--ink-light);font-weight:600;transition:color .2s;position:relative;padding-bottom:2px;}
+.nav-links a:hover{color:var(--blue);}
+.nav-links a::after{content:'';position:absolute;bottom:0;left:0;right:0;height:3px;background:var(--yellow);
+  transform:scaleX(0);transition:transform .25s;border-radius:2px;}
+.nav-links a:hover::after{transform:scaleX(1);}
+.back-btn{display:inline-flex;align-items:center;gap:6px;padding:.45rem 1rem;border:2px solid var(--blue);
+  border-radius:20px;font-size:.78rem;color:var(--blue);background:var(--white);cursor:pointer;
+  transition:all .2s;font-family:inherit;font-weight:600;}
+.back-btn:hover{background:var(--blue);color:#fff;transform:translateY(-1px);}
+
+/* ===== Hero 蓝色主背景 ===== */
+.hero{background:linear-gradient(135deg,var(--blue-deep) 0%,var(--blue) 50%,var(--blue-light) 100%);
+  padding:clamp(2.5rem,6vw,5rem) 1.5rem clamp(2rem,4vw,3.5rem);
+  position:relative;overflow:hidden;}
+.hero::before{content:'';position:absolute;top:-100px;right:-100px;width:400px;height:400px;border-radius:50%;
+  background:rgba(251,191,36,.15);}
+.hero::after{content:'';position:absolute;bottom:-80px;left:5%;width:250px;height:250px;border-radius:50%;
+  background:rgba(248,113,113,.12);}
+.hero-inner{max-width:1200px;margin:0 auto;position:relative;z-index:2;display:grid;grid-template-columns:1.5fr 1fr;gap:3rem;align-items:center;}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;padding:.4rem 1rem;background:rgba(255,255,255,.15);
+  border-radius:20px;font-size:.8rem;font-weight:600;color:#fff;margin-bottom:1.2rem;backdrop-filter:blur(4px);
+  border:1px solid rgba(255,255,255,.2);}
+.hero-badge .star{color:var(--yellow);}
+.hero h1{font-family:'Noto Serif SC',serif;font-weight:900;font-size:clamp(2rem,4.5vw,3.2rem);
+  line-height:1.2;color:#fff;margin-bottom:1rem;}
+.hero h1 .hl{background:var(--yellow);color:var(--blue-deep);padding:.05em .3em;border-radius:6px;display:inline-block;}
+.hero .subtitle{font-size:clamp(1rem,1.8vw,1.15rem);color:rgba(255,255,255,.9);line-height:1.8;
+  margin-bottom:1.8rem;}
+.hero-tags{display:flex;flex-wrap:wrap;gap:.6rem;margin-bottom:2rem;}
+.hero-tag{padding:.45rem 1.1rem;border-radius:24px;font-size:.8rem;font-weight:700;background:rgba(255,255,255,.12);
+  color:#fff;border:1.5px solid rgba(255,255,255,.25);backdrop-filter:blur(4px);transition:all .2s;}
+.hero-tag:hover{background:rgba(255,255,255,.2);transform:translateY(-2px);}
+.hero-tag.y{background:var(--yellow);color:var(--blue-deep);border-color:var(--yellow);}
+.hero-tag.r{background:var(--red);color:#fff;border-color:var(--red);}
+.hero-cta{display:inline-flex;align-items:center;gap:8px;padding:.85rem 2rem;background:var(--yellow);color:var(--blue-deep);
+  border-radius:30px;font-size:1rem;font-weight:800;cursor:pointer;transition:all .2s;border:none;
+  font-family:inherit;box-shadow:0 6px 24px rgba(251,191,36,.4);}
+.hero-cta:hover{transform:translateY(-3px);box-shadow:0 10px 32px rgba(251,191,36,.5);}
+/* Hero右侧数据卡片 */
+.hero-stats{display:grid;grid-template-columns:1fr 1fr;gap:1rem;}
+.hero-stat{background:rgba(255,255,255,.12);backdrop-filter:blur(8px);border-radius:16px;padding:1.2rem;
+  border:1px solid rgba(255,255,255,.2);text-align:center;transition:all .2s;}
+.hero-stat:hover{background:rgba(255,255,255,.18);transform:translateY(-3px);}
+.hero-stat .num{font-family:'Fraunces',serif;font-weight:900;font-size:2rem;color:var(--yellow);line-height:1;}
+.hero-stat .label{font-size:.75rem;color:rgba(255,255,255,.85);margin-top:.4rem;font-weight:600;}
+
+/* ===== 通用 Section ===== */
+.section{max-width:1200px;margin:0 auto;padding:clamp(2.5rem,5vw,4rem) 1.5rem;}
+.section-head{display:flex;align-items:center;gap:16px;margin-bottom:clamp(1.8rem,3.5vw,2.8rem);}
+.section-num{font-family:'Fraunces',serif;font-style:italic;font-weight:900;font-size:clamp(2.2rem,5vw,3.5rem);
+  color:var(--blue);line-height:1;flex:none;}
+.section-title{font-family:'Noto Serif SC',serif;font-weight:900;font-size:clamp(1.4rem,3vw,2rem);color:var(--ink);}
+.section-head::after{content:'';flex:1;height:4px;background:repeating-linear-gradient(90deg,var(--blue) 0 12px,transparent 12px 24px);
+  align-self:center;margin-left:.5rem;border-radius:2px;opacity:.3;}
+
+/* ===== 我是谁 - 蓝色卡片 ===== */
+.about-wrap{background:var(--white);border-radius:24px;padding:clamp(1.8rem,3.5vw,3rem);
+  border:2px solid var(--blue);box-shadow:0 8px 32px rgba(30,64,175,.08);position:relative;overflow:hidden;}
+.about-wrap::before{content:'';position:absolute;top:0;left:0;right:0;height:6px;
+  background:linear-gradient(90deg,var(--blue),var(--yellow),var(--red));}
+.about-grid{display:grid;grid-template-columns:1.3fr 1fr;gap:clamp(1.5rem,3vw,2.5rem);align-items:start;}
+.about-content h3{font-family:'Noto Serif SC',serif;font-weight:900;font-size:clamp(1.2rem,2.5vw,1.5rem);
+  color:var(--ink);margin-bottom:1rem;}
+.about-content h3 .em{color:var(--blue);}
+.about-content p{color:var(--ink-light);line-height:1.9;margin-bottom:1rem;font-size:.95rem;}
+.about-content p strong{color:var(--ink);background:linear-gradient(transparent 60%,var(--yellow) 60%);padding:0 .1em;}
+.about-features{display:grid;grid-template-columns:1fr 1fr;gap:.8rem;margin-top:1.2rem;}
+.about-feature{display:flex;align-items:flex-start;gap:.6rem;padding:.9rem;background:var(--blue-soft);
+  border-radius:12px;border-left:4px solid var(--blue);}
+.about-feature:nth-child(2){background:var(--yellow-soft);border-left-color:var(--yellow);}
+.about-feature:nth-child(3){background:var(--red-soft);border-left-color:var(--red);}
+.about-feature:nth-child(4){background:var(--blue-soft);border-left-color:var(--blue-light);}
+.about-feature .ico{font-size:1.3rem;flex:none;}
+.about-feature .txt{font-size:.8rem;color:var(--ink-light);line-height:1.5;}
+.about-feature .txt strong{display:block;color:var(--ink);font-size:.85rem;margin-bottom:.2rem;}
+/* 右侧数据 */
+.about-side{display:flex;flex-direction:column;gap:1rem;}
+.stat-card{background:linear-gradient(135deg,var(--blue) 0%,var(--blue-light) 100%);border-radius:16px;
+  padding:1.5rem;text-align:center;color:#fff;box-shadow:0 6px 20px rgba(30,64,175,.2);}
+.stat-card.y{background:linear-gradient(135deg,var(--yellow) 0%,#F59E0B 100%);color:var(--blue-deep);}
+.stat-card.r{background:linear-gradient(135deg,var(--red) 0%,#EF4444 100%);}
+.stat-card .num{font-family:'Fraunces',serif;font-weight:900;font-size:2.5rem;line-height:1;}
+.stat-card .label{font-size:.85rem;margin-top:.5rem;font-weight:600;opacity:.9;}
+
+/* ===== LTR是什么 - 浅蓝背景 ===== */
+.ltr-wrap{background:var(--blue-soft);border-radius:24px;padding:clamp(1.8rem,3.5vw,3rem);
+  border:2px solid var(--blue-light);position:relative;overflow:hidden;}
+.ltr-wrap::before{content:'LTR';position:absolute;top:-30px;right:-10px;font-family:'Fraunces',serif;font-weight:900;
+  font-size:10rem;color:var(--blue);opacity:.08;line-height:1;}
+.ltr-def{font-size:clamp(1.1rem,2.2vw,1.4rem);font-weight:800;color:var(--ink);margin-bottom:1rem;line-height:1.6;}
+.ltr-def .en{color:var(--blue);font-family:'Fraunces',serif;font-style:italic;font-weight:900;}
+.ltr-def .arrow{color:var(--red);margin:0 .3rem;}
+.ltr-desc{color:var(--ink-light);line-height:1.9;margin-bottom:1.8rem;font-size:.95rem;position:relative;z-index:2;}
+.ltr-desc strong{color:var(--ink);}
+.ltr-pillars{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;position:relative;z-index:2;}
+.pillar{background:var(--white);border-radius:18px;padding:1.5rem 1.2rem;text-align:center;
+  transition:all .25s;border-top:5px solid var(--blue);box-shadow:0 4px 16px rgba(30,64,175,.08);}
+.pillar:hover{transform:translateY(-5px);box-shadow:0 12px 32px rgba(30,64,175,.15);}
+.pillar:nth-child(2){border-top-color:var(--yellow);}
+.pillar:nth-child(3){border-top-color:var(--red);}
+.pillar .p-ico{font-size:2.2rem;margin-bottom:.6rem;}
+.pillar h4{font-size:1rem;font-weight:800;color:var(--ink);margin-bottom:.4rem;}
+.pillar p{font-size:.78rem;color:var(--ink-light);line-height:1.6;}
+
+/* ===== 5大关卡 - 蓝色为主卡片 ===== */
+.levels-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:1rem;}
+.level-card{background:var(--white);border-radius:18px;padding:1.4rem 1.1rem;transition:all .25s;
+  position:relative;overflow:hidden;box-shadow:0 4px 16px rgba(30,64,175,.08);border:2px solid transparent;}
+.level-card:hover{transform:translateY(-6px);box-shadow:0 16px 40px rgba(30,64,175,.15);border-color:var(--blue-light);}
+.level-card::before{content:'';position:absolute;top:0;left:0;right:0;height:5px;}
+.level-card:nth-child(1)::before{background:var(--blue);}
+.level-card:nth-child(2)::before{background:var(--blue-light);}
+.level-card:nth-child(3)::before{background:var(--yellow);}
+.level-card:nth-child(4)::before{background:var(--red);}
+.level-card:nth-child(5)::before{background:var(--blue-deep);}
+.level-num{font-family:'Fraunces',serif;font-weight:900;font-size:2.5rem;opacity:.1;position:absolute;top:.8rem;right:1rem;line-height:1;color:var(--blue);}
+.level-ico{font-size:1.8rem;margin-bottom:.6rem;display:inline-block;padding:.5rem;background:var(--blue-soft);border-radius:12px;}
+.level-card:nth-child(2) .level-ico{background:var(--blue-soft);}
+.level-card:nth-child(3) .level-ico{background:var(--yellow-soft);}
+.level-card:nth-child(4) .level-ico{background:var(--red-soft);}
+.level-card:nth-child(5) .level-ico{background:var(--blue-soft);}
+.level-card h3{font-family:'Noto Serif SC',serif;font-weight:900;font-size:1.05rem;color:var(--ink);margin-bottom:.2rem;}
+.level-card .level-en{font-size:.68rem;color:var(--ink-faint);margin-bottom:.7rem;font-style:italic;font-weight:600;}
+.level-goal{font-size:.8rem;color:var(--ink-light);line-height:1.6;margin-bottom:.7rem;}
+.level-task{display:inline-flex;align-items:center;gap:.3rem;padding:.35rem .7rem;background:var(--blue-soft);
+  border-radius:16px;font-size:.7rem;font-weight:700;color:var(--blue);}
+
+/* ===== 7步走 - 蓝色为主 ===== */
+.steps-wrap{background:var(--white);border-radius:24px;padding:clamp(1.8rem,3.5vw,2.8rem);
+  border:2px solid var(--border);box-shadow:0 4px 20px rgba(30,64,175,.06);}
+.steps-flow{display:grid;grid-template-columns:repeat(7,1fr);gap:.8rem;}
+.step-item{background:var(--blue-soft);border-radius:14px;padding:1.1rem .8rem;text-align:center;
+  border:2px solid transparent;transition:all .2s;position:relative;}
+.step-item:hover{transform:translateY(-3px);border-color:var(--blue-light);}
+.step-item:nth-child(2n){background:var(--yellow-soft);}
+.step-item:nth-child(3n){background:var(--red-soft);}
+.step-num{width:36px;height:36px;border-radius:50%;background:var(--blue);color:#fff;
+  font-family:'Fraunces',serif;font-weight:900;font-size:1rem;display:flex;align-items:center;justify-content:center;
+  margin:0 auto .6rem;box-shadow:0 3px 10px rgba(30,64,175,.25);}
+.step-item:nth-child(2n) .step-num{background:var(--yellow);color:var(--blue-deep);box-shadow:0 3px 10px rgba(251,191,36,.3);}
+.step-item:nth-child(3n) .step-num{background:var(--red);box-shadow:0 3px 10px rgba(248,113,113,.3);}
+.step-item h4{font-size:.82rem;font-weight:800;color:var(--ink);margin-bottom:.3rem;}
+.step-item p{font-size:.68rem;color:var(--ink-light);line-height:1.5;}
+
+/* ===== 结尾 CTA - 蓝色渐变 ===== */
+.cta-section{max-width:1200px;margin:0 auto;padding:clamp(2rem,4vw,3.5rem) 1.5rem clamp(3rem,6vw,5rem);}
+.cta-card{background:linear-gradient(135deg,var(--blue-deep) 0%,var(--blue) 50%,var(--blue-light) 100%);
+  border-radius:28px;padding:clamp(2.5rem,5vw,4rem);text-align:center;position:relative;overflow:hidden;
+  box-shadow:0 20px 60px rgba(30,64,175,.3);}
+.cta-card::before{content:'';position:absolute;width:400px;height:400px;border-radius:50%;
+  background:rgba(251,191,36,.12);top:-150px;right:-100px;}
+.cta-card::after{content:'';position:absolute;width:300px;height:300px;border-radius:50%;
+  background:rgba(248,113,113,.1);bottom:-100px;left:-80px;}
+.cta-inner{position:relative;z-index:2;}
+.cta-emoji{font-size:3rem;margin-bottom:1rem;display:inline-block;animation:bounce 2s infinite;}
+@keyframes bounce{0%,100%{transform:translateY(0);}50%{transform:translateY(-10px);}}
+.cta-card h2{font-family:'Noto Serif SC',serif;font-weight:900;font-size:clamp(1.5rem,3.5vw,2.2rem);color:#fff;
+  line-height:1.4;margin-bottom:1rem;}
+.cta-card h2 .hl{background:var(--yellow);color:var(--blue-deep);padding:.05em .3em;border-radius:6px;}
+.cta-card p{color:rgba(255,255,255,.9);line-height:1.8;margin-bottom:2rem;font-size:1rem;max-width:600px;margin-left:auto;margin-right:auto;}
+.cta-btn{display:inline-flex;align-items:center;gap:8px;padding:1rem 2.5rem;background:var(--yellow);color:var(--blue-deep);
+  border-radius:32px;font-size:1.05rem;font-weight:800;cursor:pointer;transition:all .2s;border:none;
+  font-family:inherit;box-shadow:0 8px 30px rgba(251,191,36,.4);}
+.cta-btn:hover{transform:translateY(-3px) scale(1.02);box-shadow:0 12px 40px rgba(251,191,36,.5);}
+
+/* ===== 页脚 ===== */
+.footer{text-align:center;padding:2rem 1.5rem;border-top:3px solid var(--blue);background:var(--white);}
+.footer p{font-size:.78rem;color:var(--ink-faint);line-height:1.8;}
+.footer .brand{font-weight:800;color:var(--ink-light);}
+.footer .patent{color:var(--red);font-weight:600;margin-top:.3rem;}
+
+/* ===== 响应式 ===== */
+@media (max-width:1024px){
+  .levels-grid{grid-template-columns:repeat(3,1fr);}
+  .steps-flow{grid-template-columns:repeat(4,1fr);}
+  .hero-inner{grid-template-columns:1fr;gap:2rem;}
+}
+@media (max-width:768px){
+  .nav-links{display:none;}
+  .about-grid{grid-template-columns:1fr;}
+  .ltr-pillars{grid-template-columns:1fr;}
+  .about-features{grid-template-columns:1fr;}
+  .levels-grid{grid-template-columns:repeat(2,1fr);}
+  .steps-flow{grid-template-columns:repeat(2,1fr);}
+  .hero-stats{grid-template-columns:1fr 1fr;}
+}
+@media (max-width:480px){
+  .levels-grid{grid-template-columns:1fr;}
+  .steps-flow{grid-template-columns:1fr;}
+  .hero-stats{grid-template-columns:1fr;}
+}
+</style>
+</head>
+<body>
+
+<!-- Alex卡通形象背景装饰（半透明，和背景融为一体） -->
+<div class="alex-bg alex-bg-1"><img src="https://aka.doubaocdn.com/s/UAxnoAaUnE" alt=""></div>
+<div class="alex-bg alex-bg-2"><img src="https://aka.doubaocdn.com/s/8yUFV89xkv" alt=""></div>
+<div class="alex-bg alex-bg-3"><img src="https://aka.doubaocdn.com/s/NG7tVmKsUd" alt=""></div>
+<div class="alex-bg alex-bg-4"><img src="https://aka.doubaocdn.com/s/8UoD2rvMEC" alt=""></div>
+
+<!-- 顶部导航 -->
+<nav class="top-nav">
+  <div class="top-nav-inner">
+    <div class="nav-brand">
+      <span class="dot"></span>
+      <span>Alex·一人公司</span>
+    </div>
+    <div class="nav-links">
+      <a href="#about">我是谁</a>
+      <a href="#ltr">LTR是什么</a>
+      <a href="#levels">5大关卡</a>
+      <a href="#steps">7步走</a>
+    </div>
+    <button class="back-btn" onclick="history.back()">← 返回工作台</button>
+  </div>
+</nav>
+
+<!-- Hero 蓝色主背景 + 右侧数据卡片 -->
+<section class="hero">
+  <div class="hero-inner">
+    <div class="hero-text">
+      <div class="hero-badge"><span class="star">⭐</span> 虫妈LTR家庭英语伴学系统 · 已申请专利保护</div>
+      <h1>你好，我是<span class="hl">虫妈</span><br>专注家庭英语伴学</h1>
+      <p class="subtitle">花6年时间研发 Learn to Read 家庭英语伴学系统，每天30分钟极简听说+结构读写，轻松养出英语牛娃！</p>
+      <div class="hero-tags">
+        <span class="hero-tag y">🎯 5-8岁家庭英语</span>
+        <span class="hero-tag">📚 SoR科学阅读</span>
+        <span class="hero-tag r">⏰ 每天30分钟</span>
+        <span class="hero-tag">🏆 从0基础到Harry Potter</span>
+      </div>
+      <button class="hero-cta" onclick="document.getElementById('about').scrollIntoView({behavior:'smooth'})">了解我的教学体系 →</button>
+    </div>
+    <div class="hero-stats">
+      <div class="hero-stat">
+        <div class="num">6年</div>
+        <div class="label">系统研发</div>
+      </div>
+      <div class="hero-stat">
+        <div class="num">30分</div>
+        <div class="label">每日陪伴</div>
+      </div>
+      <div class="hero-stat">
+        <div class="num">4维</div>
+        <div class="label">音词句篇</div>
+      </div>
+      <div class="hero-stat">
+        <div class="num">0→HP</div>
+        <div class="label">能力跃迁</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 我是谁 - 蓝色卡片 + 右侧数据 -->
+<section class="section" id="about">
+  <div class="section-head">
+    <span class="section-num">01</span>
+    <span class="section-title">我是谁</span>
+  </div>
+  <div class="about-wrap">
+    <div class="about-grid">
+      <div class="about-content">
+        <h3>专注5-8岁家庭英语伴学的<span class="em">独立老师</span></h3>
+        <p>我是虫妈，花6年时间研发出 <strong>Learn to Read 家庭英语伴学系统</strong>。每天30分钟极简听说+结构读写，轻松养出英语牛娃！</p>
+        <p>我深挖语言底层逻辑，实现体系化能力提升；不靠海量刷题，不走弯路鸡娃；依托整套闭环伴学体系，稳稳夯实孩子英语核心竞争力。</p>
+        <div class="about-features">
+          <div class="about-feature">
+            <span class="ico">🎯</span>
+            <div class="txt"><strong>体系化教学</strong>深挖语言底层逻辑，不走弯路</div>
+          </div>
+          <div class="about-feature">
+            <span class="ico">⏰</span>
+            <div class="txt"><strong>每天30分钟</strong>极简听说+结构读写，零负担</div>
+          </div>
+          <div class="about-feature">
+            <span class="ico">📚</span>
+            <div class="txt"><strong>SoR理论基础</strong>科学阅读方法论支撑</div>
+          </div>
+          <div class="about-feature">
+            <span class="ico">🏆</span>
+            <div class="txt"><strong>闭环伴学体系</strong>从0基础到Harry Potter</div>
+          </div>
+        </div>
+      </div>
+      <div class="about-side">
+        <div class="stat-card">
+          <div class="num">6年</div>
+          <div class="label">深耕家庭英语伴学系统研发</div>
+        </div>
+        <div class="stat-card y">
+          <div class="num">30分钟</div>
+          <div class="label">每天极简听说+结构读写</div>
+        </div>
+        <div class="stat-card r">
+          <div class="num">7大营</div>
+          <div class="label">完整学习路线规划</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- LTR是什么 - 浅蓝背景 -->
+<section class="section" id="ltr">
+  <div class="section-head">
+    <span class="section-num">02</span>
+    <span class="section-title">LTR 是什么</span>
+  </div>
+  <div class="ltr-wrap">
+    <div class="ltr-def">
+      <span class="en">LTR — Learn to Read</span>
+      <span class="arrow">→</span>
+      <span class="en">Read to Learn</span><br>
+      学会阅读，然后通过阅读去学习
+    </div>
+    <p class="ltr-desc">LTR家庭英语伴学系统——不是零散的知识点，而是一套完整的解决方案。以 <strong>SoR（Science of Reading）</strong>为理论基础，以 <strong>英语框架18式</strong>为实操方法，以 <strong>通关地图、每日清单、1V1伴学</strong>为服务框架，从音、词、句、篇4个维度完成4大游戏化任务，陪伴家长带娃从0基础到Harry Potter，最终养出既有原版能力又有应试成绩的英语牛娃！</p>
+    <div class="ltr-pillars">
+      <div class="pillar">
+        <div class="p-ico">🧠</div>
+        <h4>理论基础</h4>
+        <p>SoR 科学阅读方法论</p>
+      </div>
+      <div class="pillar">
+        <div class="p-ico">🔧</div>
+        <h4>实操方法</h4>
+        <p>英语框架18式结构化读写</p>
+      </div>
+      <div class="pillar">
+        <div class="p-ico">🗺️</div>
+        <h4>服务框架</h4>
+        <p>通关地图·每日清单·1V1伴学</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 5大关卡 - 5列网格 -->
+<section class="section" id="levels">
+  <div class="section-head">
+    <span class="section-num">03</span>
+    <span class="section-title">5大关卡</span>
+  </div>
+  <div class="levels-grid">
+    <div class="level-card">
+      <span class="level-num">01</span>
+      <div class="level-ico">🏝️</div>
+      <h3>听力关</h3>
+      <div class="level-en">英语小耳朵</div>
+      <p class="level-goal">建立音素意识，熟悉英语发音韵律，打好"听"的基础。</p>
+      <span class="level-task">🎧 4000+听力词汇</span>
+    </div>
+    <div class="level-card">
+      <span class="level-num">02</span>
+      <div class="level-ico">⛰️</div>
+      <h3>口语关</h3>
+      <div class="level-en">双语小达人</div>
+      <p class="level-goal">建立语言条件反射，初步实现英语无碍沟通。</p>
+      <span class="level-task">🗣️ 1000+口语词汇</span>
+    </div>
+    <div class="level-card">
+      <span class="level-num">03</span>
+      <div class="level-ico">🌈</div>
+      <h3>识字关</h3>
+      <div class="level-en">寻宝识字王</div>
+      <p class="level-goal">掌握自然拼读基础，能认读常见视觉词，开启自主阅读大门。</p>
+      <span class="level-task">🔤 2000+拼读词汇</span>
+    </div>
+    <div class="level-card">
+      <span class="level-num">04</span>
+      <div class="level-ico">♻️</div>
+      <h3>单词关</h3>
+      <div class="level-en">词汇大富翁</div>
+      <p class="level-goal">按主题积累核心词汇，迅速扩大听力与阅读词汇量。</p>
+      <span class="level-task">📖 1500+阅读词汇</span>
+    </div>
+    <div class="level-card">
+      <span class="level-num">05</span>
+      <div class="level-ico">🍉</div>
+      <h3>句法关</h3>
+      <div class="level-en">造句魔法师</div>
+      <p class="level-goal">从单词到句子，学习构建完整、正确的英语句子。</p>
+      <span class="level-task">✏️ 1000+英语句型</span>
+    </div>
+  </div>
+</section>
+
+<!-- 7步走 - 7列网格 -->
+<section class="section" id="steps">
+  <div class="section-head">
+    <span class="section-num">04</span>
+    <span class="section-title">系统使用7步走</span>
+  </div>
+  <div class="steps-wrap">
+    <div class="steps-flow">
+      <div class="step-item">
+        <div class="step-num">1</div>
+        <h4>阅读方法</h4>
+        <p>结构化读写，掌握底层方法论</p>
+      </div>
+      <div class="step-item">
+        <div class="step-num">2</div>
+        <h4>语言框架</h4>
+        <p>7大主题逐步构建框架</p>
+      </div>
+      <div class="step-item">
+        <div class="step-num">3</div>
+        <h4>路线规划</h4>
+        <p>通关地图，心中有数</p>
+      </div>
+      <div class="step-item">
+        <div class="step-num">4</div>
+        <h4>日常执行</h4>
+        <p>每日清单一键推送</p>
+      </div>
+      <div class="step-item">
+        <div class="step-num">5</div>
+        <h4>督学反馈</h4>
+        <p>1V1伴学，问题清零</p>
+      </div>
+      <div class="step-item">
+        <div class="step-num">6</div>
+        <h4>校内融合</h4>
+        <p>课外拔高+课内对标</p>
+      </div>
+      <div class="step-item">
+        <div class="step-num">7</div>
+        <h4>测评复盘</h4>
+        <p>能力测评，成果可视化</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 结尾 CTA - 蓝色渐变 -->
+<section class="cta-section">
+  <div class="cta-card">
+    <div class="cta-inner">
+      <div class="cta-emoji">🎉</div>
+      <h2>欢迎加入 LTR<br>马上开启你的<span class="hl">家庭英语之旅</span>！</h2>
+      <p>打破碎片化英语学习，遵循 Learn to Read 优先原则，搭建完整英语闭环。让家长告别迷茫，每天只需30分钟，带娃走对英语学习的每一步。</p>
+      <button class="cta-btn" onclick="history.back()">返回工作台，开始使用 →</button>
+    </div>
+  </div>
+</section>
+
+<!-- 页脚 -->
+<footer class="footer">
+  <p><span class="brand">Alex·一人公司</span> · LTR家庭英语伴学系统</p>
+  <p class="patent">虫妈LTR家庭英语伴学系统已申请专利保护，复制剽窃将以法律手段追究到底。</p>
+</footer>
+
+</body>
+</html>

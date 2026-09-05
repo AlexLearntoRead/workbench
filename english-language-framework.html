@@ -1,0 +1,1694 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>英语语言框架 · 从音素到阅读理解 | LTR 家庭英语</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,700;0,9..144,900;1,9..144,400;1,9..144,700&family=Caveat:wght@400;700&family=Noto+Serif+SC:wght@700;900&family=Noto+Sans+SC:wght@400;500;700&family=Fira+Code:wght@400&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --blue:#2B7FD8; --blue-deep:#1E5BA8; --yellow:#F4D758; --yellow-soft:#FFF3CD;
+      --red:#E84A5F; --cream:#fefcf6; --cream-dark:#faf6eb; --ink:#1A1A2E;
+      --ink-light:#4A4A5A; --ink-faint:#8A8A9A; --dark-panel:#151821;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:'Noto Sans SC',-apple-system,'PingFang SC','Helvetica Neue',sans-serif;
+      font-size:16px;line-height:1.75;color:var(--ink);background:var(--cream);}
+    ::selection{background:var(--yellow);color:var(--ink);}
+    .container{max-width:1300px;margin:0 auto;padding:0 2rem;}
+    a{color:var(--blue);text-decoration:none;}
+
+    /* ===== NAV ===== */
+    nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:0.9rem 2rem;
+      background:rgba(254,252,246,.86);backdrop-filter:blur(12px);
+      border-bottom:1px solid rgba(26,26,26,.06);display:flex;align-items:center;justify-content:space-between;}
+    nav.scrolled{box-shadow:0 2px 20px rgba(0,0,0,.06);}
+    .nav-brand{font-family:'Fraunces',serif;font-weight:900;font-size:1.05rem;letter-spacing:.02em;display:flex;align-items:center;gap:.5rem;}
+    .nav-brand .dot{width:10px;height:10px;border-radius:50%;background:var(--yellow);display:inline-block;}
+    .nav-links{display:flex;gap:1.6rem;}
+    .nav-links a{font-size:.82rem;color:var(--ink);position:relative;}
+    .nav-links a::after{content:'';position:absolute;bottom:-4px;left:0;right:0;height:2px;
+      background:var(--yellow);transform:scaleX(0);transition:transform .25s ease-out;}
+    .nav-links a:hover::after{transform:scaleX(1);}
+
+    /* ===== HERO ===== */
+    .hero{min-height:100vh;display:grid;grid-template-columns:1fr 0.62fr;align-items:center;
+      gap:48px;padding:7rem 2rem 4rem;max-width:1300px;margin:0 auto;}
+    .hero h1{font-family:'Noto Serif SC',serif;font-weight:900;
+      font-size:clamp(2.4rem,5.5vw,4.2rem);line-height:1.18;}
+    .hero h1 .accent{color:var(--blue);}
+    .hero .sub{font-size:1.05rem;color:var(--ink-light);margin-top:1.4rem;max-width:520px;}
+    .label-caps{font-size:.74rem;text-transform:uppercase;letter-spacing:.18em;font-weight:600;
+      color:var(--ink-faint);display:block;margin-bottom:.9rem;}
+    .hero-tags{display:flex;flex-wrap:wrap;gap:.6rem;margin-top:1.8rem;}
+    .tag{font-family:'Fira Code',monospace;font-size:.72rem;padding:.35em .8em;border-radius:20px;
+      background:rgba(43,127,216,.08);color:var(--blue);}
+
+    .ladder{display:flex;flex-direction:column-reverse;gap:10px;position:relative;}
+    .rung{display:flex;align-items:center;gap:12px;border-radius:12px;padding:10px 16px;
+      background:#fff;box-shadow:0 2px 14px rgba(0,0,0,.05);border-left:4px solid var(--blue);}
+    .rung:nth-child(odd){border-left-color:var(--yellow);}
+    .rung:nth-child(3n){border-left-color:var(--red);}
+    .rung .num{font-family:'Fraunces',serif;font-weight:900;font-size:1.05rem;color:var(--blue);min-width:28px;}
+    .rung .nm{font-family:'Noto Serif SC',serif;font-weight:700;font-size:.98rem;}
+    .rung .en{font-family:'Fraunces',serif;font-style:italic;font-size:.8rem;color:var(--ink-faint);margin-left:auto;}
+
+    /* ===== SECTION shell ===== */
+    .section{padding:clamp(80px,12vh,150px) 0;}
+    .section--alt{background:var(--cream-dark);}
+    .section-header{margin-bottom:clamp(36px,5vw,64px);}
+    .section-number{font-family:'Fraunces',serif;font-style:italic;font-size:clamp(1.3rem,3vw,2rem);
+      color:var(--blue);opacity:.32;display:block;margin-bottom:.2rem;}
+    .section-title{font-family:'Noto Serif SC',serif;font-weight:900;font-size:clamp(1.5rem,3.4vw,2.3rem);}
+    .section-lead{color:var(--ink-light);max-width:680px;margin-top:1rem;font-size:1rem;}
+    .subsection-tag{display:inline-block;font-family:'Fira Code',monospace;font-size:.72rem;
+      color:var(--blue);background:rgba(43,127,216,.08);padding:.3em .8em;border-radius:20px;margin:2rem 0 1.2rem;}
+
+    /* ===== 01 总览 step flow ===== */
+    .steps-container{display:flex;flex-direction:column;gap:clamp(28px,3.5vw,48px);
+      padding-left:58px;position:relative;}
+    .steps-container::before{content:'';position:absolute;left:21px;top:30px;bottom:30px;
+      width:2px;border-left:2px dashed var(--yellow);}
+    .step-item{position:relative;}
+    .step-num{position:absolute;left:-58px;top:0;width:44px;height:44px;border-radius:50%;
+      background:var(--blue);color:#fff;display:flex;align-items:center;justify-content:center;
+      font-family:'Fraunces',serif;font-weight:700;font-size:1.05rem;}
+    .step-item:nth-child(even) .step-num{background:var(--yellow);color:var(--ink);}
+    .step-item:nth-child(3n) .step-num{background:var(--red);color:#fff;}
+    .step-card{background:#fff;border-radius:16px;padding:22px 26px;box-shadow:0 3px 18px rgba(0,0,0,.045);}
+    .step-card h3{font-family:'Noto Serif SC',serif;font-weight:700;font-size:1.15rem;display:flex;align-items:baseline;gap:.6rem;flex-wrap:wrap;}
+    .step-card h3 .en{font-family:'Fraunces',serif;font-style:italic;font-weight:400;font-size:.85rem;color:var(--ink-faint);}
+    .step-card h3 .sl{font-family:'Fira Code',monospace;font-size:.66rem;color:#fff;background:var(--blue-deep);padding:.2em .6em;border-radius:10px;margin-left:auto;}
+    .step-item:nth-child(even) .step-card h3 .sl{background:var(--red);}
+    .step-card p{font-size:.92rem;color:var(--ink-light);margin-top:.5rem;line-height:1.8;}
+    .step-card .eg{font-family:'Fira Code',monospace;font-size:.78rem;color:var(--blue);margin-top:.6rem;display:block;}
+    .step-card h3 .lvl{font-family:'Fraunces',serif;font-weight:900;font-size:.8rem;color:var(--red);background:rgba(232,74,95,.08);padding:.18em .5em;border-radius:8px;}
+    .step-card .pt{display:block;margin-top:.65rem;padding:.55rem .8rem;border-radius:10px;background:var(--cream-dark);font-size:.84rem;color:var(--ink);line-height:1.7;border-left:3px solid var(--yellow);}
+    .step-card .pt b{color:var(--blue-deep);}
+
+    /* ===== 02 语音地基 ===== */
+    .gpc-demo{background:#fff;border-radius:18px;padding:clamp(28px,3vw,40px);
+      box-shadow:0 4px 24px rgba(0,0,0,.05);margin-bottom:clamp(36px,4vw,56px);}
+    .gpc-demo h3{font-family:'Noto Serif SC',serif;font-weight:700;font-size:1.1rem;margin-bottom:1.2rem;}
+    .word-row{display:flex;flex-wrap:wrap;gap:28px;}
+    .word-block{display:flex;flex-direction:column;gap:10px;align-items:center;}
+    .letters{display:flex;gap:6px;}
+    .ltr{width:46px;height:58px;border-radius:12px;display:flex;align-items:center;justify-content:center;
+      font-family:'Fraunces',serif;font-weight:900;font-size:1.8rem;color:#fff;}
+    .ltr.v{background:var(--red);} .ltr.c{background:var(--blue);} .ltr.s{background:var(--ink-faint);}
+    .sounds{display:flex;gap:6px;font-family:'Fira Code',monospace;font-size:.92rem;color:var(--ink);}
+    .sounds span{width:46px;text-align:center;}
+    .word-block .wl{font-family:'Fira Code',monospace;font-size:.74rem;color:var(--ink-faint);}
+
+    /* 音素矩阵 */
+    .ph-grid{display:flex;flex-wrap:wrap;gap:8px;margin-top:.4rem;}
+    .ph{font-family:'Fira Code',monospace;font-size:.86rem;width:42px;height:42px;border-radius:10px;
+      display:flex;align-items:center;justify-content:center;font-weight:400;}
+    .ph.v{background:rgba(232,74,95,.12);color:var(--red);}
+    .ph.c{background:rgba(43,127,216,.12);color:var(--blue-deep);}
+    .ph-label{font-family:'Noto Serif SC',serif;font-weight:700;font-size:.92rem;margin-top:1.2rem;color:var(--ink);}
+    .ph-note{font-size:.82rem;color:var(--ink-faint);margin-top:.4rem;}
+    .pa-activity{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-top:1rem;}
+    .pa{border-radius:12px;padding:14px 16px;background:var(--cream-dark);}
+    .pa b{font-family:'Noto Serif SC',serif;font-size:.92rem;}
+    .pa p{font-size:.82rem;color:var(--ink-light);margin-top:.3rem;}
+
+    /* 字素-音素关系 + 速查 */
+    .gpc-rel{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:1.4rem;}
+    .rel-card{background:var(--cream-dark);border-radius:14px;padding:18px 20px;border-bottom:4px solid var(--yellow);}
+    .rel-card:nth-child(2){border-bottom-color:var(--blue);}
+    .rel-card:nth-child(3){border-bottom-color:var(--red);}
+    .rel-card .t{font-family:'Noto Serif SC',serif;font-weight:700;font-size:.98rem;}
+    .rel-card p{font-size:.82rem;color:var(--ink-light);margin-top:.4rem;line-height:1.65;}
+    .rel-card code{font-family:'Fira Code',monospace;font-size:.78rem;color:var(--blue);}
+    .gpc-table{width:100%;border-collapse:collapse;margin-top:1.2rem;font-family:'Fira Code',monospace;font-size:.8rem;}
+    .gpc-table th,.gpc-table td{border:1px solid rgba(26,26,26,.08);padding:8px 10px;text-align:center;}
+    .gpc-table th{background:var(--blue);color:#fff;font-weight:700;}
+    .gpc-table td.g{color:var(--blue-deep);font-weight:700;}
+    .gpc-table td.s{color:var(--red);}
+
+    /* 概念积木 + 破除迷思 + 拼写规则 + 五步听写 */
+    .concept-blocks{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:.7rem;margin:1rem 0;}
+    .cb{background:var(--cream-dark);border-radius:12px;padding:.9rem 1rem;border-top:3px solid var(--blue);}
+    .cb b{font-family:'Noto Serif SC',serif;font-size:.92rem;color:var(--ink);}
+    .cb p{font-size:.8rem;color:var(--ink-light);margin-top:.3rem;line-height:1.6;}
+    .myth-card{background:linear-gradient(135deg,#fff7ed,#ffedd5);border:1px solid #fed7aa;border-radius:14px;padding:1.1rem 1.3rem;margin:1.2rem 0;}
+    .myth-card .mt{font-family:'Noto Serif SC',serif;font-weight:700;font-size:.95rem;color:#c2410c;display:block;margin-bottom:.4rem;}
+    .myth-card p{font-size:.85rem;color:#7c2d12;line-height:1.8;}
+    .myth-card b{color:#9a3412;}
+    .rule-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:.8rem;margin:1rem 0;}
+    .rule{background:var(--cream-dark);border-radius:10px;padding:.85rem 1rem;border-left:4px solid var(--blue);}
+    .rule b{font-family:'Noto Serif SC',serif;font-size:.88rem;color:var(--ink);}
+    .rule p{font-size:.79rem;color:var(--ink-light);margin-top:.35rem;line-height:1.65;}
+    .steps5{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:.7rem;margin:1rem 0 1.5rem;}
+    .st{background:#fff;border:1px solid rgba(26,26,26,.08);border-radius:12px;padding:1rem;box-shadow:0 2px 12px rgba(0,0,0,.04);}
+    .st .n{display:inline-flex;width:26px;height:26px;align-items:center;justify-content:center;background:var(--blue);color:#fff;border-radius:50%;font-weight:700;font-size:.85rem;font-family:'Fraunces',serif;}
+    .st b{margin-left:.4rem;font-family:'Noto Serif SC',serif;font-size:.9rem;color:var(--ink);}
+    .st p{font-size:.79rem;color:var(--ink-light);margin-top:.45rem;line-height:1.6;}
+    .gpc-full td,.gpc-full th{font-size:.74rem;padding:5px 7px;}
+
+    /* 语音地基 · 听力积累与语音意识（隐性地基） */
+    .found-section{margin-top:.6rem;}
+    .found-intro{background:linear-gradient(135deg,#eef2ff,#e0e7ff);border:1px solid #c7d2fe;border-radius:14px;padding:1.1rem 1.3rem;margin:.4rem 0 1.4rem;}
+    .found-intro .t{font-family:'Noto Serif SC',serif;font-weight:700;font-size:.98rem;color:#3730a3;display:block;margin-bottom:.4rem;}
+    .found-intro p{font-size:.85rem;color:#312e81;line-height:1.85;}
+    .found-intro b{color:#1e1b4b;}
+    .found-block{background:var(--cream-dark);border-radius:14px;padding:1.3rem 1.4rem;margin-bottom:1.3rem;border-left:4px solid var(--blue);}
+    .found-block h4{font-family:'Noto Serif SC',serif;font-weight:700;font-size:1rem;color:var(--ink);margin-bottom:.3rem;}
+    .found-block .lead{font-size:.84rem;color:var(--ink-light);line-height:1.8;margin-bottom:.8rem;}
+    .mat-cloud{display:flex;flex-wrap:wrap;gap:.45rem;margin:.6rem 0;}
+    .mat{background:#fff;border:1px solid rgba(26,26,26,.1);border-radius:20px;padding:.3rem .8rem;font-size:.78rem;color:var(--ink-light);}
+    .time-table{width:100%;border-collapse:collapse;margin:.8rem 0;font-size:.78rem;}
+    .time-table th,.time-table td{border:1px solid rgba(26,26,26,.1);padding:6px 8px;text-align:center;font-family:'Fira Code',monospace;}
+    .time-table th{background:var(--blue);color:#fff;}
+    .time-table td:first-child{background:var(--cream-dark);font-family:'Noto Serif SC',serif;font-weight:700;}
+    .pa-table{width:100%;border-collapse:collapse;margin:.8rem 0;font-size:.82rem;}
+    .pa-table th,.pa-table td{border:1px solid rgba(26,26,26,.1);padding:9px 11px;vertical-align:top;line-height:1.7;}
+    .pa-table th{background:#eef2ff;color:#3730a3;font-family:'Noto Serif SC',serif;}
+    .pa-table td:first-child{font-family:'Noto Serif SC',serif;font-weight:700;color:var(--ink);background:var(--cream-dark);}
+    .pa-table .num{color:var(--blue-deep);font-weight:700;}
+    .pa-layer-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-top:.8rem;}
+    .pa-layer{background:#fff;border:1px solid rgba(26,26,26,.08);border-radius:12px;padding:1rem 1.1rem;box-shadow:0 2px 12px rgba(0,0,0,.04);}
+    .pa-layer .lh{font-family:'Noto Serif SC',serif;font-weight:700;font-size:.92rem;color:var(--blue-deep);margin-bottom:.5rem;}
+    .pa-layer ul{margin:0;padding-left:1.1rem;}
+    .pa-layer li{font-size:.8rem;color:var(--ink-light);line-height:1.7;margin-bottom:.3rem;}
+    .pa-layer li b{color:var(--ink);font-family:'Fira Code',monospace;font-size:.76rem;}
+    @media(max-width:720px){.pa-layer-grid{grid-template-columns:1fr;}}
+
+    /* 音节 */
+    .syll-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(18px,2.3vw,28px);}
+    .syl-card{background:#fff;border-radius:16px;padding:24px 22px;box-shadow:0 3px 16px rgba(0,0,0,.045);
+      position:relative;overflow:hidden;border-bottom:4px solid var(--yellow);}
+    .syl-card:nth-child(3n+1){border-bottom-color:var(--blue);}
+    .syl-card:nth-child(3n){border-bottom-color:var(--red);}
+    .syl-card .cn{font-family:'Noto Serif SC',serif;font-weight:700;font-size:1.05rem;}
+    .syl-card .en{font-family:'Fraunces',serif;font-style:italic;font-size:.78rem;color:var(--ink-faint);display:block;margin-bottom:.5rem;}
+    .syl-card p{font-size:.85rem;color:var(--ink-light);line-height:1.7;}
+    .syl-card .x{font-family:'Fira Code',monospace;font-size:.78rem;color:var(--blue);margin-top:.6rem;display:block;}
+    .syl-card .split{font-family:'Fira Code',monospace;font-size:.76rem;color:var(--ink-faint);margin-top:.3rem;display:block;}
+
+    /* ===== 03 词层 ===== */
+    .word-quad{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin-top:1.4rem;}
+    .quad{background:#fff;border-radius:14px;padding:20px 18px;box-shadow:0 3px 16px rgba(0,0,0,.045);border-top:4px solid var(--blue);}
+    .quad:nth-child(2){border-top-color:var(--red);}
+    .quad:nth-child(3){border-top-color:var(--yellow);}
+    .quad:nth-child(4){border-top-color:var(--ink-faint);}
+    .quad .k{font-family:'Noto Serif SC',serif;font-weight:700;font-size:.98rem;}
+    .quad p{font-size:.82rem;color:var(--ink-light);margin-top:.4rem;line-height:1.6;}
+    .quad code{font-family:'Fira Code',monospace;font-size:.76rem;color:var(--blue);}
+    .pos-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-top:1.2rem;}
+    .pos{background:var(--cream-dark);border-radius:12px;padding:14px 16px;}
+    .pos .t{font-family:'Fraunces',serif;font-weight:900;font-size:1.1rem;color:var(--blue);}
+    .pos .n{font-family:'Noto Serif SC',serif;font-weight:700;font-size:.9rem;}
+    .pos code{font-family:'Fira Code',monospace;font-size:.72rem;color:var(--ink-light);display:block;margin-top:.3rem;}
+    .pitfall{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:1.2rem;}
+    .pf{background:#fff;border-radius:14px;padding:18px 20px;box-shadow:0 3px 16px rgba(0,0,0,.045);}
+    .pf .t{font-family:'Noto Serif SC',serif;font-weight:700;font-size:.95rem;color:var(--red);}
+    .pf p{font-size:.82rem;color:var(--ink-light);margin-top:.4rem;line-height:1.6;}
+    .pf code{font-family:'Fira Code',monospace;font-size:.78rem;color:var(--blue);}
+    .stress-demo{background:#fff;border-radius:16px;padding:22px 24px;box-shadow:0 3px 16px rgba(0,0,0,.045);margin-top:1.4rem;}
+    .stress-demo h4{font-family:'Noto Serif SC',serif;font-weight:700;font-size:1rem;margin-bottom:.8rem;}
+    .stress-row{display:flex;flex-wrap:wrap;gap:22px;font-family:'Fira Code',monospace;font-size:.9rem;}
+    .stress-row .w b{color:var(--red);font-weight:900;}
+
+    /* 词层新增：主题语境 + 构词法锚点 */
+    .theme-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(18px,2.3vw,28px);margin-top:1.2rem;}
+    .theme-card{background:#fff;border-radius:16px;padding:24px 22px;box-shadow:0 3px 16px rgba(0,0,0,.045);border-top:4px solid var(--blue);}
+    .theme-card:nth-child(2){border-top-color:var(--yellow);}
+    .theme-card:nth-child(3){border-top-color:var(--red);}
+    .theme-card .cn{font-family:'Noto Serif SC',serif;font-weight:700;font-size:1.05rem;}
+    .theme-card .en{font-family:'Fraunces',serif;font-style:italic;font-size:.76rem;color:var(--ink-faint);display:block;margin-bottom:.5rem;}
+    .theme-card ul{list-style:none;margin-top:.5rem;}
+    .theme-card li{font-size:.8rem;color:var(--ink-light);padding:.28rem 0;border-bottom:1px dashed rgba(26,26,26,.08);}
+    .morph-demo{background:var(--cream-dark);border-radius:14px;padding:18px 22px;margin-top:1.4rem;border-left:4px solid var(--yellow);}
+    .morph-demo h4{font-family:'Noto Serif SC',serif;font-weight:700;font-size:1rem;color:var(--ink);margin-bottom:.6rem;}
+    .morph-demo>p{font-size:.82rem;color:var(--ink-light);margin-top:.7rem;line-height:1.7;}
+    .morph-chain{display:flex;flex-wrap:wrap;align-items:center;gap:8px;font-family:'Fira Code',monospace;font-size:.92rem;}
+    .morph-chain .m{background:#fff;border:1px solid var(--ink-faint);border-radius:8px;padding:6px 10px;color:var(--blue);}
+    .morph-chain .m i{font-style:normal;color:var(--ink-light);font-size:.72rem;margin-left:4px;}
+    .morph-chain .op{color:var(--ink-faint);font-weight:700;}
+    .morph-chain .eq{color:var(--ink-faint);font-weight:700;}
+    .morph-chain .word{background:var(--ink);color:#fff;border-radius:8px;padding:6px 12px;font-weight:700;}
+    .morph-chain .word small{display:block;font-family:'Noto Sans SC',sans-serif;font-weight:400;font-size:.7rem;opacity:.85;}
+
+    /* ===== 04 句层 ===== */
+    .parse{background:#fff;border-radius:18px;padding:clamp(28px,3.5vw,48px);box-shadow:0 4px 28px rgba(0,0,0,.05);}
+    .sentence{font-family:'Noto Serif SC',serif;font-weight:900;font-size:clamp(1.3rem,2.6vw,1.9rem);
+      line-height:1.6;text-align:center;margin-bottom:1.8rem;}
+    .sentence .np{color:var(--blue);} .sentence .vp{color:var(--red);}
+    .layer-row{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:1.4rem;}
+    .layer-box{background:var(--cream-dark);border-radius:14px;padding:22px 20px;border-bottom:4px solid var(--yellow);}
+    .layer-box ul.mm{list-style:none;padding:0;margin:.5rem 0;font-size:.8rem;}
+    .layer-box ul.mm li{margin:.38rem 0;line-height:1.5;}
+    .layer-box .cg{font-size:.74rem;color:var(--ink-light);margin-top:.55rem;background:#fff;border-radius:8px;padding:.5rem .7rem;line-height:1.6;}
+    .layer-box:nth-child(2){border-bottom-color:var(--blue);}
+    .layer-box:nth-child(3){border-bottom-color:var(--red);}
+    .layer-box .t{font-family:'Noto Serif SC',serif;font-weight:700;font-size:1rem;}
+    .layer-box .en{font-family:'Fraunces',serif;font-style:italic;font-size:.76rem;color:var(--ink-faint);}
+    .layer-box p{font-size:.84rem;color:var(--ink-light);margin-top:.5rem;line-height:1.7;}
+    .layer-box code{font-family:'Fira Code',monospace;font-size:.74rem;color:var(--blue);}
+    .sv-matrix{width:100%;border-collapse:collapse;margin-top:1.2rem;font-size:.86rem;}
+    .sv-matrix th,.sv-matrix td{border:1px solid rgba(26,26,26,.08);padding:12px 14px;vertical-align:top;}
+    .sv-matrix th{background:var(--blue);color:#fff;font-family:'Noto Serif SC',serif;}
+    .sv-matrix td .pat{font-family:'Fira Code',monospace;color:var(--blue-deep);font-weight:700;}
+    .sv-matrix td .ex{font-family:'Fira Code',monospace;font-size:.78rem;color:var(--ink-light);display:block;margin-top:.3rem;}
+
+    /* 句型转换 */
+    .tf-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:18px;margin-top:1.4rem;}
+    .tf-card{background:var(--cream-dark);border-radius:14px;padding:18px 20px;border-bottom:4px solid var(--yellow);}
+    .tf-card:nth-child(2){border-bottom-color:var(--blue);}
+    .tf-card:nth-child(3){border-bottom-color:var(--red);}
+    .tf-card:nth-child(4){border-bottom-color:var(--ink-faint);}
+    .tf-card .t{font-family:'Noto Serif SC',serif;font-weight:700;font-size:.98rem;}
+    .tf-card p{font-size:.82rem;color:var(--ink-light);margin-top:.4rem;line-height:1.6;}
+    .tf-card code{font-family:'Fira Code',monospace;font-size:.76rem;color:var(--blue);display:block;margin-top:.3rem;}
+
+    /* 三位化妆师 + 形式进阶 */
+    .mua-intro{background:linear-gradient(135deg,rgba(43,127,216,.06),rgba(244,215,88,.1));border-radius:18px;
+      padding:clamp(22px,3vw,34px);margin-top:1.2rem;display:flex;gap:18px;align-items:center;flex-wrap:wrap;}
+    .mua-intro .face{font-size:2.6rem;}
+    .mua-intro .txt{flex:1;min-width:240px;}
+    .mua-intro .txt p{font-size:.92rem;color:var(--ink-light);line-height:1.85;}
+    .mua-rule{font-family:'Noto Serif SC',serif;font-weight:700;font-size:.95rem;margin-top:1rem;color:var(--ink);}
+    .fl{display:flex;flex-direction:column;gap:0;margin-top:.9rem;}
+    .fl-step{display:flex;align-items:center;gap:10px;background:var(--cream-dark);border-radius:10px;padding:8px 12px;font-size:.8rem;}
+    .fl-step b{color:var(--blue-deep);min-width:84px;}
+    .fl-step code{font-family:'Fira Code',monospace;font-size:.72rem;color:var(--ink);}
+    .fl-arrow{text-align:center;color:var(--ink-faint);font-size:.95rem;line-height:1.25;}
+
+    /* 非谓语表 */
+    .nonfinite-table{width:100%;border-collapse:collapse;margin-top:1.2rem;font-family:'Fira Code',monospace;font-size:.78rem;}
+    .nonfinite-table th,.nonfinite-table td{border:1px solid rgba(26,26,26,.08);padding:9px 11px;text-align:left;vertical-align:top;}
+    .nonfinite-table th{background:var(--blue);color:#fff;font-family:'Noto Serif SC',serif;}
+    .nonfinite-table td.f{color:var(--blue-deep);font-weight:700;}
+
+    /* ===== DARK insight ===== */
+    .dark-section{background:var(--cream-dark);color:var(--ink);padding:clamp(70px,9vh,120px) 0;}
+    .dark-section .container{max-width:1100px;}
+    .insight-big{font-family:'Noto Serif SC',serif;font-weight:900;font-size:clamp(1.5rem,3.6vw,2.6rem);
+      line-height:1.6;color:var(--ink);}
+    .insight-big .hl{background:linear-gradient(transparent 58%,rgba(244,215,88,.55) 58%);color:var(--ink);}
+    .insight-sub{margin-top:1.6rem;font-size:1rem;color:var(--ink-light);max-width:680px;line-height:1.9;}
+    .insight-mark{font-family:'Fraunces',serif;font-style:italic;color:var(--red);font-size:1rem;letter-spacing:.1em;}
+
+    /* ===== 配图 figure ===== */
+    .fig{margin:1.8rem auto 0;max-width:780px;}
+    .fig svg{width:100%;height:auto;display:block;}
+    .fig--card svg{background:#fff;border-radius:18px;box-shadow:0 3px 16px rgba(0,0,0,.045);}
+    .fig--dark svg{background:#fffdf7;border:1px solid rgba(0,0,0,.06);border-radius:18px;box-shadow:0 3px 16px rgba(0,0,0,.045);}
+    .fig-cap{font-size:.8rem;color:var(--ink-faint);text-align:center;margin-top:.8rem;line-height:1.65;}
+    .fig-cap b{color:var(--ink);}
+
+    /* ===== 05 文章层 ===== */
+    .text-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(18px,2.3vw,28px);margin-bottom:clamp(40px,5vw,64px);}
+    .text-card{background:#fff;border-radius:16px;padding:26px 22px;box-shadow:0 3px 16px rgba(0,0,0,.045);}
+    .text-card .ic{font-size:1.8rem;margin-bottom:10px;}
+    .text-card h4{font-family:'Noto Serif SC',serif;font-weight:700;font-size:1.05rem;}
+    .text-card .en{font-family:'Fraunces',serif;font-style:italic;font-size:.76rem;color:var(--ink-faint);display:block;margin-bottom:.5rem;}
+    .text-card p{font-size:.84rem;color:var(--ink-light);line-height:1.7;}
+    .genre-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:1.2rem;}
+    .genre{background:#fff;border-radius:12px;padding:16px 18px;box-shadow:0 2px 12px rgba(0,0,0,.04);}
+    .genre .t{font-family:'Noto Serif SC',serif;font-weight:700;font-size:.95rem;}
+    .genre p{font-size:.78rem;color:var(--ink-light);margin-top:.3rem;}
+    .coh-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-top:1.2rem;}
+    .coh{background:#fff;border-radius:14px;padding:18px 20px;box-shadow:0 3px 16px rgba(0,0,0,.045);}
+    .coh .t{font-family:'Noto Serif SC',serif;font-weight:700;font-size:.95rem;color:var(--blue-deep);}
+    .coh p{font-size:.82rem;color:var(--ink-light);margin-top:.4rem;line-height:1.65;}
+    .coh code{font-family:'Fira Code',monospace;font-size:.74rem;color:var(--red);}
+    /* 长难句拆解 */
+    .trunk{background:linear-gradient(transparent 52%,rgba(244,215,88,.55) 52%);font-weight:700;}
+    .leaf{color:var(--ink-faint);font-size:.82em;}
+
+    /* ===== 06 学习路径 sticky ===== */
+    .layout-sticky{display:grid;grid-template-columns:0.34fr 1fr;gap:clamp(40px,6vw,90px);align-items:start;}
+    .sticky-side{position:sticky;top:90px;}
+    .sticky-side .big{font-family:'Fraunces',serif;font-weight:900;font-size:clamp(3rem,7vw,5rem);
+      color:rgba(43,127,216,.16);line-height:.9;}
+    .sticky-side h2{font-family:'Noto Serif SC',serif;font-weight:900;font-size:clamp(1.4rem,3vw,2rem);margin-top:-.4rem;}
+    .path-list{display:flex;flex-direction:column;gap:22px;}
+    .path-item{display:flex;gap:18px;align-items:flex-start;background:#fff;border-radius:16px;
+      padding:22px 24px;box-shadow:0 3px 16px rgba(0,0,0,.045);}
+    .path-item .pn{font-family:'Fraunces',serif;font-weight:900;font-size:1.3rem;color:var(--blue);min-width:34px;}
+    .path-item:nth-child(even) .pn{color:var(--red);}
+    .path-item h4{font-family:'Noto Serif SC',serif;font-weight:700;font-size:1.05rem;}
+    .path-item p{font-size:.86rem;color:var(--ink-light);margin-top:.4rem;line-height:1.7;}
+
+    footer{padding:clamp(50px,7vh,90px) 0;text-align:center;background:var(--cream-dark);}
+    .foot-brand{font-family:'Fraunces',serif;font-weight:900;font-size:1.2rem;}
+    .foot-sub{font-size:.82rem;color:var(--ink-faint);margin-top:.5rem;}
+    .foot-note{font-family:'Caveat',cursive;font-size:1.1rem;color:var(--blue);margin-top:1.2rem;}
+
+    .reveal{opacity:0;transform:translateY(32px);transition:opacity .7s cubic-bezier(.16,1,.3,1),transform .7s cubic-bezier(.16,1,.3,1);}
+    .reveal.visible{opacity:1;transform:none;}
+    .reveal-d1{transition-delay:.1s;} .reveal-d2{transition-delay:.2s;} .reveal-d3{transition-delay:.3s;}
+
+    .phase-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin:.6rem 0 2rem;}
+    .phase{background:#fff;border-radius:16px;padding:18px 16px;box-shadow:0 3px 16px rgba(0,0,0,.05);border-top:3px solid var(--blue);position:relative;}
+    .phase:nth-child(even){border-top-color:var(--red);}
+    .phase .pn{font-family:'Fraunces',serif;font-weight:900;font-size:1.15rem;color:var(--blue);}
+    .phase:nth-child(even) .pn{color:var(--red);}
+    .phase .t{font-family:'Noto Serif SC',serif;font-weight:700;font-size:.98rem;margin:.2rem 0 .3rem;}
+    .phase .age{display:inline-block;font-size:.7rem;color:#fff;background:var(--ink-faint);padding:.12em .7em;border-radius:20px;margin-bottom:.45rem;}
+    .phase p{font-size:.8rem;color:var(--ink-light);line-height:1.65;}
+    .phase p b{color:var(--ink);}
+
+    /* 想深入了解折叠（公开课细节收纳） */
+    details.deep-dive{margin:1.4rem 0;border:1.5px dashed var(--blue);border-radius:14px;background:#fff;overflow:hidden;}
+    details.deep-dive>summary{cursor:pointer;list-style:none;padding:.9rem 1.2rem;font-family:'Noto Serif SC',serif;font-weight:700;font-size:.95rem;color:var(--blue);display:flex;align-items:center;gap:.55rem;transition:background .2s;}
+    details.deep-dive>summary::-webkit-details-marker{display:none;}
+    details.deep-dive>summary::before{content:'＋';font-family:'Fira Code',monospace;font-size:.95rem;color:var(--red);font-weight:700;transition:transform .2s;}
+    details.deep-dive[open]>summary::before{content:'－';}
+    details.deep-dive>summary:hover{background:rgba(43,127,216,.05);}
+    details.deep-dive .dd-body{padding:0 1.2rem 1.2rem;border-top:1px dashed rgba(43,127,216,.25);padding-top:1rem;}
+
+    @media (max-width:900px){
+      .hero{grid-template-columns:1fr;min-height:auto;padding:6rem 1.5rem 3rem;}
+      .ladder{margin-top:2rem;}
+      .syll-grid,.layer-row,.text-grid,.word-quad,.pos-grid,.pitfall,.gpc-rel,.ct-branches,.coh-grid,.genre-grid,
+      .theme-grid,.tf-grid,.phase-grid{grid-template-columns:1fr;}
+      .pa-activity{grid-template-columns:1fr;}
+      .split{grid-template-columns:1fr;}
+      .layout-sticky{grid-template-columns:1fr;}
+      .sticky-side{position:static;}
+      .nav-links{display:none;}
+    }
+    @media (max-width:600px){body{font-size:15px;}}
+    @media (prefers-reduced-motion:reduce){.reveal{opacity:1;transform:none;transition:none;}}
+  </style>
+</head>
+<body>
+
+  <nav id="nav">
+    <div class="nav-brand"><span class="dot"></span>LTR 家庭英语</div>
+    <div class="nav-links">
+      <a href="#sor">阅读科学</a>
+      <a href="#overview">框架总览</a>
+      <a href="#sound">语音地基</a>
+      <a href="#word">词层</a>
+      <a href="#sentence">句层</a>
+      <a href="#text">文章层</a>
+      <a href="#path">学习路径</a>
+    </div>
+  </nav>
+
+  <!-- ===== HERO ===== -->
+  <section class="hero">
+    <div class="hero-text">
+      <span class="label-caps">英语语言框架</span>
+      <h1>从音素到文章，英语是如何长出来的？</h1>
+      <p class="sub">孩子学英语卡壳，十有八九不是不努力，而是<b>中间某一层塌了</b>。这一页，带你看懂英语是怎么一层层长出来的——也带你看懂，<b>你家孩子卡在哪一层</b>。</p>
+      <div class="hero-tags">
+        <span class="tag">Phoneme 音素</span>
+        <span class="tag">Grapheme 字素</span>
+        <span class="tag">Syllable 音节</span>
+        <span class="tag">Word 单词</span>
+        <span class="tag">Syntax 句法</span>
+        <span class="tag">Discourse 文章</span>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <div class="ladder">
+        <div class="rung"><span class="num">06</span><span class="nm">文章</span><span class="en">Discourse</span></div>
+        <div class="rung"><span class="num">05</span><span class="nm">句子</span><span class="en">Syntax</span></div>
+        <div class="rung"><span class="num">04</span><span class="nm">单词</span><span class="en">Word · Morphology</span></div>
+        <div class="rung"><span class="num">03</span><span class="nm">音节</span><span class="en">Syllable</span></div>
+        <div class="rung"><span class="num">02</span><span class="nm">字素</span><span class="en">Grapheme</span></div>
+        <div class="rung"><span class="num">01</span><span class="nm">音素</span><span class="en">Phoneme</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 00 理论支撑：阅读科学 ===== -->
+  <section class="section" id="sor">
+    <div class="container">
+      <div class="section-header reveal">
+        <span class="section-number">理论</span>
+        <h2 class="section-title">为什么这么学：两条腿走路</h2>
+        <p class="section-lead">英语不是"泡"出来的。全球语言学界几十年的研究得出一个共识：<b>会读 = 会认字（解码）× 听得懂（理解）</b>。两条腿缺一条，阅读理解都是 0。这一页，就建立在这个结论上。</p>
+      </div>
+
+      <!-- 解码 × 理解 公式 -->
+      <div class="gpc-demo reveal reveal-d1">
+        <h3>阅读的黄金公式：阅读理解 = 解码 × 理解</h3>
+        <div style="background:#fff;border-radius:16px;padding:1.4rem 1.3rem;text-align:center;box-shadow:0 4px 24px rgba(0,0,0,.05);">
+          <div style="font-family:'Noto Serif SC',serif;font-weight:900;font-size:clamp(1.25rem,3.2vw,1.8rem);color:var(--ink);">阅读理解 = 解码能力 <span style="color:var(--red);">×</span> 语言理解能力</div>
+          <p style="font-size:.86rem;color:var(--ink-light);margin-top:.7rem;">关键是<b>乘号</b>——任一项为 0，最终的阅读理解都是 0。</p>
+        </div>
+        <div class="gpc-rel" style="margin-top:1.2rem;">
+          <div class="rel-card"><div class="t">🔓 解码能力 D</div>
+            <p>"破译密码"：看到字母，迅速准确地转成声音。核心 = 音素意识 + 自然拼读 + 快速识字。解码慢，大脑没空想意思。</p></div>
+          <div class="rel-card"><div class="t">👂 语言理解 LC</div>
+            <p>"听懂话"：这段文字念给你听，你能懂多少？取决于词汇量、背景知识、长句理解力。解码满分却不懂词意 = 假阅读。</p></div>
+          <div class="rel-card"><div class="t">✖️ 缺一不可</div>
+            <p>听不懂 → 1×0=0；认不出字 → 0×1=0。<b>两项都要过关。</b></p></div>
+        </div>
+      </div>
+
+      <!-- 阅读绳 -->
+      <figure class="fig fig--dark reveal reveal-d2">
+        <svg viewBox="0 0 720 300" role="img" aria-label="Scarborough 阅读绳：解码绳与语言理解绳交织成阅读理解">
+          <path d="M40,150 C 90,95 130,205 180,150 C 230,95 270,205 320,150 C 370,95 410,205 460,150 C 510,95 550,205 600,150"
+                fill="none" stroke="#2B7FD8" stroke-width="11" stroke-linecap="round" opacity="0.95"/>
+          <path d="M40,150 C 90,205 130,95 180,150 C 230,205 270,95 320,150 C 370,205 410,95 460,150 C 510,205 550,95 600,150"
+                fill="none" stroke="#F4D758" stroke-width="11" stroke-linecap="round" opacity="0.95"/>
+          <text x="34" y="74" fill="#2B7FD8" font-family="'Noto Serif SC',serif" font-size="17" font-weight="700">解码绳</text>
+          <text x="34" y="92" fill="#2B7FD8" font-size="12">音素 · 字素 · 音节</text>
+          <text x="34" y="216" fill="#1A1A2E" font-family="'Noto Serif SC',serif" font-size="17" font-weight="700">语言理解绳</text>
+          <text x="34" y="234" fill="#1A1A2E" font-size="12">单词 · 句子 · 文章</text>
+          <rect x="612" y="122" width="96" height="56" rx="14" fill="#E84A5F"/>
+          <text x="660" y="156" fill="#fefcf6" font-family="'Noto Serif SC',serif" font-size="17" font-weight="800" text-anchor="middle">阅读理解</text>
+        </svg>
+        <figcaption class="fig-cap">解码绳（蓝）与语言理解绳（金）交织成阅读理解（红）——<b>先解码、后理解，两条绳缺一不可</b>。前三层是"读得出词"，后三层是"读得懂意"。</figcaption>
+      </figure>
+
+      <!-- 想深入了解：理论细节 -->
+      <details class="deep-dive reveal reveal-d3">
+        <summary>想深入了解 · 为什么"泡"不出来？（SoR 理论细节）</summary>
+        <div class="dd-body">
+
+          <div class="subsection-tag">阅读科学是什么</div>
+          <div class="found-block">
+            <h4>① 阅读不是本能：SoR 是什么？</h4>
+            <p class="lead">Science of Reading（SoR）<b>不是</b>某一套教材、课程或教学法。它是过去几十年里，认知心理学、神经科学、语言学、教育学共同研究"大脑如何学会阅读"的<b>成果总和</b>。一句话：阅读不是天赋，而是必须通过特定方式<b>后天习得</b>的技能。</p>
+            <div class="mat-cloud">
+              <span class="mat">🧠 认知心理学（心智过程）</span>
+              <span class="mat">🔬 神经科学（脑成像看阅读）</span>
+              <span class="mat">🗣️ 语言学（语言结构）</span>
+              <span class="mat">🏫 教育学（教学实践）</span>
+            </div>
+          </div>
+
+          <div class="found-block" style="border-left-color:var(--red);">
+            <h4>② 阅读 = "反人性"：大脑必须重新布线</h4>
+            <p class="lead">科学阅读最核心、也最反直觉的结论是：<b>学会阅读，对人类大脑是不自然的。</b></p>
+            <div class="gpc-rel">
+              <div class="rel-card"><div class="t">🗣️ 口语是自然的</div>
+                <p>听力正常的婴儿放在有人说话的环境里，几乎不用教就会说话——这是写在基因里的能力。</p></div>
+              <div class="rel-card"><div class="t">📖 阅读是不自然的</div>
+                <p>文字几千年前才发明，大脑没有专门"阅读区"。要学会阅读，必须在视觉区和口语区之间，<b>强行搭一座高速桥</b>。</p></div>
+              <div class="rel-card"><div class="t">✅ 必须显性教学</div>
+                <p>阅读不自然，就不能指望"泡在书堆里"自动学会。拼读、规则必须<b>系统、明确、按顺序</b>地单独教。</p></div>
+            </div>
+          </div>
+
+          <div class="subsection-tag">有效阅读的五大支柱</div>
+          <div class="gpc-rel">
+            <div class="rel-card"><div class="t">👂 音素意识</div><p>学字母前，先训练耳朵听出单词里最小的声音单位（如分辨 c-a-t 三个音）。</p></div>
+            <div class="rel-card"><div class="t">🔤 自然拼读</div><p>建立"声音↔字母"的直接联系，掌握拼读规则（即本框架的音素→字素）。</p></div>
+            <div class="rel-card"><div class="t">🚀 流利度</div><p>准确、快速、有感情地朗读，从"费力解码"过渡到"自动化阅读"。</p></div>
+            <div class="rel-card"><div class="t">📚 词汇</div><p>理解单词意思，含口语词汇与书面词汇（即本框架的听力积累与词层）。</p></div>
+            <div class="rel-card"><div class="t">🤔 理解</div><p>运用策略读懂文本深层含义（即本框架的句子层与文章层）。</p></div>
+          </div>
+
+          <div class="subsection-tag">科学阅读 vs 传统流行观念</div>
+          <table class="pa-table">
+            <tr><th>对比项</th><th>传统观念（全语言 / 平衡阅读法）</th><th>科学阅读 Science of Reading</th></tr>
+            <tr><td>阅读本质</td><td>像说话一样自然，给环境就能学会</td><td>不自然，大脑需要"重新布线"</td></tr>
+            <tr><td>遇到生词</td><td>看图片猜、看上下文猜、看首字母猜（三条线索法）</td><td>看着字母，用拼读规则把词读出来（解码）</td></tr>
+            <tr><td>拼读教学</td><td>只教一点，或在阅读中随缘教（隐性教学）</td><td>系统、明确、按顺序单独教（显性教学）</td></tr>
+            <tr><td>适合人群</td><td>可能适合部分语感好的孩子，但会遗漏许多</td><td>对绝大多数孩子有效，对阅读障碍儿童是必需</td></tr>
+          </table>
+
+        </div>
+      </details>
+
+    </div>
+  </section>
+
+<!-- ===== 01 总览 ===== -->
+  <section class="section" id="overview">
+    <div class="container">
+      <div class="section-header reveal">
+        <span class="section-number">01</span>
+        <h2 class="section-title">六个台阶：英语是这样长出来的</h2>
+        <p class="section-lead">底层是"声音与字形"（读得出词），顶层是"意义与结构"（读得懂意）。六层正好对应国际读写障碍协会（IDA）<b>结构化读写 Structured Literacy</b> 的六大语言组件——每一层塌了，上面的楼层都会晃。</p>
+      </div>
+      <div class="steps-container reveal reveal-d1">
+        <div class="step-item"><span class="step-num">1</span><div class="step-card">
+          <h3><span class="lvl">L1</span> 音素 <span class="en">Phoneme</span><span class="sl">SL① Phonology 语音</span></h3>
+          <p>语言中能区分意义的最小声音单位。英语约 44 个音素（辅音+元音），耳朵听出来的"最小颗粒"。</p>
+          <span class="eg">/k/  /æ/  /t/</span>
+          <span class="pt">👧 孩子分不清 ship/sheep？——是耳朵还没"调频"。</span></div></div>
+        <div class="step-item"><span class="step-num">2</span><div class="step-card">
+          <h3><span class="lvl">L2</span> 字素 <span class="en">Grapheme</span><span class="sl">SL② Sound-Symbol 音形对应</span></h3>
+          <p>代表音素的字母或字母组合，以及"形→音"的对应规则（字素-音素对应）。这是拼读的核心。</p>
+          <span class="eg">c → /k/ ， a → /æ/ ， sh → /ʃ/</span>
+          <span class="pt">👧 c-a-t 三个字母对三个音——见词能读、听音能写。</span></div></div>
+        <div class="step-item"><span class="step-num">3</span><div class="step-card">
+          <h3><span class="lvl">L3</span> 音节 <span class="en">Syllable</span><span class="sl">SL③ Syllables 音节</span></h3>
+          <p>以一个元音音为核心拼读单位。LTR 体系归纳出六种音节类型，用来系统化拆词。音节直接拼出单词的读音。</p>
+          <span class="eg">cat = 闭音节（c-a-t，1 个音节）</span>
+          <span class="pt">👧 长单词看着吓人？拆成音节就是纸老虎：com·pu·ter。</span></div></div>
+        <div class="step-item"><span class="step-num">4</span><div class="step-card">
+          <h3><span class="lvl">L4</span> 单词 <span class="en">Word · Morphology</span><span class="sl">SL④ Morphology 构词法</span></h3>
+          <p>音形义结合的独立单位，带上词性（名词/动词…）和释义，可以单独使用。构词法（前缀/词根/后缀）是单词内部的"意义积木"。</p>
+          <span class="eg">cat  n. 猫</span>
+          <span class="pt">👧 单词不是背出来的，是"拆"出来的——un·reach·able 一眼看穿。</span></div></div>
+        <div class="step-item"><span class="step-num">5</span><div class="step-card">
+          <h3><span class="lvl">L5</span> 句子 <span class="en">Sentence · Syntax</span><span class="sl">SL⑤ Syntax 句法</span></h3>
+          <p>表达完整意思的单位。从五种基本句型出发，经"句型转换→扩大→组合"，一步步长大成并列句、复合句。</p>
+          <span class="eg">The cat sat.</span>
+          <span class="pt">👧 长句子读不懂？先找主干：谁，做了什么。</span></div></div>
+        <div class="step-item"><span class="step-num">6</span><div class="step-card">
+          <h3><span class="lvl">L6</span> 文章 <span class="en">Discourse · Semantics</span><span class="sl">SL⑥ Semantics 语义</span></h3>
+          <p>把词汇、句子连成可被理解的意义：词义解读、长难句拆解、语篇组织。这是阅读的"天花板"——读懂一整篇文章。</p>
+          <span class="eg">故事 / 说明文 / 议论文…</span>
+          <span class="pt">👧 单词都认识、句子也读得通，可读完一本书问他讲了什么，说不出来？——文章是有"骨架"的。</span></div></div>
+      </div>
+
+      <div class="section-header reveal" style="margin-top:3rem;">
+        <h2 class="section-title" style="font-size:clamp(1.2rem,2.6vw,1.6rem);">六个台阶 = 结构化读写 SL 六组件</h2>
+        <p class="section-lead">音素·字素·音节（前三层）是<b>解码绳</b>——解决"词怎么读"；单词·句子·文章（后三层）是<b>语言理解绳</b>——解决"什么意思"。两条绳交织，才是完整的阅读能力。这就是 LTR「结构化读写」的全貌：<b>先解码，后理解。</b></p>
+      </div>
+
+    </div>
+  </section>
+
+<!-- ===== 02 语音地基 ===== -->
+  <section class="section section--alt" id="sound">
+    <div class="container">
+      <div class="section-header reveal">
+        <span class="section-number">02</span>
+        <h2 class="section-title">语音地基：音素 → 字素 → 音节</h2>
+        <p class="section-lead">这是 LTR 拼读体系的主场，也是 Structured Literacy 的前三个组件（Phonology / Sound-Symbol / Syllables）。在正式拼读之前，还有一层<b>隐性地基——听力积累（语音意识）</b>：孩子先"听得懂、分得开声音"，后面"见词能读、听音能写"才扎得稳。下面先看隐性地基，再把每一层做厚。</p>
+      </div>
+
+      <!-- 隐性地基：听力积累与语音意识（折叠） -->
+      <details class="deep-dive reveal reveal-d1" open>
+        <summary>想深入了解 · 拼读之前，先过"声音"这一关（听力·语音意识·Echo）</summary>
+        <div class="dd-body">
+          <div class="found-intro">
+            <span class="t">隐性地基｜拼读开始之前，先过"声音"这一关</span>
+            <p>传统英语课默认"学习从认字母、学拼读开始"；但科学上，孩子得先在<b>声音层面</b>打地基。这块地基有两块：<b>听力积累</b>（耳朵里先攒下"听力词汇"）和 <b>语音意识</b>（耳朵能"听得出、分得开、拼得回"声音）。它不涉及任何字母和文字——但孩子声音分得清不清楚，直接决定后面自然拼读入门的门槛高低。</p>
+          </div>
+        </div>
+      </details>
+
+      <!-- L1 音素 -->
+      <span class="subsection-tag">L1 音素 · Phoneme ｜ SL① Phonology 语音</span>
+      <div class="gpc-demo reveal reveal-d1">
+        <h3>概念积木：音素 · 字母 · 字素 · 音标</h3>
+        <div class="concept-blocks">
+          <div class="cb"><b>音素 Phoneme</b><p>最小的发音单位，耳朵听到的"声音信号"。</p></div>
+          <div class="cb"><b>音标 IPA</b><p>记录音素的书面符号，音素与音标一对一。</p></div>
+          <div class="cb"><b>字母 Letter</b><p>26 个书写符号：5 个元音 + 21 个辅音。</p></div>
+          <div class="cb"><b>字素 Grapheme</b><p>一个字母或多个字母组成的组合（Phonics 的"形"）。</p></div>
+        </div>
+        <p class="ph-note">一句话串联：<b>音标标记音素，音素对应字素，字素组成单词。</b></p>
+        <div class="myth-card">
+          <span class="mt">破除迷思｜汉纳拼写研究（Stanford, 1963–66）</span>
+          <p>以 <b>17,310</b> 词为样本的系统分析发现：英语拼写规则覆盖率 <b>&gt;95%</b>。所谓"不规则"高度集中在高频功能词（said、was、have… 不足 1%）和低频学术词。掌握核心规则，孩子就能见词能读、听音能写——英语拼写远非"例外太多"。</p>
+        </div>
+        <h3 style="margin-top:1.6rem;">音素 ≠ 字母：一个音可以有多种写法，一个字母也可以发多种音</h3>
+        <p style="font-size:.9rem;color:var(--ink-light);line-height:1.8;">
+          英语约 <b>44 个音素</b>（以英式 RP 为例：12 单元音 + 8 双元音 = 20 元音，24 辅音）。注意音素是"声音"，字母是"符号"，二者不是一一对应。下面两张矩阵把全部 44 个音素铺开——<span style="color:var(--red);">红=元音</span>，<span style="color:var(--blue-deep);">蓝=辅音</span>。
+        </p>
+        <div class="ph-label">元音 Vowels（20）</div>
+        <div class="ph-grid">
+          <span class="ph v">/iː/</span><span class="ph v">/ɪ/</span><span class="ph v">/e/</span><span class="ph v">/æ/</span>
+          <span class="ph v">/ʌ/</span><span class="ph v">/ɑː/</span><span class="ph v">/ɒ/</span><span class="ph v">/ɔː/</span>
+          <span class="ph v">/ʊ/</span><span class="ph v">/uː/</span><span class="ph v">/ɜː/</span><span class="ph v">/ə/</span>
+          <span class="ph v">/eɪ/</span><span class="ph v">/aɪ/</span><span class="ph v">/ɔɪ/</span><span class="ph v">/aʊ/</span>
+          <span class="ph v">/əʊ/</span><span class="ph v">/ɪə/</span><span class="ph v">/eə/</span><span class="ph v">/ʊə/</span>
+        </div>
+        <div class="ph-label">辅音 Consonants（24）</div>
+        <div class="ph-grid">
+          <span class="ph c">/p/</span><span class="ph c">/b/</span><span class="ph c">/t/</span><span class="ph c">/d/</span>
+          <span class="ph c">/k/</span><span class="ph c">/ɡ/</span><span class="ph c">/f/</span><span class="ph c">/v/</span>
+          <span class="ph c">/θ/</span><span class="ph c">/ð/</span><span class="ph c">/s/</span><span class="ph c">/z/</span>
+          <span class="ph c">/ʃ/</span><span class="ph c">/ʒ/</span><span class="ph c">/h/</span><span class="ph c">/tʃ/</span>
+          <span class="ph c">/dʒ/</span><span class="ph c">/m/</span><span class="ph c">/n/</span><span class="ph c">/ŋ/</span>
+          <span class="ph c">/l/</span><span class="ph c">/r/</span><span class="ph c">/w/</span><span class="ph c">/j/</span>
+        </div>
+        <p class="ph-note">最小对立对（minimal pair）：只差一个音素，意思就变——<code style="font-family:'Fira Code',monospace;color:var(--blue);">cat /kæt/ ↔ bat /bæt/</code>（差在首音 /k/↔/b/）。这是音素"区分意义"的铁证。</p>
+        
+        <details class="deep-dive">
+          <summary>想深入了解 · 音素意识 4 项训练（阅读预备役）</summary>
+          <div class="dd-body">
+<span class="subsection-tag" style="margin-top:1.4rem;">音素意识 4 项训练（阅读预备役）</span>
+        <div class="pa-activity">
+          <div class="pa"><b>① 辨音</b><p>听出两个词是否同音/近音，如 ship ↔ sheep。</p></div>
+          <div class="pa"><b>② 拆分</b><p>把词拆成音素，如 cat → /k/·/æ/·/t/。</p></div>
+          <div class="pa"><b>③ 混合</b><p>把分开的音拼回词，/k/·/æ/·/t/ → cat。</p></div>
+          <div class="pa"><b>④ 替换</b><p>换掉一个音生成新词，cat → bat → hat。</p></div>
+        </div>
+      </div>
+
+
+          </div>
+        </details>
+      <!-- L2 字素 -->
+      <span class="subsection-tag">L2 字素 · Grapheme ｜ SL② Sound-Symbol 音形对应</span>
+      <div class="gpc-demo reveal reveal-d2">
+        <h3>字素：一个字母，或几个字母"抱团"</h3>
+        <p style="font-size:.9rem;color:var(--ink-light);line-height:1.8;">
+          字素（Grapheme）是"一个字母或多个字母组成的组合"，是 Phonics 里承载发音的"书写单位"。它和音素构成 <b>多对多</b> 关系——这正是英语需要系统学拼读、而非死记单词的原因。
+        </p>
+        <div class="gpc-rel">
+          <div class="rel-card"><div class="t">见词能读</div><p>字素 → 音素<br>形→音（visual to sound）</p></div>
+          <div class="rel-card"><div class="t">听音能写</div><p>音素 → 字素<br>音→形（sound to symbol）</p></div>
+          <div class="rel-card"><div class="t">两大难点</div><p>拼读难点：变音（字母交互规则）<br>拼写难点：一对多</p></div>
+        </div>
+        <h3 style="margin-top:1.8rem;">字素-音素对应拆解示范 · 元音标红、辅音标蓝、哑音标灰</h3>
+        <div class="word-row">
+          <div class="word-block">
+            <div class="letters"><span class="ltr c">c</span><span class="ltr v">a</span><span class="ltr c">t</span></div>
+            <div class="sounds"><span>/k/</span><span>/æ/</span><span>/t/</span></div>
+            <span class="wl">闭音节 · cat</span>
+          </div>
+          <div class="word-block">
+            <div class="letters"><span class="ltr c">c</span><span class="ltr v">a</span><span class="ltr c">k</span><span class="ltr s">e</span></div>
+            <div class="sounds"><span>/k/</span><span>/eɪ/</span><span>/k/</span><span>—</span></div>
+            <span class="wl">magic e · cake</span>
+          </div>
+          <div class="word-block">
+            <div class="letters"><span class="ltr c">sh</span><span class="ltr v">i</span><span class="ltr c">p</span></div>
+            <div class="sounds"><span>/ʃ/</span><span>/ɪ/</span><span>/p/</span></div>
+            <span class="wl">辅音组合 · ship</span>
+          </div>
+        </div>
+        <h3 style="margin-top:1.8rem;">字素-音素的三种对应关系（多对多，不是死记）</h3>
+        <div class="gpc-rel">
+          <div class="rel-card"><div class="t">一对一</div><p>一个字素对应一个音。<br><code>c → /k/</code><br><code>o → /ɒ/</code></p></div>
+          <div class="rel-card"><div class="t">多对一</div><p>不同字素发同一音。<br><code>sh / ch / ti → /ʃ/</code><br><code>c / k / ck → /k/</code></p></div>
+          <div class="rel-card"><div class="t">一对多</div><p>同一字素发不同音。<br><code>a → /æ/ /eɪ/ /ɑː/</code><br><code>o → /ɒ/ /əʊ/ /ʌ/</code></p></div>
+        </div>
+        
+        <details class="deep-dive">
+          <summary>想深入了解 · 拼写规则精选（12 条）+ 五步听写 + 44 音素字素表</summary>
+          <div class="dd-body">
+<h3 style="margin-top:1.8rem;">拼写规则精选（高频核心）</h3>
+        <div class="rule-grid">
+          <div class="rule"><b>① c / g 变色龙</b><p>c 后接 e/i/y 发 /s/（cent），否则 /k/（cat）；g 后接 e/i/y 可能发 /dʒ/（gym）。</p></div>
+          <div class="rule"><b>② 词尾禁字</b><p>英语单词绝不以 i、u、v、j 结尾（love 加 e、boy 用 y）。</p></div>
+          <div class="rule"><b>③ 元音位置定长短</b><p>a/e/o/u 在音节末尾发长音（go, he）；单音节词尾 y 发 /aɪ/（cry）。</p></div>
+          <div class="rule"><b>④ 双写 1-1-1</b><p>1 元音+1 辅音结尾且重音在末音节，加元音后缀双写（hop→hopping）。</p></div>
+          <div class="rule"><b>⑤ 去 e 规则</b><p>加元音开头后缀时，去末尾不发音 e（make+ing=making）。</p></div>
+          <div class="rule"><b>⑥ 变 y 为 i</b><p>辅音+y 结尾加后缀，y 变 i（happy→happiness）；后缀以 i 开头则保留 y。</p></div>
+          <div class="rule"><b>⑦ dge / ck / tch</b><p>短元音后用 dge/ck/tch 拼 /dʒ//k//tʃ/，保护短元音（bridge, back, watch）。</p></div>
+          <div class="rule"><b>⑧ 默音 e 九功能</b><p>魔法 e（hope）、避免违禁（have, blue）、软化辅音（dance, large）……共九类。</p></div>
+          <div class="rule"><b>⑨ 复数 / 三单</b><p>词尾"嘶嘶声"(s,x,z,ch,sh) 加 -es（boxes）；仅 4 个不规则 has/does/goes/is。</p></div>
+          <div class="rule"><b>⑩ schwa 弱读音</b><p>非重读元音弱化为 /ə/（banana）或 /ɪ/（basket）。</p></div>
+          <div class="rule"><b>⑪ gh 组合</b><p>igh/eigh 中 gh 不发音（high），或发 /f/（laugh）。</p></div>
+          <div class="rule"><b>⑫ 词首发 /z/ 写 z</b><p>词首发 /z/ 一定写 z 而非 s（zoo）。</p></div>
+        </div>
+
+        <h3 style="margin-top:1.8rem;">五步单词听写（音素→字素 的闭环练习）</h3>
+        <div class="steps5">
+          <div class="st"><span class="n">1</span><b>听单词</b><p>听完整发音≥3遍，建立声音记忆。</p></div>
+          <div class="st"><span class="n">2</span><b>切音节</b><p>把长词切成声音块（呼应 L3 音节）。</p></div>
+          <div class="st"><span class="n">3</span><b>分音素</b><p>每音节拆成最小声音（呼应 L1 音素）。</p></div>
+          <div class="st"><span class="n">4</span><b>配字素</b><p>给每个音素匹配字素（呼应 L2 字素）。</p></div>
+          <div class="st"><span class="n">5</span><b>验字形</b><p>用拼写规则敲定最终写法。</p></div>
+        </div>
+
+        <h3 style="margin-top:1.8rem;">44 音素 → 主导字素对应（工具表，不必死记）</h3>
+        <p class="ph-note">每个音素列出最常见、占比最高的字素组合与例词。</p>
+        <table class="gpc-table gpc-full">
+          <tr><th>音素</th><th>主导字素 / 组合</th><th>例词</th><th>音素</th><th>主导字素 / 组合</th><th>例词</th></tr>
+          <tr><td class="s">/b/</td><td class="g">b, bb</td><td>bib, rabbit</td><td class="s">/iː/</td><td class="g">ee, ea, e, ey, y</td><td>see, eat, he, key</td></tr>
+          <tr><td class="s">/k/</td><td class="g">c, k, ck, ch, qu</td><td>cat, kite, back, school</td><td class="s">/ɪ/</td><td class="g">i, y</td><td>sit, gym</td></tr>
+          <tr><td class="s">/tʃ/</td><td class="g">ch, tch</td><td>chip, watch</td><td class="s">/e/</td><td class="g">e, ea</td><td>bed, bread</td></tr>
+          <tr><td class="s">/d/</td><td class="g">d, dd</td><td>dog, add</td><td class="s">/æ/</td><td class="g">a</td><td>cat</td></tr>
+          <tr><td class="s">/f/</td><td class="g">f, ff, ph</td><td>fan, off, photo</td><td class="s">/ʌ/</td><td class="g">u, o</td><td>cup, come</td></tr>
+          <tr><td class="s">/g/</td><td class="g">g, gg</td><td>go, egg</td><td class="s">/ɑː/</td><td class="g">ar, a</td><td>car, papa</td></tr>
+          <tr><td class="s">/h/</td><td class="g">h</td><td>hat</td><td class="s">/ɒ/</td><td class="g">o, a(w后)</td><td>hot, want</td></tr>
+          <tr><td class="s">/dʒ/</td><td class="g">j, g, ge, dge</td><td>jam, gem, bridge</td><td class="s">/ɔː/</td><td class="g">or, al, au, aw</td><td>for, ball, author</td></tr>
+          <tr><td class="s">/l/</td><td class="g">l, ll</td><td>leg, ball</td><td class="s">/ʊ/</td><td class="g">oo, u</td><td>book, bull</td></tr>
+          <tr><td class="s">/m/</td><td class="g">m, mm, mb</td><td>man, lamb</td><td class="s">/uː/</td><td class="g">oo, ew, ue</td><td>food, new, blue</td></tr>
+          <tr><td class="s">/n/</td><td class="g">n, nn, kn</td><td>no, knee</td><td class="s">/ɜː/</td><td class="g">er, ir, ur, or(w后)</td><td>her, bird, nurse, word</td></tr>
+          <tr><td class="s">/ŋ/</td><td class="g">ng, n(k/g前)</td><td>sing, bank</td><td class="s">/ə/</td><td class="g">er, ar, or, a, e, i, o, u</td><td>teacher, dollar</td></tr>
+          <tr><td class="s">/p/</td><td class="g">p, pp</td><td>pen, apple</td><td class="s">/eɪ/</td><td class="g">a_e, ai, ay, a</td><td>cake, rain, play</td></tr>
+          <tr><td class="s">/r/</td><td class="g">r, rr, wr</td><td>red, write</td><td class="s">/aɪ/</td><td class="g">i_e, igh, y</td><td>bike, high, my</td></tr>
+          <tr><td class="s">/s/</td><td class="g">s, ss, c(e/i/y), se</td><td>sun, city, case</td><td class="s">/ɔɪ/</td><td class="g">oi, oy</td><td>boil, boy</td></tr>
+          <tr><td class="s">/ʒ/</td><td class="g">s(-sure/-sion)</td><td>measure, vision</td><td class="s">/aʊ/</td><td class="g">ow, ou</td><td>cow, out</td></tr>
+          <tr><td class="s">/ʃ/</td><td class="g">sh, ti, ch</td><td>ship, station, machine</td><td class="s">/əʊ/</td><td class="g">o_e, oa, ow</td><td>go, boat, snow</td></tr>
+          <tr><td class="s">/t/</td><td class="g">t, tt</td><td>ten, bet</td><td class="s">/ɪə/</td><td class="g">ear, eer</td><td>ear, engineer</td></tr>
+          <tr><td class="s">/θ/</td><td class="g">th</td><td>think</td><td class="s">/eə/</td><td class="g">air, are</td><td>air, care</td></tr>
+          <tr><td class="s">/ð/</td><td class="g">th</td><td>this</td><td class="s">/ʊə/</td><td class="g">ure</td><td>pure, sure</td></tr>
+          <tr><td class="s">/v/</td><td class="g">v, ve</td><td>van, have</td><td class="s">/w/</td><td class="g">w, wh, qu(u)</td><td>wet, when</td></tr>
+          <tr><td class="s">/j/</td><td class="g">y</td><td>yes</td><td class="s">/z/</td><td class="g">z, zz, s, se</td><td>zoo, buzz, dogs</td></tr>
+        </table>
+      </div>
+
+
+          </div>
+        </details>
+      <!-- L3 音节 -->
+      <span class="subsection-tag">L3 音节 · Syllable ｜ SL③ Syllables 音节</span>
+      <div class="syll-grid reveal reveal-d3">
+        <div class="syl-card"><span class="en">Open Syllable</span><div class="cn">开音节</div>
+          <p>以元音音结尾，元音发"长音"（字母本音）。</p><span class="x">e.g. go /ɡoʊ/ · me /miː/</span><span class="split">拆：go（1 音节）</span></div>
+        <div class="syl-card"><span class="en">Closed Syllable</span><div class="cn">闭音节</div>
+          <p>以辅音结尾，元音发"短音"。最常见、最先教。</p><span class="x">e.g. cat /kæt/ · hop /hɒp/</span><span class="split">拆：cat（1 音节）</span></div>
+        <div class="syl-card"><span class="en">Magic E (VCe)</span><div class="cn">magic e 音节</div>
+          <p>"元音+辅音+e"，末尾 e 不发音，前面元音发长音。</p><span class="x">e.g. cake /keɪk/ · bite /baɪt/</span><span class="split">拆：ca·ke（2 音节）</span></div>
+        <div class="syl-card"><span class="en">Vowel Team</span><div class="cn">元音字母组合音节</div>
+          <p>两个元音走一起，常发长音或组合音。</p><span class="x">e.g. boat /boʊt/ · rain /reɪn/</span><span class="split">拆：boat（1 音节）</span></div>
+        <div class="syl-card"><span class="en">R-Controlled</span><div class="cn">R 控制音节</div>
+          <p>元音被 r "接管"，不再发常规长/短音。</p><span class="x">e.g. car /kɑːr/ · her /hɜːr/</span><span class="split">拆：car（1 音节）</span></div>
+        <div class="syl-card"><span class="en">Consonant -le</span><div class="cn">辅音+le 音节</div>
+          <p>词尾"辅音+le"，自成一体，常读成 /əl/。</p><span class="x">e.g. ta·ble · lit·tle</span><span class="split">拆：ta·ble（2 音节）</span></div>
+      </div>
+      <p class="ph-note" style="margin-top:1rem;">多音节词拆法：<code style="font-family:'Fira Code',monospace;color:var(--blue);">com·pu·ter</code>（3 音节，按元音核切分）；<code style="font-family:'Fira Code',monospace;color:var(--blue);">bas·ket·ball</code>（3 音节）。先定音节数，再逐音节判类型——这就是 LTR 拆词流程。</p>
+    </div>
+  </section>
+
+  <!-- ===== 03 词层 ===== -->
+  <section class="section" id="word">
+    <div class="container">
+      <div class="section-header reveal">
+        <span class="section-number">03</span>
+        <h2 class="section-title">词层：单词不是"背"出来的，是"拆"出来的</h2>
+        <p class="section-lead"><span class="lvl">L4</span> ｜ SL④ Morphology 构词法。孩子背了 1000 个单词还是记不住？——因为单词不是"背"出来的，是"拆"出来的。这一层，带你看懂单词内部的"意义积木"。</p>
+      </div>
+
+      <!-- 引子：单词种类（主题语境） -->
+      <span class="subsection-tag">单词的来源：英语是"三层叠出来"的语言</span>
+      <p class="ph-note">为什么英语拼写看着乱、单词长短不一？因为英语不是一次成形的，而是历史上叠了三层：<b>盎格鲁-撒克逊层（最老、最高频）</b>、<b>拉丁层</b>、<b>希腊层</b>。看懂这三层，就懂了"为什么有的词短而规矩、有的词长而抽象"，也懂了单词到底该怎么学。</p>
+      <div class="layer-row reveal reveal-d1">
+        <div class="layer-box"><div class="t">盎格鲁-撒克逊层 <span class="en">Anglo-Saxon</span></div>
+          <p>英语的"地基词"：日常名词、动词、功能词（<code>shepherd, work, the, and</code>）。<b>最短、拼读最规矩</b>，对应自然拼读第一阶段。<br>例：<code>foot, hand, water, blackboard</code></p></div>
+        <div class="layer-box"><div class="t">拉丁层 <span class="en">Latin</span></div>
+          <p>中古以后随文化、学术涌入，多<b>前缀 + 词根 + 后缀</b>（如 -tion, pre-, -able）。学术 / 抽象词的主力。<br>例：<code>nation, transport, visible</code></p></div>
+        <div class="layer-box"><div class="t">希腊层 <span class="en">Greek</span></div>
+          <p>科技术语、专业词根（photo-, tele-, -logy）。最长、最"硬核"。<br>例：<code>photograph, telephone, biology</code></p></div>
+      </div>
+
+      <figure class="fig fig--card">
+        <svg viewBox="0 0 680 290" role="img" aria-label="英语三层词源：红（盎格鲁-撒克逊层）、黄（拉丁层）、蓝（希腊层）由下往上叠">
+          <defs>
+            <filter id="stackShadow" x="-20%" y="-20%" width="140%" height="140%">
+              <feDropShadow dx="0" dy="3" stdDeviation="4" flood-color="#1A1A2E" flood-opacity="0.16"/>
+            </filter>
+          </defs>
+          <!-- 红：盎格鲁-撒克逊地基层 -->
+          <rect x="40" y="190" width="600" height="70" rx="14" fill="#E84A5F" filter="url(#stackShadow)"/>
+          <text x="340" y="218" fill="#fefcf6" font-family="'Noto Serif SC',serif" font-size="16" font-weight="800" text-anchor="middle">盎格鲁-撒克逊层 Anglo-Saxon（地基层）</text>
+          <text x="340" y="238" fill="#fefcf6" font-size="12.5" text-anchor="middle" opacity="0.95">日常词 · 最短最规矩</text>
+          <text x="340" y="254" fill="#fefcf6" font-size="12.5" text-anchor="middle" opacity="0.95">shepherd / work / blackboard / water</text>
+          <!-- 黄：拉丁层 -->
+          <rect x="110" y="105" width="460" height="70" rx="14" fill="#F4D758" filter="url(#stackShadow)"/>
+          <text x="340" y="133" fill="#1A1A2E" font-family="'Noto Serif SC',serif" font-size="16" font-weight="800" text-anchor="middle">拉丁层 Latin</text>
+          <text x="340" y="153" fill="#1A1A2E" font-size="12.5" text-anchor="middle">学术抽象词 · 前缀 + 词根 + 后缀</text>
+          <text x="340" y="169" fill="#1A1A2E" font-size="12.5" text-anchor="middle">nation / transport / visible</text>
+          <!-- 蓝：希腊层 -->
+          <rect x="180" y="20" width="320" height="70" rx="14" fill="#2B7FD8" filter="url(#stackShadow)"/>
+          <text x="340" y="48" fill="#fefcf6" font-family="'Noto Serif SC',serif" font-size="16" font-weight="800" text-anchor="middle">希腊层 Greek</text>
+          <text x="340" y="68" fill="#fefcf6" font-size="12.5" text-anchor="middle" opacity="0.95">科技术语 · 最长最硬核</text>
+          <text x="340" y="84" fill="#fefcf6" font-size="12.5" text-anchor="middle" opacity="0.95">photograph / telephone / biology</text>
+          <!-- 叠上去 -->
+          <text x="620" y="58" fill="#8A8A9A" font-size="14" font-weight="700" text-anchor="middle">↑ 叠上去</text>
+        </svg>
+        <figcaption class="fig-cap">英语是历史上叠了三层：地基是 <b>Anglo-Saxon</b>，往上叠 <b>Latin</b>、<b>Greek</b>。看懂层级，就懂了单词该怎么学。</figcaption>
+      </figure>
+      <div class="myth-card">
+        <span class="mt">框架逻辑｜为什么这层重要</span>
+        <p>高频日常词多来自<b>盎格鲁-撒克逊层</b>（短、规则，先学）；抽象 / 学术词多来自<b>拉丁 / 希腊层</b>（长、带词根词缀）。所以单词不是"背"出来的，而是按<b>词源 + 构词法</b>拆出来的——这正是 L4 把"构词法"放在单词内部透视的原因，也是高年级词汇量翻倍的杠杆。</p>
+      </div>
+
+      <!-- 词义陷阱（呼应 L6-a） -->
+      
+      <details class="deep-dive">
+        <summary>想深入了解 · 单词的"字"与"义"（词性 / 词义陷阱 / 构词法）</summary>
+        <div class="dd-body">
+<span class="subsection-tag">引子 · 单词的种类：按"主题语境"分类（课标框架）</span>
+      <div class="theme-grid reveal reveal-d1">
+        <div class="theme-card"><span class="en">Person & Self</span><div class="cn">人与自我</div>
+          <ul><li>生活与学习</li><li>做人与做事</li></ul></div>
+        <div class="theme-card"><span class="en">Person & Society</span><div class="cn">人与社会</div>
+          <ul><li>社会服务与人际沟通</li><li>文学、艺术与体育</li><li>历史、社会与文化</li><li>科学与技术</li></ul></div>
+        <div class="theme-card"><span class="en">Person & Nature</span><div class="cn">人与自然</div>
+          <ul><li>自然生态</li><li>环境保护</li><li>灾害防范</li><li>宇宙探索</li></ul></div>
+      </div>
+      <p class="ph-note" style="margin-top:1rem;">主题语境帮孩子知道"这个词在什么场景用"，是词汇网络的"收纳筐"。下面进入更硬核的"词性"——决定单词在句子里干什么活。</p>
+
+      <!-- 词性：名词详讲 -->
+      <span class="subsection-tag">词性 · 名词详讲</span>
+      <div class="layer-row reveal reveal-d2">
+        <div class="layer-box"><div class="t">名词的分类 <span class="en">Classification</span></div>
+          <p><b>专有名词</b> Proper：特定人名/地名/机构，首字母大写（<code>Beijing, Tom</code>）。<br><b>普通名词</b> Common：<br>· 个体（<code>cat, book</code>）<br>· 集合（<code>family, team</code>）<br>· 抽象（<code>love, idea</code>）</p></div>
+        <div class="layer-box"><div class="t">可数 vs 不可数 <span class="en">Count / Non-count</span></div>
+          <p><b>可数</b>：有单复数（<code>cat→cats</code>）。<br><b>不可数</b>：需用量词（<code>a cup of water</code>，<code>two pieces of advice</code>）。<br><b>集合名词</b>：强调整体单数、成员复数（<code>The team is / are</code>）。</p></div>
+        <div class="layer-box"><div class="t">形态变化 <span class="en">Inflection</span></div>
+          <p><b>复数</b>：规则（<code>-s/-es</code>）/ 不规则（<code>child→children</code>）。<br><b>所有格</b>：<code>'s</code>（<code>the cat's paw</code>）。<br>名词在句中常作<b>主语 / 宾语 / 表语</b>。</p></div>
+      </div>
+
+      <!-- 十大词性一览 -->
+      <span class="subsection-tag">十大词性一览（名词之外，各司其职）</span>
+      <div class="pos-grid reveal reveal-d3">
+        <div class="pos"><div class="t">n.</div><div class="n">名词</div><code>cat, book</code></div>
+        <div class="pos"><div class="t">v.</div><div class="n">动词</div><code>run, eat</code></div>
+        <div class="pos"><div class="t">adj.</div><div class="n">形容词</div><code>red, small</code></div>
+        <div class="pos"><div class="t">adv.</div><div class="n">副词</div><code>quickly</code></div>
+        <div class="pos"><div class="t">pron.</div><div class="n">代词</div><code>he, it</code></div>
+        <div class="pos"><div class="t">prep.</div><div class="n">介词</div><code>in, on</code></div>
+        <div class="pos"><div class="t">conj.</div><div class="n">连词</div><code>and, because</code></div>
+        <div class="pos"><div class="t">int.</div><div class="n">感叹词</div><code>wow, oh</code></div>
+        <div class="pos"><div class="t">art./det.</div><div class="n">冠词 / 限定词</div><code>a, an, the</code></div>
+        <div class="pos"><div class="t">num.</div><div class="n">数词</div><code>one, first</code></div>
+      </div>
+      <p class="ph-note" style="margin-top:1rem;">英语共 <b>十大词性</b>（上图）；而一个句子由 <b>八大句子成分</b> 构成——主语、谓语、宾语、表语、补语、定语、状语、同位语。词性管"单词属哪一类"，句子成分管"单词在句里干什么活"，二者不是一回事。</p>
+
+      <!-- 单词的来源：三层词源 (Moats Ch4/Ch5) -->
+      <span class="subsection-tag">词义的"陷阱"：同形异义 / 同音异义 / 一词多义</span>
+      <div class="pitfall reveal">
+        <div class="pf"><div class="t">同音异义 Homophone</div><p>音同形不同义不同。<br><code>meat / miːt / 肉</code><br><code>meet / miːt / 遇见</code></p></div>
+        <div class="pf"><div class="t">一词多义 Polysemy</div><p>同形同音，多个相关义。<br><code>bank 河岸 / 银行</code><br><code>book 书 / 预订</code></p></div>
+        <div class="pf"><div class="t">同形异义 Homograph</div><p>形同音不同义不同。<br><code>row /roʊ/ 排 · /raʊ/ 划</code><br><code>bass /beɪs/ 鱼 · /bæs/ 低音</code></p></div>
+      </div>
+
+      <!-- 音节划分与重音（呼应 L3） -->
+      <span class="subsection-tag">音节划分与重音（单词的"形"维度，呼应 L3）</span>
+      <div class="stress-demo reveal">
+        <h4>多音节词：先拆音节，再定重音（重读音节用红色标出）</h4>
+        <div class="stress-row">
+          <span class="w"><b>pho</b>·to·graph</span>
+          <span class="w">pho·<b>to</b>·gra·phy</span>
+          <span class="w"><b>ta</b>·ble</span>
+          <span class="w">un·der·<b>stand</b></span>
+        </div>
+        <p style="font-size:.82rem;color:var(--ink-light);margin-top:.8rem;line-height:1.7;">重音位置会改变词的"听感"甚至词性（如 <code style="font-family:'Fira Code',monospace;color:var(--blue);">RE·cord</code> 名 / <code style="font-family:'Fira Code',monospace;color:var(--blue);">re·CORD</code> 动）。这是单词层"形"轴的延伸，和 L3 音节类型配合使用。</p>
+      </div>
+
+      <!-- 构词法 Morphology -->
+      <span class="subsection-tag">构词法 Morphology：单词内部的"意义积木"</span>
+      <p class="ph-note">英语单词不是字母的随机拼凑，而是由"意义单位——词素"组合而成。构词法（形态学 Morphology）是 Structured Literacy 的六大组件之一：掌握它，遇到生词能"拆开猜意思"，词汇量成倍增长。</p>
+      <div class="layer-row reveal reveal-d1">
+        <div class="layer-box"><div class="t">词素 Morpheme <span class="en">最小意义单位</span></div>
+          <p><b>自由词素</b>：可独立成词（<code>cat, run, happy</code>）。<br><b>黏着词素</b>：须依附他词（<code>un-, -ness, -s</code>）。<br>词根 Root = 去尽词缀后的核心（<code>happy</code>）；词干 Stem = 词根 + 部分词缀（<code>happily</code> 中的 <code>happy</code>）。</p></div>
+        <div class="layer-box"><div class="t">词缀 Affix <span class="en">Prefix / Suffix</span></div>
+          <p><b>前缀</b>：在词首，多改词义、不改词性（<code>un- 不, re- 再, dis- 否</code>）。<br><b>后缀</b>：在词尾，常改词性（<code>-ness 名, -ful 形, -er 者</code>）。<br>中缀英语极少。</p></div>
+        <div class="layer-box"><div class="t">屈折 vs 派生 <span class="en">Inflection / Derivation</span></div>
+          <p><b>屈折</b>：表语法关系，不改词性（<code>-s 复数, -ed 过去, -ing, -er/-est 比较</code>）。<br><b>派生</b>：加词缀造新词，常改词性（<code>teach→teacher, happy→unhappy</code>）。</p></div>
+      </div>
+      <span class="subsection-tag">六大构词法 Word-formation</span>
+      <div class="coh-grid reveal reveal-d2">
+        <div class="coh"><div class="t">派生法 Derivation</div><p>词根 + 前缀 / 后缀。<br><code>teach → teacher</code><br><code>happy → unhappy</code></p></div>
+        <div class="coh"><div class="t">合成法 Compounding</div><p>两词合并成新词。<br><code>black + board → blackboard</code><br><code>post office</code></p></div>
+        <div class="coh"><div class="t">转化法 Conversion</div><p>不改形，直接转词性（零派生）。<br><code>water n.水 → v.浇水</code><br><code>book n.书 → v.预订</code></p></div>
+        <div class="coh"><div class="t">混成法 Blending</div><p>取两词部分拼合。<br><code>smoke + fog → smog</code><br><code>breakfast + lunch → brunch</code></p></div>
+        <div class="coh"><div class="t">缩略法 Clipping</div><p>截短或取首字母。<br><code>advertisement → ad</code><br><code>UN, NASA, radar</code></p></div>
+        <div class="coh"><div class="t">逆成法 Back-formation</div><p>误删"后缀"造词（常名→动）。<br><code>liaison → liaise</code><br><code>editor → edit</code></p></div>
+      </div>
+      <div class="morph-demo reveal reveal-d3">
+        <h4>拆一个词族：un·happy·ness</h4>
+        <div class="morph-chain">
+          <span class="m">un-<i>否定</i></span><span class="op">+</span><span class="m">happy<i>词根·形</i></span><span class="op">+</span><span class="m">-ness<i>名化</i></span><span class="eq">=</span><span class="word">unhappiness<small>名词 · "不快乐"</small></span>
+        </div>
+        <p>前缀 un- 表否定 → 词根 happy（形容词）→ 后缀 -ness 转名词。三层意义叠加，正是"意义积木"的模样。掌握词根与常见词缀，一个词族（happy / happily / unhappy / happiness / unhappiness）可一次拿下。</p>
+      </div>
+    
+        </div>
+      </details><
+    </div>
+  </section>
+
+
+
+<!-- ===== DARK insight：金句带 ===== -->
+  <section class="dark-section">
+    <div class="container">
+      <p class="insight-mark">— The Core Idea · Structured Literacy</p>
+      <p class="insight-big">解码绳让你"读得出词"；<br>语言理解绳让你"读得懂意"。<br>两绳<span class="hl">交织</span>，才是阅读理解。</p>
+      <p class="insight-sub">前三层（音素 → 字素 → 音节）属于"解码绳"，解决"词怎么读"；后三层（单词 → 句子 → 文章）属于"语言理解绳"，解决"什么意思、怎么读懂"。这正是 LTR「结构化读写 = Structured Literacy」的全貌：先解码，后理解。</p>
+    </div>
+  </section>
+
+<!-- ===== 04 句层 ===== -->
+  <section class="section section--alt" id="sentence">
+    <div class="container">
+      <div class="section-header reveal">
+        <span class="section-number">04</span>
+        <h2 class="section-title">句层：长句子读不懂？先找主干</h2>
+        <p class="section-lead"><span class="lvl">L5</span> ｜ SL⑤ Syntax 句法。英语句子 = <b>核心主干</b>（谁 + 做什么）+ <b>修饰成分</b>。孩子读不懂长句子，多半是只看到一堆修饰，没抓到主干。</p>
+      </div>
+
+      <!-- 句眼 -->
+      <div class="mua-intro reveal reveal-d1">
+        <div class="face">🧬</div>
+        <div class="txt">
+          <p><b>句眼：</b>英语句子 = <b>核心主干</b>（谁 + 做什么）+ <b>修饰 / 扩展成分</b>（什么样的、何时、为何…）。扩句，就是往主干上不断"加料"——从词到短语、从短语到从句、从简单句到复合句。</p>
+          <p class="mua-rule">英语是"右分支"语言：修饰语多后置，扩句往往向右叠加信息层，越扩越长（形合特征）。</p>
+        </div>
+      </div>
+
+      <!-- ① 五种基本句型 -->
+      <span class="subsection-tag">① 五种基本句型 + 句子成分</span>
+      <table class="sv-matrix reveal reveal-d2">
+        <tr><th>句型</th><th>结构</th><th>说明 / 例</th></tr>
+        <tr><td class="pat">SV</td><td>主语 + 动词</td><td>不及物。<span class="ex">The cat sat.</span></td></tr>
+        <tr><td class="pat">SVP</td><td>主语 + 系动词 + 表语</td><td>说明主语状态。<span class="ex">She is happy.</span></td></tr>
+        <tr><td class="pat">SVO</td><td>主语 + 动词 + 宾语</td><td>及物，单宾。<span class="ex">He ate an apple.</span></td></tr>
+        <tr><td class="pat">SVOO</td><td>主语 + 动词 + 间宾 + 直宾</td><td>双宾。<span class="ex">She gave me a book.</span></td></tr>
+        <tr><td class="pat">SVOC</td><td>主语 + 动词 + 宾语 + 补语</td><td>宾语补不足。<span class="ex">We made him captain.</span></td></tr>
+      </table>
+      <p class="ph-note" style="margin-top:1rem;">一个句子由 <b>八大句子成分</b> 构成：<b>主语 / 谓语 / 宾语 / 表语 / 补语</b>（主干零件）+ <b>定语 / 状语 / 同位语</b>（修饰 / 补充成分）。注意：词性有十种，句子成分有八种，二者不是一回事——词性管"词属哪类"，成分管"词在句里干啥"。下面 ③ 会细讲修饰成分。</p>
+
+      <!-- ② 句型转换 -->
+      <span class="subsection-tag">② 基本句型的转换（骨架"变脸"）</span>
+      <div class="tf-grid reveal reveal-d3">
+        <div class="tf-card"><div class="t">否定 Negative</div>
+          <p>加 don't / doesn't / didn't 或 not。</p><code>He does not eat apples.</code></div>
+        <div class="tf-card"><div class="t">疑问 Interrogative</div>
+          <p>助动词提前（一般疑问）/ 疑问词开头（特殊疑问）。</p><code>Does he eat apples? / What does he eat?</code></div>
+        <div class="tf-card"><div class="t">There be 存在句</div>
+          <p>表示"存在有"，主谓倒装。</p><code>There is a cat on the mat.</code></div>
+        <div class="tf-card"><div class="t">被动 Passive</div>
+          <p>宾语变主语，动词变 be + done。</p><code>The apple was eaten (by him).</code></div>
+      </div>
+
+      <!-- ③ 扩大：三位化妆师 -->
+      <span class="subsection-tag">③ 扩大：三大修饰成分（三位"化妆师"）</span>
+      <div class="mua-intro reveal">
+        <div class="face">👤</div>
+        <div class="txt">
+          <p>把英语句子比作"<b>素颜小人</b>"，定语、状语、补语就是三位专业化妆师——各司其职，让"素颜句"变身"精致表达"。</p>
+          <p class="mua-rule">口诀：定语打扮名词🎀，状语装饰动作🕒，补语完善宾语➕。先找"被修饰的是谁"，再选"用什么化妆"！</p>
+        </div>
+      </div>
+
+      <div class="syll-grid reveal reveal-d1">
+        <!-- 定语 -->
+        <div class="syl-card"><div class="cn">定语 🎀 服装师</div><span class="en">Attribute · 修饰名词/代词</span>
+          <p>限定、分类、描述名词。形式可逐级"升级"：</p>
+          <div class="fl">
+            <div class="fl-step"><b>形容词</b><code>The student</code></div>
+            <div class="fl-arrow">↓</div>
+            <div class="fl-step"><b>介词短语</b><code>in the blue shirt</code></div>
+            <div class="fl-arrow">↓</div>
+            <div class="fl-step"><b>非谓语</b><code>reading under the tree</code></div>
+            <div class="fl-arrow">↓</div>
+            <div class="fl-step"><b>定语从句</b><code>who won the scholarship</code></div>
+          </div>
+          <span class="split">嵌套：…who won the scholarship that his teacher recommended</span></div>
+        <!-- 状语 -->
+        <div class="syl-card"><div class="cn">状语 🕒 场景师</div><span class="en">Adverbial · 修饰动/形/副/全句</span>
+          <p>交代时间、地点、原因、目的、方式…形式进阶：</p>
+          <div class="fl">
+            <div class="fl-step"><b>副词</b><code>He left quickly.</code></div>
+            <div class="fl-arrow">↓</div>
+            <div class="fl-step"><b>介词短语</b><code>after the meeting</code></div>
+            <div class="fl-arrow">↓</div>
+            <div class="fl-step"><b>非谓语</b><code>having finished all reports</code></div>
+            <div class="fl-arrow">↓</div>
+            <div class="fl-step"><b>状语从句</b><code>because he received a call</code></div>
+          </div>
+          <span class="split">功能：时间/地点/原因/条件/方式/让步</span></div>
+        <!-- 补语 -->
+        <div class="syl-card"><div class="cn">补语 ➕ 造型师</div><span class="en">Complement · 完善主/宾</span>
+          <p>补充主语或宾语的状态/身份/结果。</p>
+          <div class="fl">
+            <div class="fl-step"><b>形容词宾补</b><code>I found the book interesting.</code></div>
+            <div class="fl-step"><b>分词宾补</b><code>I found the book left on the desk.</code></div>
+            <div class="fl-step"><b>名词主补</b><code>The book was considered a masterpiece.</code></div>
+          </div>
+          <span class="split">⚠️ 不同于汉语"结果/趋向补语"</span></div>
+      </div>
+      <p class="ph-note" style="margin-top:1rem;"><b>角度一规律：</b>修饰语具有"可替换性"与"可升级性"——同一修饰功能可用不同语法形式实现，复杂度依次递增。扩句时要注意修饰语与中心词的逻辑搭配及位置（如多重定语顺序）。</p>
+
+      <!-- 非谓语动词 -->
+      <span class="subsection-tag">非谓语动词：突破"一句一谓"的限制</span>
+      <div class="gpc-demo reveal reveal-d2" style="margin-bottom:1.4rem;">
+        <h3>英语严格遵循"一个独立分句只能有一个限定动词"</h3>
+        <p style="font-size:.9rem;color:var(--ink-light);line-height:1.8;">非谓语动词（不定式 / 动名词 / 分词）让动词"降级"后仍可承担核心成分——本质是<b>"压缩的从句"</b>：<br><code style="font-family:'Fira Code',monospace;color:var(--blue);">Having finished the work, he left. ≈ After he had finished the work, he left.</code></p>
+        <table class="nonfinite-table">
+          <tr><th>非谓语形式</th><th>可充当成分</th><th>示例</th></tr>
+          <tr><td class="f">to do</td><td>主、宾、表、定、状、宾补</td><td>To master grammar takes patience.（主语）</td></tr>
+          <tr><td class="f">doing</td><td>主、宾、表、定、状、宾补</td><td>She avoided answering the question.（宾语）</td></tr>
+          <tr><td class="f">done / doing</td><td>定、状、宾补、主补</td><td>Built in 1990, the bridge needs repair.（状语/原因）</td></tr>
+        </table>
+      </div>
+
+      <!-- ④ 组合（一）：并列句 -->
+      <span class="subsection-tag">④ 组合（一）：并列句 Compound（平等并联）</span>
+      <p class="ph-note">两个或以上<b>独立分句</b>用并列连词平等连接，逻辑平行、无主次——每个分句都能单独成句。连接形式：<b>逗号 + 并列连词</b>，或<b>分号</b>，或<b>冒号</b>（表解释）。</p>
+      <div class="coh-grid reveal reveal-d3">
+        <div class="coh"><div class="t">for 原因</div><p><code>It was late, for we left.</code></p></div>
+        <div class="coh"><div class="t">and 并列 / 顺承</div><p><code>He laughed, and she smiled.</code></p></div>
+        <div class="coh"><div class="t">nor 也不（倒装）</div><p><code>He can't swim, nor can I.</code></p></div>
+        <div class="coh"><div class="t">but 转折</div><p><code>I tried, but I failed.</code></p></div>
+        <div class="coh"><div class="t">or 选择</div><p><code>Work hard, or you fail.</code></p></div>
+        <div class="coh"><div class="t">yet 然而</div><p><code>It's small, yet powerful.</code></p></div>
+        <div class="coh"><div class="t">so 结果</div><p><code>He was tired, so he slept.</code></p></div>
+      </div>
+      <p class="ph-note" style="margin-top:.8rem;">FANBOYS 七连词记法：<b>F</b>or · <b>A</b>nd · <b>N</b>or · <b>B</b>ut · <b>O</b>r · <b>Y</b>et · <b>S</b>o。并列句可再叠加从句，形成<b>并列复杂句</b>（compound-complex），如 <code>The cat sat, and the dog barked because it heard a noise.</code></p>
+
+      <!-- ④ 组合（二）：从句 -->
+      <span class="subsection-tag">④ 组合（二）：从句 Clause（带主谓、依附主句）</span>
+      <p class="ph-note">从句本身有主谓，却<b>不能独立成句</b>，必须嵌进主句充当某一成分。按"充当什么成分"分三大类：</p>
+      <div class="layer-row reveal">
+        <div class="layer-box"><div class="t">名词性从句 <span class="en">Noun clause</span></div>
+          <p>在句中当"名词"用——作主 / 宾 / 表 / 同位。</p>
+          <ul class="mm">
+            <li><b>主语从句</b><code>What he said is true.</code></li>
+            <li><b>宾语从句</b><code>I know that he came.</code></li>
+            <li><b>表语从句</b><code>The truth is that he lied.</code></li>
+            <li><b>同位语从句</b><code>The news that he won surprised us.</code></li>
+          </ul>
+          <p class="cg">引导词：that / whether / what / who / when / how…</p></div>
+        <div class="layer-box"><div class="t">形容词性从句 <span class="en">定语从句</span></div>
+          <p>修饰名词 / 代词，紧跟被修饰词。</p>
+          <ul class="mm">
+            <li><b>关系代词</b><code>who / whom / whose / which / that</code></li>
+            <li><b>关系副词</b><code>when / where / why</code></li>
+          </ul>
+          <p class="cg">例：<code>The man who helped us left.</code><br>限制 / 非限制（逗号）：<code>My brother, who lives abroad, …</code></p></div>
+        <div class="layer-box"><div class="t">副词性从句 <span class="en">状语从句</span></div>
+          <p>作状语，交代时间 / 原因 / 条件…</p>
+          <ul class="mm">
+            <li><b>时间</b> when / while / after</li>
+            <li><b>原因</b> because / since / as</li>
+            <li><b>条件</b> if / unless</li>
+            <li><b>目的 / 结果</b> so that / so…that</li>
+            <li><b>让步</b> although / even if</li>
+            <li><b>方式 / 比较</b> as / than</li>
+          </ul>
+          <p class="cg">例：<code>When it rained, we stayed.</code></p></div>
+      </div>
+      <p class="ph-note" style="margin-top:1rem;"><b>角度二规律：</b>并列重"平衡"，主从重"层次"。扩句到高级阶段，本质是<b>逻辑关系的语法化</b>——时间→when/while；因果→because/since；条件→if/unless；让步→although/even if。终极形态：主干清晰 + 修饰分层 + 逻辑严密 + 形合标记完整。</p>
+    </div>
+  </section>
+
+  <!-- ===== 05 文章层 ===== -->
+  <section class="section" id="text">
+    <div class="container">
+      <div class="section-header reveal">
+        <span class="section-number">05</span>
+        <h2 class="section-title">文章层：读懂一篇文章，靠的是"骨架"</h2>
+        <p class="section-lead"><span class="lvl">L6</span> ｜ SL⑥ Semantics 语义。单词都认识、句子也读得通，可读完一本书，问他讲了什么，说不出来？——<b>文章不是句子的堆叠，它是有"骨架"的。</b>这一层，就是教孩子看骨架。</p>
+      </div>
+
+      <!-- L6-a 词汇与词义 -->
+      <span class="subsection-tag">L6-a 词汇与词义：一词多义 / 同音异义 / 同形异义 / 语境猜词</span>
+      <div class="coh-grid reveal reveal-d1">
+        <div class="coh"><div class="t">一词多义 Polysemy</div>
+          <p>同形同音，多个相关义。阅读中要根据上下文选义。<br><code>bank 河岸 / 银行</code></p></div>
+        <div class="coh"><div class="t">同音异义 Homophone</div>
+          <p>音同形不同义不同，拼写是重要线索。<br><code>meat 肉 / meet 遇见</code></p></div>
+        <div class="coh"><div class="t">同形异义 Homograph</div>
+          <p>形同音不同，靠读音和语境区分。<br><code>row /roʊ/ 排 · /raʊ/ 划</code></p></div>
+        <div class="coh"><div class="t">语境猜词 Context</div>
+          <p>用同义/反义、解释、例子等线索推断生词，不依赖词典。<br><code>The boy was elated—so happy he jumped.</code></p></div>
+      </div>
+
+      <!-- L6-b 长难句拆解 -->
+      <span class="subsection-tag">L6-b 长难句拆解：扩句的"逆向"</span>
+      <div class="parse reveal reveal-d2">
+        <div class="sentence">
+          <span class="trunk">The student</span> <span class="leaf">who won the scholarship that his teacher recommended</span> <span class="trunk">left</span> <span class="leaf">quickly after the meeting.</span>
+        </div>
+        <div class="layer-row">
+          <div class="layer-box"><div class="t">主干 <span class="en">Trunk · SVO</span></div>
+            <p><b>The student (S) + left (V)</b>：剥离所有修饰后，意思就是"学生离开了"。这是阅读的"锚"。</p></div>
+          <div class="layer-box"><div class="t">定语枝叶 <span class="en">Attribute leaves</span></div>
+            <p><code>who won the scholarship</code>（定语从句）+ <code>that his teacher recommended</code>（嵌套定语从句），两层都修饰 student。</p></div>
+          <div class="layer-box"><div class="t">状语枝叶 <span class="en">Adverbial leaves</span></div>
+            <p><code>quickly</code>（副词，方式）+ <code>after the meeting</code>（介词短语，时间），交代"怎样、何时"。</p></div>
+        </div>
+      </div>
+      <p class="ph-note" style="margin-top:1rem;">看到长难句，先抓主干 SVO，再逐层剥掉定语/状语枝叶——这正是 L5"扩大"的反向操作。主干清，文意就清。</p>
+
+      <!-- L6-c 语篇组织 -->
+      <span class="subsection-tag">L6-c 语篇组织：文本结构 + 体裁 + 轻量衔接</span>
+      <div class="text-grid reveal reveal-d3">
+        <div class="text-card"><div class="ic">📐</div><h4>问题与解决</h4><span class="en">Problem–Solution</span>
+          <p>先抛问题，再给方案。说明文、议论文最常见。</p></div>
+        <div class="text-card"><div class="ic">🔗</div><h4>因果</h4><span class="en">Cause–Effect</span>
+          <p>因为…所以…。解释"为什么"的底层逻辑。</p></div>
+        <div class="text-card"><div class="ic">⚖️</div><h4>比较对照</h4><span class="en">Compare–Contrast</span>
+          <p>相同与不同。常用于人物、事物、观点辨析。</p></div>
+        <div class="text-card"><div class="ic">📋</div><h4>顺序</h4><span class="en">Sequence</span>
+          <p>时间或步骤先后。叙事、操作说明离不开它。</p></div>
+        <div class="text-card"><div class="ic">🔍</div><h4>描述</h4><span class="en">Description</span>
+          <p>围绕一个主题展开细节，建立画面感。</p></div>
+        <div class="text-card"><div class="ic">💡</div><h4>观点+支撑</h4><span class="en">Claim–Support</span>
+          <p>先立论点，再用例子/数据支撑。议论文骨架。</p></div>
+      </div>
+      <div class="genre-grid reveal">
+        <div class="genre"><div class="t">叙事 Narrative</div><p>讲故事，重情节与顺序。</p></div>
+        <div class="genre"><div class="t">说明 Expository</div><p>讲知识，重结构与事实。</p></div>
+        <div class="genre"><div class="t">议论 Argument</div><p>讲观点，重论证与说服。</p></div>
+        <div class="genre"><div class="t">应用 Applied</div><p>书信/通知/日记等实用体。</p></div>
+      </div>
+      <h3 style="font-family:'Noto Serif SC',serif;font-weight:700;font-size:1.1rem;margin-top:2rem;">衔接手段 Cohesion：让句子"粘"成文章（轻量）</h3>
+      <div class="coh-grid reveal reveal-d1">
+        <div class="coh"><div class="t">指代 Reference</div><p>用代词回指前文，避免重复。<br><code>The cat sat. It was tired.</code>（it=cat）</p></div>
+        <div class="coh"><div class="t">连接词 Conjunction</div><p>用 and/but/because 等显式连逻辑。<br><code>He was tired, so he slept.</code></p></div>
+        <div class="coh"><div class="t">词汇链 Lexical</div><p>重复/同义/上下义词织成语义网。<br><code>cat → kitten → pet</code></p></div>
+        <div class="coh"><div class="t">替代/省略</div><p>用 do/one 替代，或省去已知信息。<br><code>He likes tea; I do too.</code></p></div>
+      </div>
+      <p class="ph-note" style="margin-top:1rem;">连贯（coherence）是"逻辑上通不通"，衔接（cohesion）是"形式上连不连"——两者合力，零散句子才成文章。到这一层，孩子就真正"读懂"了。</p>
+    </div>
+  </section>
+
+  <!-- ===== 06 学习路径 ===== -->
+  <section class="section section--alt" id="path">
+    <div class="container">
+      <div class="section-header reveal">
+        <span class="section-number">06</span>
+        <h2 class="section-title">给家长的学习路径：路线 + 阶段</h2>
+        <p class="section-lead">整条路线分两阶段：先<b>极简听说打地基</b>（积累 4000+ 听力词汇 + 44 个音素），再<b>结构读写提能力</b>（音韵→拼读→音节→构词→句法→语义）。顺着框架从下往上走，每个阶段目标清晰、不跳级。它正是国际读写障碍协会（IDA）定义的 <b>Structured Literacy（结构化读写）</b>——系统、显性、按顺序。</p>
+      </div>
+
+      <div class="subsection-tag">孩子的阅读，分五个发展阶段（Ehri 模型）</div>
+      <p class="ph-note">顺着框架往下走，孩子的阅读会经历五个阶段。家长看清"孩子现在在哪一层"，就不会盲目抢跑、也不会错过关键信号：</p>
+      <div class="phase-grid reveal reveal-d1">
+        <div class="phase"><span class="pn">①</span><div class="t">前字母阶段</div><p class="age">约 4–5 岁</p><p>靠画面 / 记忆"认"书，还不懂字母代表声音。重点在<b>听力积累 + 语音意识</b>。</p></div>
+        <div class="phase"><span class="pn">②</span><div class="t">早期字母阶段</div><p class="age">幼儿园~1 年级</p><p>刚建立"字母→声音"，能拼最简单短词（CVC）。开始系统拼读。</p></div>
+        <div class="phase"><span class="pn">③</span><div class="t">后期字母阶段</div><p class="age">1~2 年级</p><p>能拼多音节词、掌握音节类型，拼读渐自动化。构词法、句法上线。</p></div>
+        <div class="phase"><span class="pn">④</span><div class="t">巩固阶段</div><p class="age">2 年级+</p><p>见词几乎秒读，注意力转向<b>理解</b>。长难句、语篇、阅读策略登场。</p></div>
+        <div class="phase"><span class="pn">⑤</span><div class="t">流畅阅读阶段</div><p class="age">3 年级以上</p><p>解码自动化，阅读用于<b>学习</b>。词汇、句法、语篇全面服务"读懂文章"。</p></div>
+      </div>
+
+      <figure class="fig fig--card">
+        <svg viewBox="0 0 680 250" role="img" aria-label="Ehri 阅读五阶段阶梯：从前字母到流畅阅读">
+          <rect x="20" y="176" width="128" height="34" rx="8" fill="#2B7FD8"/>
+          <text x="84" y="194" fill="#fefcf6" font-family="'Noto Serif SC',serif" font-size="13.5" font-weight="700" text-anchor="middle">① 前字母</text>
+          <text x="84" y="210" fill="#fefcf6" font-size="10.5" text-anchor="middle" opacity="0.85">约 4–5 岁</text>
+          <rect x="148" y="142" width="128" height="68" rx="8" fill="#F4D758"/>
+          <text x="212" y="178" fill="#1A1A2E" font-family="'Noto Serif SC',serif" font-size="13.5" font-weight="700" text-anchor="middle">② 早期字母</text>
+          <text x="212" y="194" fill="#1A1A2E" font-size="10.5" text-anchor="middle">幼小~1 年级</text>
+          <rect x="276" y="108" width="128" height="102" rx="8" fill="#2B7FD8"/>
+          <text x="340" y="174" fill="#fefcf6" font-family="'Noto Serif SC',serif" font-size="13.5" font-weight="700" text-anchor="middle">③ 后期字母</text>
+          <text x="340" y="190" fill="#fefcf6" font-size="10.5" text-anchor="middle" opacity="0.85">1~2 年级</text>
+          <rect x="404" y="74" width="128" height="136" rx="8" fill="#F4D758"/>
+          <text x="468" y="170" fill="#1A1A2E" font-family="'Noto Serif SC',serif" font-size="13.5" font-weight="700" text-anchor="middle">④ 巩固</text>
+          <text x="468" y="186" fill="#1A1A2E" font-size="10.5" text-anchor="middle">2 年级+</text>
+          <rect x="532" y="40" width="128" height="170" rx="8" fill="#2B7FD8"/>
+          <text x="596" y="166" fill="#fefcf6" font-family="'Noto Serif SC',serif" font-size="13.5" font-weight="700" text-anchor="middle">⑤ 流畅</text>
+          <text x="596" y="182" fill="#fefcf6" font-size="10.5" text-anchor="middle" opacity="0.85">3 年级+</text>
+          <text x="340" y="242" fill="#8A8A9A" font-size="12" text-anchor="middle">阅读发展阶段：从"认书"走向"用阅读学习" →</text>
+        </svg>
+        <figcaption class="fig-cap">顺着框架往下走，孩子的阅读会经历<b>五个阶段</b>。看清孩子现在在哪一层，不盲目抢跑。</figcaption>
+      </figure>
+
+      <div class="layout-sticky">
+        <div class="sticky-side reveal">
+          <span class="big">06</span>
+          <h2>六层路线一览</h2>
+          <p class="section-lead" style="margin-top:1rem;">把五个发展阶段，落到 LTR 的六个台阶上——每一层学什么、对应哪个营，一图看清：</p>
+        </div>
+        <div class="path-list reveal reveal-d1">
+          <div class="path-item"><span class="pn">1</span><div><h4>音素意识 Phonology <span class="sl">SL①</span></h4>
+            <p>先不碰字母，训练耳朵分辨、拆分、混合声音（如拍手数音节、替换首音）。这是阅读的"预备役"。</p></div></div>
+          <div class="path-item"><span class="pn">2</span><div><h4>形音对应 Sound-Symbol <span class="sl">SL②</span></h4>
+            <p>建立"字母/组合 → 声音"的对应，开始"见词能读、听音能写"。配套 LTR 六种音节类型系统拆词。</p></div></div>
+          <div class="path-item"><span class="pn">3</span><div><h4>音节与流利解码 Syllables <span class="sl">SL③</span></h4>
+            <p>从逐音拼读过渡到一眼读词，速度和准确率上来，大脑才有余力去"理解"。</p></div></div>
+          <div class="path-item"><span class="pn">4</span><div><h4>单词与构词 Morphology <span class="sl">SL④</span></h4>
+            <p>单词的音形义与词性吃透（名词详讲），下一步用构词法（前缀/词根/后缀）成倍扩充词汇，遇到生词会"拆解推测"。</p></div></div>
+          <div class="path-item"><span class="pn">5</span><div><h4>句子与句法 Syntax <span class="sl">SL⑤</span></h4>
+            <p>从五种基本句型出发，经转换、扩大、组合，读懂并写出由简到繁的句子——这是理解长难句的基础。</p></div></div>
+          <div class="path-item"><span class="pn">6</span><div><h4>文章与阅读理解 Semantics <span class="sl">SL⑥</span></h4>
+            <p>从词义解读、长难句拆解法，到语篇结构与体裁识别，最终达成"读懂一整篇文章"——这是框架的"天花板"。</p></div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="container">
+      <div class="foot-brand">LTR 家庭英语 · 结构化读写</div>
+      <div class="foot-sub">从音素到文章 · 一张图看懂英语的底层架构（Structured Literacy 对齐版）</div>
+      <div class="foot-note">— Alex 陪你，把英语拆开、再拼起来 —</div>
+    </div>
+  </footer>
+
+  <script>
+    const nav=document.getElementById('nav');
+    window.addEventListener('scroll',()=>{nav.classList.toggle('scrolled',window.scrollY>20);});
+    const obs=new IntersectionObserver((es)=>{es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');obs.unobserve(e.target);}});},{threshold:.12});
+    document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
+  </script>
+</body>
+</html>
+      <details class="deep-dive">
+        <summary>想深入了解 · 句子是怎么"长大"的（五种句型 / 转换 / 非谓语 / 从句）</summary>
+        <div class="dd-body">
+
+        </div>
+      </details>
+
+<!-- ===== 05 文章层 ===== -->
+  <section class="section" id="text">
+    <div class="container">
+      <div class="section-header reveal">
+        <span class="section-number">05</span>
+        <h2 class="section-title">文章层：读懂一篇文章，靠的是"骨架"</h2>
+        <p class="section-lead"><span class="lvl">L6</span> ｜ SL⑥ Semantics 语义。单词都认识、句子也读得通，可读完一本书，问他讲了什么，说不出来？——<b>文章不是句子的堆叠，它是有"骨架"的。</b>这一层，就是教孩子看骨架。</p>
+      </div>
+
+      <!-- L6-a 词汇与词义 -->
+      <span class="subsection-tag">L6-a 词汇与词义：一词多义 / 同音异义 / 同形异义 / 语境猜词</span>
+      <div class="coh-grid reveal reveal-d1">
+        <div class="coh"><div class="t">一词多义 Polysemy</div>
+          <p>同形同音，多个相关义。阅读中要根据上下文选义。<br><code>bank 河岸 / 银行</code></p></div>
+        <div class="coh"><div class="t">同音异义 Homophone</div>
+          <p>音同形不同义不同，拼写是重要线索。<br><code>meat 肉 / meet 遇见</code></p></div>
+        <div class="coh"><div class="t">同形异义 Homograph</div>
+          <p>形同音不同，靠读音和语境区分。<br><code>row /roʊ/ 排 · /raʊ/ 划</code></p></div>
+        <div class="coh"><div class="t">语境猜词 Context</div>
+          <p>用同义/反义、解释、例子等线索推断生词，不依赖词典。<br><code>The boy was elated—so happy he jumped.</code></p></div>
+      </div>
+
+      <!-- L6-b 长难句拆解 -->
+      <span class="subsection-tag">L6-b 长难句拆解：扩句的"逆向"</span>
+      <div class="parse reveal reveal-d2">
+        <div class="sentence">
+          <span class="trunk">The student</span> <span class="leaf">who won the scholarship that his teacher recommended</span> <span class="trunk">left</span> <span class="leaf">quickly after the meeting.</span>
+        </div>
+        <div class="layer-row">
+          <div class="layer-box"><div class="t">主干 <span class="en">Trunk · SVO</span></div>
+            <p><b>The student (S) + left (V)</b>：剥离所有修饰后，意思就是"学生离开了"。这是阅读的"锚"。</p></div>
+          <div class="layer-box"><div class="t">定语枝叶 <span class="en">Attribute leaves</span></div>
+            <p><code>who won the scholarship</code>（定语从句）+ <code>that his teacher recommended</code>（嵌套定语从句），两层都修饰 student。</p></div>
+          <div class="layer-box"><div class="t">状语枝叶 <span class="en">Adverbial leaves</span></div>
+            <p><code>quickly</code>（副词，方式）+ <code>after the meeting</code>（介词短语，时间），交代"怎样、何时"。</p></div>
+        </div>
+      </div>
+      <p class="ph-note" style="margin-top:1rem;">看到长难句，先抓主干 SVO，再逐层剥掉定语/状语枝叶——这正是 L5"扩大"的反向操作。主干清，文意就清。</p>
+
+      <!-- L6-c 语篇组织 -->
+      <span class="subsection-tag">L6-c 语篇组织：文本结构 + 体裁 + 轻量衔接</span>
+      <div class="text-grid reveal reveal-d3">
+        <div class="text-card"><div class="ic">📐</div><h4>问题与解决</h4><span class="en">Problem–Solution</span>
+          <p>先抛问题，再给方案。说明文、议论文最常见。</p></div>
+        <div class="text-card"><div class="ic">🔗</div><h4>因果</h4><span class="en">Cause–Effect</span>
+          <p>因为…所以…。解释"为什么"的底层逻辑。</p></div>
+        <div class="text-card"><div class="ic">⚖️</div><h4>比较对照</h4><span class="en">Compare–Contrast</span>
+          <p>相同与不同。常用于人物、事物、观点辨析。</p></div>
+        <div class="text-card"><div class="ic">📋</div><h4>顺序</h4><span class="en">Sequence</span>
+          <p>时间或步骤先后。叙事、操作说明离不开它。</p></div>
+        <div class="text-card"><div class="ic">🔍</div><h4>描述</h4><span class="en">Description</span>
+          <p>围绕一个主题展开细节，建立画面感。</p></div>
+        <div class="text-card"><div class="ic">💡</div><h4>观点+支撑</h4><span class="en">Claim–Support</span>
+          <p>先立论点，再用例子/数据支撑。议论文骨架。</p></div>
+      </div>
+      <div class="genre-grid reveal">
+        <div class="genre"><div class="t">叙事 Narrative</div><p>讲故事，重情节与顺序。</p></div>
+        <div class="genre"><div class="t">说明 Expository</div><p>讲知识，重结构与事实。</p></div>
+        <div class="genre"><div class="t">议论 Argument</div><p>讲观点，重论证与说服。</p></div>
+        <div class="genre"><div class="t">应用 Applied</div><p>书信/通知/日记等实用体。</p></div>
+      </div>
+      <h3 style="font-family:'Noto Serif SC',serif;font-weight:700;font-size:1.1rem;margin-top:2rem;">衔接手段 Cohesion：让句子"粘"成文章（轻量）</h3>
+      <div class="coh-grid reveal reveal-d1">
+        <div class="coh"><div class="t">指代 Reference</div><p>用代词回指前文，避免重复。<br><code>The cat sat. It was tired.</code>（it=cat）</p></div>
+        <div class="coh"><div class="t">连接词 Conjunction</div><p>用 and/but/because 等显式连逻辑。<br><code>He was tired, so he slept.</code></p></div>
+        <div class="coh"><div class="t">词汇链 Lexical</div><p>重复/同义/上下义词织成语义网。<br><code>cat → kitten → pet</code></p></div>
+        <div class="coh"><div class="t">替代/省略</div><p>用 do/one 替代，或省去已知信息。<br><code>He likes tea; I do too.</code></p></div>
+      </div>
+      <p class="ph-note" style="margin-top:1rem;">连贯（coherence）是"逻辑上通不通"，衔接（cohesion）是"形式上连不连"——两者合力，零散句子才成文章。到这一层，孩子就真正"读懂"了。</p>
+    </div>
+  </section>
+
+  <!-- ===== 06 学习路径 ===== -->
+  <section class="section section--alt" id="path">
+    <div class="container">
+      <div class="section-header reveal">
+        <span class="section-number">06</span>
+        <h2 class="section-title">给家长的学习路径：路线 + 阶段</h2>
+        <p class="section-lead">整条路线分两阶段：先<b>极简听说打地基</b>（积累 4000+ 听力词汇 + 44 个音素），再<b>结构读写提能力</b>（音韵→拼读→音节→构词→句法→语义）。顺着框架从下往上走，每个阶段目标清晰、不跳级。它正是国际读写障碍协会（IDA）定义的 <b>Structured Literacy（结构化读写）</b>——系统、显性、按顺序。</p>
+      </div>
+
+      <div class="subsection-tag">孩子的阅读，分五个发展阶段（Ehri 模型）</div>
+      <p class="ph-note">顺着框架往下走，孩子的阅读会经历五个阶段。家长看清"孩子现在在哪一层"，就不会盲目抢跑、也不会错过关键信号：</p>
+      <div class="phase-grid reveal reveal-d1">
+        <div class="phase"><span class="pn">①</span><div class="t">前字母阶段</div><p class="age">约 4–5 岁</p><p>靠画面 / 记忆"认"书，还不懂字母代表声音。重点在<b>听力积累 + 语音意识</b>。</p></div>
+        <div class="phase"><span class="pn">②</span><div class="t">早期字母阶段</div><p class="age">幼儿园~1 年级</p><p>刚建立"字母→声音"，能拼最简单短词（CVC）。开始系统拼读。</p></div>
+        <div class="phase"><span class="pn">③</span><div class="t">后期字母阶段</div><p class="age">1~2 年级</p><p>能拼多音节词、掌握音节类型，拼读渐自动化。构词法、句法上线。</p></div>
+        <div class="phase"><span class="pn">④</span><div class="t">巩固阶段</div><p class="age">2 年级+</p><p>见词几乎秒读，注意力转向<b>理解</b>。长难句、语篇、阅读策略登场。</p></div>
+        <div class="phase"><span class="pn">⑤</span><div class="t">流畅阅读阶段</div><p class="age">3 年级以上</p><p>解码自动化，阅读用于<b>学习</b>。词汇、句法、语篇全面服务"读懂文章"。</p></div>
+      </div>
+
+      <figure class="fig fig--card">
+        <svg viewBox="0 0 680 250" role="img" aria-label="Ehri 阅读五阶段阶梯：从前字母到流畅阅读">
+          <rect x="20" y="176" width="128" height="34" rx="8" fill="#2B7FD8"/>
+          <text x="84" y="194" fill="#fefcf6" font-family="'Noto Serif SC',serif" font-size="13.5" font-weight="700" text-anchor="middle">① 前字母</text>
+          <text x="84" y="210" fill="#fefcf6" font-size="10.5" text-anchor="middle" opacity="0.85">约 4–5 岁</text>
+          <rect x="148" y="142" width="128" height="68" rx="8" fill="#F4D758"/>
+          <text x="212" y="178" fill="#1A1A2E" font-family="'Noto Serif SC',serif" font-size="13.5" font-weight="700" text-anchor="middle">② 早期字母</text>
+          <text x="212" y="194" fill="#1A1A2E" font-size="10.5" text-anchor="middle">幼小~1 年级</text>
+          <rect x="276" y="108" width="128" height="102" rx="8" fill="#2B7FD8"/>
+          <text x="340" y="174" fill="#fefcf6" font-family="'Noto Serif SC',serif" font-size="13.5" font-weight="700" text-anchor="middle">③ 后期字母</text>
+          <text x="340" y="190" fill="#fefcf6" font-size="10.5" text-anchor="middle" opacity="0.85">1~2 年级</text>
+          <rect x="404" y="74" width="128" height="136" rx="8" fill="#F4D758"/>
+          <text x="468" y="170" fill="#1A1A2E" font-family="'Noto Serif SC',serif" font-size="13.5" font-weight="700" text-anchor="middle">④ 巩固</text>
+          <text x="468" y="186" fill="#1A1A2E" font-size="10.5" text-anchor="middle">2 年级+</text>
+          <rect x="532" y="40" width="128" height="170" rx="8" fill="#2B7FD8"/>
+          <text x="596" y="166" fill="#fefcf6" font-family="'Noto Serif SC',serif" font-size="13.5" font-weight="700" text-anchor="middle">⑤ 流畅</text>
+          <text x="596" y="182" fill="#fefcf6" font-size="10.5" text-anchor="middle" opacity="0.85">3 年级+</text>
+          <text x="340" y="242" fill="#8A8A9A" font-size="12" text-anchor="middle">阅读发展阶段：从"认书"走向"用阅读学习" →</text>
+        </svg>
+        <figcaption class="fig-cap">顺着框架往下走，孩子的阅读会经历<b>五个阶段</b>。看清孩子现在在哪一层，不盲目抢跑。</figcaption>
+      </figure>
+
+      <div class="layout-sticky">
+        <div class="sticky-side reveal">
+          <span class="big">06</span>
+          <h2>六层路线一览</h2>
+          <p class="section-lead" style="margin-top:1rem;">把五个发展阶段，落到 LTR 的六个台阶上——每一层学什么、对应哪个营，一图看清：</p>
+        </div>
+        <div class="path-list reveal reveal-d1">
+          <div class="path-item"><span class="pn">1</span><div><h4>音素意识 Phonology <span class="sl">SL①</span></h4>
+            <p>先不碰字母，训练耳朵分辨、拆分、混合声音（如拍手数音节、替换首音）。这是阅读的"预备役"。</p></div></div>
+          <div class="path-item"><span class="pn">2</span><div><h4>形音对应 Sound-Symbol <span class="sl">SL②</span></h4>
+            <p>建立"字母/组合 → 声音"的对应，开始"见词能读、听音能写"。配套 LTR 六种音节类型系统拆词。</p></div></div>
+          <div class="path-item"><span class="pn">3</span><div><h4>音节与流利解码 Syllables <span class="sl">SL③</span></h4>
+            <p>从逐音拼读过渡到一眼读词，速度和准确率上来，大脑才有余力去"理解"。</p></div></div>
+          <div class="path-item"><span class="pn">4</span><div><h4>单词与构词 Morphology <span class="sl">SL④</span></h4>
+            <p>单词的音形义与词性吃透（名词详讲），下一步用构词法（前缀/词根/后缀）成倍扩充词汇，遇到生词会"拆解推测"。</p></div></div>
+          <div class="path-item"><span class="pn">5</span><div><h4>句子与句法 Syntax <span class="sl">SL⑤</span></h4>
+            <p>从五种基本句型出发，经转换、扩大、组合，读懂并写出由简到繁的句子——这是理解长难句的基础。</p></div></div>
+          <div class="path-item"><span class="pn">6</span><div><h4>文章与阅读理解 Semantics <span class="sl">SL⑥</span></h4>
+            <p>从词义解读、长难句拆解法，到语篇结构与体裁识别，最终达成"读懂一整篇文章"——这是框架的"天花板"。</p></div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="container">
+      <div class="foot-brand">LTR 家庭英语 · 结构化读写</div>
+      <div class="foot-sub">从音素到文章 · 一张图看懂英语的底层架构（Structured Literacy 对齐版）</div>
+      <div class="foot-note">— Alex 陪你，把英语拆开、再拼起来 —</div>
+    </div>
+  </footer>
+
+  <script>
+    const nav=document.getElementById('nav');
+    window.addEventListener('scroll',()=>{nav.classList.toggle('scrolled',window.scrollY>20);});
+    const obs=new IntersectionObserver((es)=>{es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');obs.unobserve(e.target);}});},{threshold:.12});
+    document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
+  </script>
+</body>
+</html><span class="subsection-tag">L6-a 词汇与词义：一词多义 / 同音异义 / 同形异义 / 语境猜词</span>
+      <div class="coh-grid reveal reveal-d1">
+        <div class="coh"><div class="t">一词多义 Polysemy</div>
+          <p>同形同音，多个相关义。阅读中要根据上下文选义。<br><code>bank 河岸 / 银行</code></p></div>
+        <div class="coh"><div class="t">同音异义 Homophone</div>
+          <p>音同形不同义不同，拼写是重要线索。<br><code>meat 肉 / meet 遇见</code></p></div>
+        <div class="coh"><div class="t">同形异义 Homograph</div>
+          <p>形同音不同，靠读音和语境区分。<br><code>row /roʊ/ 排 · /raʊ/ 划</code></p></div>
+        <div class="coh"><div class="t">语境猜词 Context</div>
+          <p>用同义/反义、解释、例子等线索推断生词，不依赖词典。<br><code>The boy was elated—so happy he jumped.</code></p></div>
+      </div>
+
+      <!-- L6-b 长难句拆解 -->
+      
+      <details class="deep-dive">
+        <summary>想深入了解 · 词义与语篇（一词多义 / 语境猜词 / 语篇结构 / 衔接手段）</summary>
+        <div class="dd-body">
+<span class="subsection-tag">L6-b 长难句拆解：扩句的"逆向"</span>
+      <div class="parse reveal reveal-d2">
+        <div class="sentence">
+          <span class="trunk">The student</span> <span class="leaf">who won the scholarship that his teacher recommended</span> <span class="trunk">left</span> <span class="leaf">quickly after the meeting.</span>
+        </div>
+        <div class="layer-row">
+          <div class="layer-box"><div class="t">主干 <span class="en">Trunk · SVO</span></div>
+            <p><b>The student (S) + left (V)</b>：剥离所有修饰后，意思就是"学生离开了"。这是阅读的"锚"。</p></div>
+          <div class="layer-box"><div class="t">定语枝叶 <span class="en">Attribute leaves</span></div>
+            <p><code>who won the scholarship</code>（定语从句）+ <code>that his teacher recommended</code>（嵌套定语从句），两层都修饰 student。</p></div>
+          <div class="layer-box"><div class="t">状语枝叶 <span class="en">Adverbial leaves</span></div>
+            <p><code>quickly</code>（副词，方式）+ <code>after the meeting</code>（介词短语，时间），交代"怎样、何时"。</p></div>
+        </div>
+      </div>
+      <p class="ph-note" style="margin-top:1rem;">看到长难句，先抓主干 SVO，再逐层剥掉定语/状语枝叶——这正是 L5"扩大"的反向操作。主干清，文意就清。</p>
+
+      <!-- L6-c 语篇组织 -->
+      <span class="subsection-tag">L6-c 语篇组织：文本结构 + 体裁 + 轻量衔接</span>
+      <div class="text-grid reveal reveal-d3">
+        <div class="text-card"><div class="ic">📐</div><h4>问题与解决</h4><span class="en">Problem–Solution</span>
+          <p>先抛问题，再给方案。说明文、议论文最常见。</p></div>
+        <div class="text-card"><div class="ic">🔗</div><h4>因果</h4><span class="en">Cause–Effect</span>
+          <p>因为…所以…。解释"为什么"的底层逻辑。</p></div>
+        <div class="text-card"><div class="ic">⚖️</div><h4>比较对照</h4><span class="en">Compare–Contrast</span>
+          <p>相同与不同。常用于人物、事物、观点辨析。</p></div>
+        <div class="text-card"><div class="ic">📋</div><h4>顺序</h4><span class="en">Sequence</span>
+          <p>时间或步骤先后。叙事、操作说明离不开它。</p></div>
+        <div class="text-card"><div class="ic">🔍</div><h4>描述</h4><span class="en">Description</span>
+          <p>围绕一个主题展开细节，建立画面感。</p></div>
+        <div class="text-card"><div class="ic">💡</div><h4>观点+支撑</h4><span class="en">Claim–Support</span>
+          <p>先立论点，再用例子/数据支撑。议论文骨架。</p></div>
+      </div>
+      <div class="genre-grid reveal">
+        <div class="genre"><div class="t">叙事 Narrative</div><p>讲故事，重情节与顺序。</p></div>
+        <div class="genre"><div class="t">说明 Expository</div><p>讲知识，重结构与事实。</p></div>
+        <div class="genre"><div class="t">议论 Argument</div><p>讲观点，重论证与说服。</p></div>
+        <div class="genre"><div class="t">应用 Applied</div><p>书信/通知/日记等实用体。</p></div>
+      </div>
+      <h3 style="font-family:'Noto Serif SC',serif;font-weight:700;font-size:1.1rem;margin-top:2rem;">衔接手段 Cohesion：让句子"粘"成文章（轻量）</h3>
+      <div class="coh-grid reveal reveal-d1">
+        <div class="coh"><div class="t">指代 Reference</div><p>用代词回指前文，避免重复。<br><code>The cat sat. It was tired.</code>（it=cat）</p></div>
+        <div class="coh"><div class="t">连接词 Conjunction</div><p>用 and/but/because 等显式连逻辑。<br><code>He was tired, so he slept.</code></p></div>
+        <div class="coh"><div class="t">词汇链 Lexical</div><p>重复/同义/上下义词织成语义网。<br><code>cat → kitten → pet</code></p></div>
+        <div class="coh"><div class="t">替代/省略</div><p>用 do/one 替代，或省去已知信息。<br><code>He likes tea; I do too.</code></p></div>
+      </div>
+      <p class="ph-note" style="margin-top:1rem;">连贯（coherence）是"逻辑上通不通"，衔接（cohesion）是"形式上连不连"——两者合力，零散句子才成文章。到这一层，孩子就真正"读懂"了。</p>
+    
+        </div>
+      </details>
+
+<!-- ===== 06 学习路径 ===== -->
+  <section class="section section--alt" id="path">
+    <div class="container">
+      <div class="section-header reveal">
+        <span class="section-number">06</span>
+        <h2 class="section-title">给家长的学习路径：路线 + 阶段</h2>
+        <p class="section-lead">整条路线分两阶段：先<b>极简听说打地基</b>（积累 4000+ 听力词汇 + 44 个音素），再<b>结构读写提能力</b>（音韵→拼读→音节→构词→句法→语义）。顺着框架从下往上走，每个阶段目标清晰、不跳级。它正是国际读写障碍协会（IDA）定义的 <b>Structured Literacy（结构化读写）</b>——系统、显性、按顺序。</p>
+      </div>
+
+      <div class="subsection-tag">孩子的阅读，分五个发展阶段（Ehri 模型）</div>
+      <p class="ph-note">顺着框架往下走，孩子的阅读会经历五个阶段。家长看清"孩子现在在哪一层"，就不会盲目抢跑、也不会错过关键信号：</p>
+      <div class="phase-grid reveal reveal-d1">
+        <div class="phase"><span class="pn">①</span><div class="t">前字母阶段</div><p class="age">约 4–5 岁</p><p>靠画面 / 记忆"认"书，还不懂字母代表声音。重点在<b>听力积累 + 语音意识</b>。</p></div>
+        <div class="phase"><span class="pn">②</span><div class="t">早期字母阶段</div><p class="age">幼儿园~1 年级</p><p>刚建立"字母→声音"，能拼最简单短词（CVC）。开始系统拼读。</p></div>
+        <div class="phase"><span class="pn">③</span><div class="t">后期字母阶段</div><p class="age">1~2 年级</p><p>能拼多音节词、掌握音节类型，拼读渐自动化。构词法、句法上线。</p></div>
+        <div class="phase"><span class="pn">④</span><div class="t">巩固阶段</div><p class="age">2 年级+</p><p>见词几乎秒读，注意力转向<b>理解</b>。长难句、语篇、阅读策略登场。</p></div>
+        <div class="phase"><span class="pn">⑤</span><div class="t">流畅阅读阶段</div><p class="age">3 年级以上</p><p>解码自动化，阅读用于<b>学习</b>。词汇、句法、语篇全面服务"读懂文章"。</p></div>
+      </div>
+
+      <figure class="fig fig--card">
+        <svg viewBox="0 0 680 250" role="img" aria-label="Ehri 阅读五阶段阶梯：从前字母到流畅阅读">
+          <rect x="20" y="176" width="128" height="34" rx="8" fill="#2B7FD8"/>
+          <text x="84" y="194" fill="#fefcf6" font-family="'Noto Serif SC',serif" font-size="13.5" font-weight="700" text-anchor="middle">① 前字母</text>
+          <text x="84" y="210" fill="#fefcf6" font-size="10.5" text-anchor="middle" opacity="0.85">约 4–5 岁</text>
+          <rect x="148" y="142" width="128" height="68" rx="8" fill="#F4D758"/>
+          <text x="212" y="178" fill="#1A1A2E" font-family="'Noto Serif SC',serif" font-size="13.5" font-weight="700" text-anchor="middle">② 早期字母</text>
+          <text x="212" y="194" fill="#1A1A2E" font-size="10.5" text-anchor="middle">幼小~1 年级</text>
+          <rect x="276" y="108" width="128" height="102" rx="8" fill="#2B7FD8"/>
+          <text x="340" y="174" fill="#fefcf6" font-family="'Noto Serif SC',serif" font-size="13.5" font-weight="700" text-anchor="middle">③ 后期字母</text>
+          <text x="340" y="190" fill="#fefcf6" font-size="10.5" text-anchor="middle" opacity="0.85">1~2 年级</text>
+          <rect x="404" y="74" width="128" height="136" rx="8" fill="#F4D758"/>
+          <text x="468" y="170" fill="#1A1A2E" font-family="'Noto Serif SC',serif" font-size="13.5" font-weight="700" text-anchor="middle">④ 巩固</text>
+          <text x="468" y="186" fill="#1A1A2E" font-size="10.5" text-anchor="middle">2 年级+</text>
+          <rect x="532" y="40" width="128" height="170" rx="8" fill="#2B7FD8"/>
+          <text x="596" y="166" fill="#fefcf6" font-family="'Noto Serif SC',serif" font-size="13.5" font-weight="700" text-anchor="middle">⑤ 流畅</text>
+          <text x="596" y="182" fill="#fefcf6" font-size="10.5" text-anchor="middle" opacity="0.85">3 年级+</text>
+          <text x="340" y="242" fill="#8A8A9A" font-size="12" text-anchor="middle">阅读发展阶段：从"认书"走向"用阅读学习" →</text>
+        </svg>
+        <figcaption class="fig-cap">顺着框架往下走，孩子的阅读会经历<b>五个阶段</b>。看清孩子现在在哪一层，不盲目抢跑。</figcaption>
+      </figure>
+
+      <div class="layout-sticky">
+        <div class="sticky-side reveal">
+          <span class="big">06</span>
+          <h2>六层路线一览</h2>
+          <p class="section-lead" style="margin-top:1rem;">把五个发展阶段，落到 LTR 的六个台阶上——每一层学什么、对应哪个营，一图看清：</p>
+        </div>
+        <div class="path-list reveal reveal-d1">
+          <div class="path-item"><span class="pn">1</span><div><h4>音素意识 Phonology <span class="sl">SL①</span></h4>
+            <p>先不碰字母，训练耳朵分辨、拆分、混合声音（如拍手数音节、替换首音）。这是阅读的"预备役"。</p></div></div>
+          <div class="path-item"><span class="pn">2</span><div><h4>形音对应 Sound-Symbol <span class="sl">SL②</span></h4>
+            <p>建立"字母/组合 → 声音"的对应，开始"见词能读、听音能写"。配套 LTR 六种音节类型系统拆词。</p></div></div>
+          <div class="path-item"><span class="pn">3</span><div><h4>音节与流利解码 Syllables <span class="sl">SL③</span></h4>
+            <p>从逐音拼读过渡到一眼读词，速度和准确率上来，大脑才有余力去"理解"。</p></div></div>
+          <div class="path-item"><span class="pn">4</span><div><h4>单词与构词 Morphology <span class="sl">SL④</span></h4>
+            <p>单词的音形义与词性吃透（名词详讲），下一步用构词法（前缀/词根/后缀）成倍扩充词汇，遇到生词会"拆解推测"。</p></div></div>
+          <div class="path-item"><span class="pn">5</span><div><h4>句子与句法 Syntax <span class="sl">SL⑤</span></h4>
+            <p>从五种基本句型出发，经转换、扩大、组合，读懂并写出由简到繁的句子——这是理解长难句的基础。</p></div></div>
+          <div class="path-item"><span class="pn">6</span><div><h4>文章与阅读理解 Semantics <span class="sl">SL⑥</span></h4>
+            <p>从词义解读、长难句拆解法，到语篇结构与体裁识别，最终达成"读懂一整篇文章"——这是框架的"天花板"。</p></div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="container">
+      <div class="foot-brand">LTR 家庭英语 · 结构化读写</div>
+      <div class="foot-sub">从音素到文章 · 一张图看懂英语的底层架构（Structured Literacy 对齐版）</div>
+      <div class="foot-note">— Alex 陪你，把英语拆开、再拼起来 —</div>
+    </div>
+  </footer>
+
+  <script>
+    const nav=document.getElementById('nav');
+    window.addEventListener('scroll',()=>{nav.classList.toggle('scrolled',window.scrollY>20);});
+    const obs=new IntersectionObserver((es)=>{es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');obs.unobserve(e.target);}});},{threshold:.12});
+    document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
+  </script>
+</body>
+</html>
+      <details class="deep-dive">
+        <summary>想深入了解 · 句子是怎么"长大"的（五种句型 / 转换 / 非谓语 / 从句）</summary>
+        <div class="dd-body">
+
+        </div>
+      </details>
+
+<!-- ===== 05 文章层 ===== -->
+  <section class="section" id="text">
+    <div class="container">
+      <div class="section-header reveal">
+        <span class="section-number">05</span>
+        <h2 class="section-title">文章层：从读懂词、句到读懂文章</h2>
+        <p class="section-lead">文章层对应 Structured Literacy 的第六个组件 Semantics（语义学），本质是"意义"。语义学从四个层面层层推进：<b>词义</b>（一个词什么意思）→ <b>句义</b>（一句话什么意思）→ <b>语篇衔接</b>（句子怎么粘成连贯文章）→ <b>语用</b>（这话在当下语境里什么意思）。本章只做"读懂"，不写作出产。下面按 词汇与词义 → 长难句拆解 → 语篇组织 三块展开。</p>
+      </div>
+
+      <!-- L6-a 词汇与词义 -->
+      <span class="subsection-tag">L6-a 词汇与词义：一词多义 / 同音异义 / 同形异义 / 语境猜词</span>
+      <div class="coh-grid reveal reveal-d1">
+        <div class="coh"><div class="t">一词多义 Polysemy</div>
+          <p>同形同音，多个相关义。阅读中要根据上下文选义。<br><code>bank 河岸 / 银行</code></p></div>
+        <div class="coh"><div class="t">同音异义 Homophone</div>
+          <p>音同形不同义不同，拼写是重要线索。<br><code>meat 肉 / meet 遇见</code></p></div>
+        <div class="coh"><div class="t">同形异义 Homograph</div>
+          <p>形同音不同，靠读音和语境区分。<br><code>row /roʊ/ 排 · /raʊ/ 划</code></p></div>
+        <div class="coh"><div class="t">语境猜词 Context</div>
+          <p>用同义/反义、解释、例子等线索推断生词，不依赖词典。<br><code>The boy was elated—so happy he jumped.</code></p></div>
+      </div>
+
+      <!-- L6-b 长难句拆解 -->
+      <span class="subsection-tag">L6-b 长难句拆解：扩句的"逆向"</span>
+      <div class="parse reveal reveal-d2">
+        <div class="sentence">
+          <span class="trunk">The student</span> <span class="leaf">who won the scholarship that his teacher recommended</span> <span class="trunk">left</span> <span class="leaf">quickly after the meeting.</span>
+        </div>
+        <div class="layer-row">
+          <div class="layer-box"><div class="t">主干 <span class="en">Trunk · SVO</span></div>
+            <p><b>The student (S) + left (V)</b>：剥离所有修饰后，意思就是"学生离开了"。这是阅读的"锚"。</p></div>
+          <div class="layer-box"><div class="t">定语枝叶 <span class="en">Attribute leaves</span></div>
+            <p><code>who won the scholarship</code>（定语从句）+ <code>that his teacher recommended</code>（嵌套定语从句），两层都修饰 student。</p></div>
+          <div class="layer-box"><div class="t">状语枝叶 <span class="en">Adverbial leaves</span></div>
+            <p><code>quickly</code>（副词，方式）+ <code>after the meeting</code>（介词短语，时间），交代"怎样、何时"。</p></div>
+        </div>
+      </div>
+      <p class="ph-note" style="margin-top:1rem;">看到长难句，先抓主干 SVO，再逐层剥掉定语/状语枝叶——这正是 L5"扩大"的反向操作。主干清，文意就清。</p>
+
+      <!-- L6-c 语篇组织 -->
+      <span class="subsection-tag">L6-c 语篇组织：文本结构 + 体裁 + 轻量衔接</span>
+      <div class="text-grid reveal reveal-d3">
+        <div class="text-card"><div class="ic">📐</div><h4>问题与解决</h4><span class="en">Problem–Solution</span>
+          <p>先抛问题，再给方案。说明文、议论文最常见。</p></div>
+        <div class="text-card"><div class="ic">🔗</div><h4>因果</h4><span class="en">Cause–Effect</span>
+          <p>因为…所以…。解释"为什么"的底层逻辑。</p></div>
+        <div class="text-card"><div class="ic">⚖️</div><h4>比较对照</h4><span class="en">Compare–Contrast</span>
+          <p>相同与不同。常用于人物、事物、观点辨析。</p></div>
+        <div class="text-card"><div class="ic">📋</div><h4>顺序</h4><span class="en">Sequence</span>
+          <p>时间或步骤先后。叙事、操作说明离不开它。</p></div>
+        <div class="text-card"><div class="ic">🔍</div><h4>描述</h4><span class="en">Description</span>
+          <p>围绕一个主题展开细节，建立画面感。</p></div>
+        <div class="text-card"><div class="ic">💡</div><h4>观点+支撑</h4><span class="en">Claim–Support</span>
+          <p>先立论点，再用例子/数据支撑。议论文骨架。</p></div>
+      </div>
+      <div class="genre-grid reveal">
+        <div class="genre"><div class="t">叙事 Narrative</div><p>讲故事，重情节与顺序。</p></div>
+        <div class="genre"><div class="t">说明 Expository</div><p>讲知识，重结构与事实。</p></div>
+        <div class="genre"><div class="t">议论 Argument</div><p>讲观点，重论证与说服。</p></div>
+        <div class="genre"><div class="t">应用 Applied</div><p>书信/通知/日记等实用体。</p></div>
+      </div>
+      <h3 style="font-family:'Noto Serif SC',serif;font-weight:700;font-size:1.1rem;margin-top:2rem;">衔接手段 Cohesion：让句子"粘"成文章（轻量）</h3>
+      <div class="coh-grid reveal reveal-d1">
+        <div class="coh"><div class="t">指代 Reference</div><p>用代词回指前文，避免重复。<br><code>The cat sat. It was tired.</code>（it=cat）</p></div>
+        <div class="coh"><div class="t">连接词 Conjunction</div><p>用 and/but/because 等显式连逻辑。<br><code>He was tired, so he slept.</code></p></div>
+        <div class="coh"><div class="t">词汇链 Lexical</div><p>重复/同义/上下义词织成语义网。<br><code>cat → kitten → pet</code></p></div>
+        <div class="coh"><div class="t">替代/省略</div><p>用 do/one 替代，或省去已知信息。<br><code>He likes tea; I do too.</code></p></div>
+      </div>
+      <p class="ph-note" style="margin-top:1rem;">连贯（coherence）是"逻辑上通不通"，衔接（cohesion）是"形式上连不连"——两者合力，零散句子才成文章。到这一层，孩子就真正"读懂"了。</p>
+    </div>
+  </section>
+
+  <!-- ===== 06 学习路径 ===== -->
+  <section class="section section--alt" id="path">
+    <div class="container">
+      <div class="section-header reveal">
+        <span class="section-number">06</span>
+        <h2 class="section-title">给家长的学习路径：路线 + 阶段</h2>
+        <p class="section-lead">整条路线分两阶段：先<b>极简听说打地基</b>（积累 4000+ 听力词汇 + 44 个音素），再<b>结构读写提能力</b>（音韵→拼读→音节→构词→句法→语义）。顺着框架从下往上走，每个阶段目标清晰、不跳级。它正是国际读写障碍协会（IDA）定义的 <b>Structured Literacy（结构化读写）</b>——系统、显性、按顺序。</p>
+      </div>
+
+      <div class="subsection-tag">孩子的阅读，分五个发展阶段（Ehri 模型）</div>
+      <p class="ph-note">顺着框架往下走，孩子的阅读会经历五个阶段。家长看清"孩子现在在哪一层"，就不会盲目抢跑、也不会错过关键信号：</p>
+      <div class="phase-grid reveal reveal-d1">
+        <div class="phase"><span class="pn">①</span><div class="t">前字母阶段</div><p class="age">约 4–5 岁</p><p>靠画面 / 记忆"认"书，还不懂字母代表声音。重点在<b>听力积累 + 语音意识</b>。</p></div>
+        <div class="phase"><span class="pn">②</span><div class="t">早期字母阶段</div><p class="age">幼儿园~1 年级</p><p>刚建立"字母→声音"，能拼最简单短词（CVC）。开始系统拼读。</p></div>
+        <div class="phase"><span class="pn">③</span><div class="t">后期字母阶段</div><p class="age">1~2 年级</p><p>能拼多音节词、掌握音节类型，拼读渐自动化。构词法、句法上线。</p></div>
+        <div class="phase"><span class="pn">④</span><div class="t">巩固阶段</div><p class="age">2 年级+</p><p>见词几乎秒读，注意力转向<b>理解</b>。长难句、语篇、阅读策略登场。</p></div>
+        <div class="phase"><span class="pn">⑤</span><div class="t">流畅阅读阶段</div><p class="age">3 年级以上</p><p>解码自动化，阅读用于<b>学习</b>。词汇、句法、语篇全面服务"读懂文章"。</p></div>
+      </div>
+
+      <figure class="fig fig--card">
+        <svg viewBox="0 0 680 250" role="img" aria-label="Ehri 阅读五阶段阶梯：从前字母到流畅阅读">
+          <rect x="20" y="176" width="128" height="34" rx="8" fill="#2B7FD8"/>
+          <text x="84" y="194" fill="#fefcf6" font-family="'Noto Serif SC',serif" font-size="13.5" font-weight="700" text-anchor="middle">① 前字母</text>
+          <text x="84" y="210" fill="#fefcf6" font-size="10.5" text-anchor="middle" opacity="0.85">约 4–5 岁</text>
+          <rect x="148" y="142" width="128" height="68" rx="8" fill="#F4D758"/>
+          <text x="212" y="178" fill="#1A1A2E" font-family="'Noto Serif SC',serif" font-size="13.5" font-weight="700" text-anchor="middle">② 早期字母</text>
+          <text x="212" y="194" fill="#1A1A2E" font-size="10.5" text-anchor="middle">幼小~1 年级</text>
+          <rect x="276" y="108" width="128" height="102" rx="8" fill="#2B7FD8"/>
+          <text x="340" y="174" fill="#fefcf6" font-family="'Noto Serif SC',serif" font-size="13.5" font-weight="700" text-anchor="middle">③ 后期字母</text>
+          <text x="340" y="190" fill="#fefcf6" font-size="10.5" text-anchor="middle" opacity="0.85">1~2 年级</text>
+          <rect x="404" y="74" width="128" height="136" rx="8" fill="#F4D758"/>
+          <text x="468" y="170" fill="#1A1A2E" font-family="'Noto Serif SC',serif" font-size="13.5" font-weight="700" text-anchor="middle">④ 巩固</text>
+          <text x="468" y="186" fill="#1A1A2E" font-size="10.5" text-anchor="middle">2 年级+</text>
+          <rect x="532" y="40" width="128" height="170" rx="8" fill="#2B7FD8"/>
+          <text x="596" y="166" fill="#fefcf6" font-family="'Noto Serif SC',serif" font-size="13.5" font-weight="700" text-anchor="middle">⑤ 流畅</text>
+          <text x="596" y="182" fill="#fefcf6" font-size="10.5" text-anchor="middle" opacity="0.85">3 年级+</text>
+          <text x="340" y="242" fill="#8A8A9A" font-size="12" text-anchor="middle">阅读发展阶段：从"认书"走向"用阅读学习" →</text>
+        </svg>
+        <figcaption class="fig-cap">顺着框架往下走，孩子的阅读会经历<b>五个阶段</b>。看清孩子现在在哪一层，不盲目抢跑。</figcaption>
+      </figure>
+
+      <div class="layout-sticky">
+        <div class="sticky-side reveal">
+          <span class="big">06</span>
+          <h2>六层路线一览</h2>
+          <p class="section-lead" style="margin-top:1rem;">把五个发展阶段，落到 LTR 的六个台阶上——每一层学什么、对应哪个营，一图看清：</p>
+        </div>
+        <div class="path-list reveal reveal-d1">
+          <div class="path-item"><span class="pn">1</span><div><h4>音素意识 Phonology <span class="sl">SL①</span></h4>
+            <p>先不碰字母，训练耳朵分辨、拆分、混合声音（如拍手数音节、替换首音）。这是阅读的"预备役"。</p></div></div>
+          <div class="path-item"><span class="pn">2</span><div><h4>形音对应 Sound-Symbol <span class="sl">SL②</span></h4>
+            <p>建立"字母/组合 → 声音"的对应，开始"见词能读、听音能写"。配套 LTR 六种音节类型系统拆词。</p></div></div>
+          <div class="path-item"><span class="pn">3</span><div><h4>音节与流利解码 Syllables <span class="sl">SL③</span></h4>
+            <p>从逐音拼读过渡到一眼读词，速度和准确率上来，大脑才有余力去"理解"。</p></div></div>
+          <div class="path-item"><span class="pn">4</span><div><h4>单词与构词 Morphology <span class="sl">SL④</span></h4>
+            <p>单词的音形义与词性吃透（名词详讲），下一步用构词法（前缀/词根/后缀）成倍扩充词汇，遇到生词会"拆解推测"。</p></div></div>
+          <div class="path-item"><span class="pn">5</span><div><h4>句子与句法 Syntax <span class="sl">SL⑤</span></h4>
+            <p>从五种基本句型出发，经转换、扩大、组合，读懂并写出由简到繁的句子——这是理解长难句的基础。</p></div></div>
+          <div class="path-item"><span class="pn">6</span><div><h4>文章与阅读理解 Semantics <span class="sl">SL⑥</span></h4>
+            <p>从词义解读、长难句拆解法，到语篇结构与体裁识别，最终达成"读懂一整篇文章"——这是框架的"天花板"。</p></div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="container">
+      <div class="foot-brand">LTR 家庭英语 · 结构化读写</div>
+      <div class="foot-sub">从音素到文章 · 一张图看懂英语的底层架构（Structured Literacy 对齐版）</div>
+      <div class="foot-note">— Alex 陪你，把英语拆开、再拼起来 —</div>
+    </div>
+  </footer>
+
+  <script>
+    const nav=document.getElementById('nav');
+    window.addEventListener('scroll',()=>{nav.classList.toggle('scrolled',window.scrollY>20);});
+    const obs=new IntersectionObserver((es)=>{es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');obs.unobserve(e.target);}});},{threshold:.12});
+    document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
+  </script>
+</body>
+</html>

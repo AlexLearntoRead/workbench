@@ -1,0 +1,944 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Word Matrix · 词根词缀教学工具</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  background:#fff;color:#1f2937;
+  font-family:'Segoe UI','Microsoft YaHei','PingFang SC',sans-serif;
+  -webkit-font-smoothing:antialiased;
+  padding-top:32px;
+}
+[hidden]{display:none!important}
+
+/* 返回按钮 */
+.back-to-workbench{
+  position:fixed;bottom:12px;right:12px;z-index:9999;
+  padding:6px 14px;background:#fff;
+  border:2px solid #2B7FD8;border-radius:14px;
+  font-size:12px;font-weight:700;color:#2B7FD8;
+  cursor:pointer;font-family:inherit;white-space:nowrap;
+  box-shadow:0 2px 8px rgba(0,0,0,.12);
+  transition:all .2s;text-decoration:none;
+}
+.back-to-workbench:hover{
+  background:#2B7FD8;color:#fff;
+}
+
+/* 顶部标题 */
+header{
+  text-align:center;padding:10px 20px 16px;
+}
+header h1{
+  font-size:26px;font-weight:800;
+  background:linear-gradient(90deg,#2B7FD8,#ff5c5c);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+}
+header p{font-size:13px;color:#64748b;margin-top:4px}
+
+/* 导航标签 */
+.nav-tabs{
+  display:flex;justify-content:center;gap:6px;
+  padding:0 20px 16px;flex-wrap:wrap;
+}
+.nav-tab{
+  padding:8px 18px;border:2px solid #e2e8f0;border-radius:20px;
+  background:#fff;cursor:pointer;font-size:13px;font-weight:600;
+  color:#64748b;font-family:inherit;transition:all .15s;
+}
+.nav-tab:hover{border-color:#2B7FD8;color:#2B7FD8}
+.nav-tab.active{background:#2B7FD8;color:#fff;border-color:#2B7FD8}
+
+main{max-width:1400px;margin:0 auto;padding:0 20px 40px}
+
+/* ========== 首页模块 ========== */
+.module-grid{
+  display:grid;grid-template-columns:repeat(2,1fr);gap:16px;
+  max-width:900px;margin:20px auto;
+}
+.module-card{
+  background:#f0f7fc;border-radius:14px;padding:24px;
+  cursor:pointer;transition:all .2s;border-left:5px solid #2B7FD8;
+}
+.module-card:hover{transform:translateY(-3px);box-shadow:0 6px 20px rgba(0,0,0,.08)}
+.module-card:nth-child(2){border-left-color:#5cb85c}
+.module-card:nth-child(3){border-left-color:#ff5c5c}
+.module-card:nth-child(4){border-left-color:#9b59b6}
+.module-icon{font-size:36px;margin-bottom:10px}
+.module-title{font-size:18px;font-weight:700;margin-bottom:6px}
+.module-desc{font-size:13px;color:#64748b;line-height:1.6}
+
+/* ========== Word Matrix 展示 ========== */
+.matrix-container{
+  background:#f8fafc;border-radius:16px;padding:24px;
+  margin-top:10px;
+}
+.matrix-selector{
+  display:flex;justify-content:center;gap:10px;margin-bottom:20px;flex-wrap:wrap;
+}
+.matrix-selector select{
+  padding:8px 14px;border:2px solid #2B7FD8;border-radius:10px;
+  font-size:14px;font-weight:600;color:#1f2937;background:#fff;
+  font-family:inherit;cursor:pointer;
+}
+.matrix-layout{
+  display:grid;grid-template-columns:1fr auto 1fr;
+  gap:20px;align-items:start;max-width:1100px;margin:0 auto;
+}
+.matrix-col{
+  display:flex;flex-direction:column;gap:8px;
+}
+.matrix-col-title{
+  text-align:center;font-size:14px;font-weight:700;
+  color:#64748b;margin-bottom:6px;text-transform:uppercase;letter-spacing:.05em;
+}
+.matrix-prefix{justify-content:flex-end;align-items:flex-end}
+.matrix-suffix{align-items:flex-start}
+.morpheme-card{
+  padding:10px 16px;border-radius:10px;cursor:pointer;
+  font-size:16px;font-weight:700;text-align:center;
+  transition:all .15s;min-width:80px;
+  border:2px solid transparent;
+}
+.morpheme-card .meaning{
+  display:block;font-size:11px;font-weight:400;margin-top:2px;opacity:.8;
+}
+.prefix-card{background:#dbeafe;color:#1e40af;border-color:#93c5fd}
+.prefix-card:hover{background:#bfdbfe;transform:translateX(3px)}
+.root-card{
+  background:#fef3c7;color:#92400e;border-color:#fcd34d;
+  padding:20px 28px;font-size:24px;min-width:140px;
+}
+.root-card .meaning{font-size:13px}
+.suffix-card{background:#dcfce7;color:#166534;border-color:#86efac}
+.suffix-card:hover{background:#bbf7d0;transform:translateX(-3px)}
+.morpheme-card.selected{
+  box-shadow:0 0 0 3px rgba(74,159,212,.4);
+  transform:scale(1.05);
+}
+.matrix-center{
+  display:flex;flex-direction:column;align-items:center;gap:10px;
+}
+.matrix-arrow{
+  font-size:24px;color:#94a3b8;font-weight:700;
+}
+.matrix-result{
+  background:#fff;border:3px solid #2B7FD8;border-radius:14px;
+  padding:16px 28px;text-align:center;min-width:200px;
+}
+.matrix-result .word{
+  font-size:28px;font-weight:800;color:#1f2937;letter-spacing:1px;
+}
+.matrix-result .word-sum{
+  font-size:13px;color:#64748b;margin-top:6px;
+}
+.matrix-result .play-btn{
+  margin-top:10px;padding:6px 16px;background:#2B7FD8;color:#fff;
+  border:none;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;
+  font-family:inherit;
+}
+.matrix-result .play-btn:hover{background:#1a5fb0}
+
+/* ========== 词素库 ========== */
+.library-section{margin-bottom:24px}
+.library-section h3{
+  font-size:16px;font-weight:700;margin-bottom:10px;
+  padding-left:10px;border-left:4px solid #2B7FD8;
+}
+.library-grid{
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));
+  gap:8px;
+}
+.lib-card{
+  background:#fff;border:2px solid #e2e8f0;border-radius:10px;
+  padding:10px 12px;cursor:pointer;transition:all .15s;
+}
+.lib-card:hover{border-color:#2B7FD8;transform:translateY(-2px)}
+.lib-card .morph{font-size:16px;font-weight:700;color:#1f2937}
+.lib-card .mean{font-size:12px;color:#64748b;margin-top:2px}
+.lib-card .examples{font-size:11px;color:#94a3b8;margin-top:4px;font-style:italic}
+.lib-prefix{border-left:4px solid #3b82f6}
+.lib-root{border-left:4px solid #f59e0b}
+.lib-suffix{border-left:4px solid #22c55e}
+
+/* ========== 单词上传解析 ========== */
+.upload-area{
+  background:#f8fafc;border:2px dashed #cbd5e1;border-radius:16px;
+  padding:30px;text-align:center;margin-bottom:20px;
+}
+.upload-area textarea{
+  width:100%;min-height:120px;border:2px solid #e2e8f0;border-radius:10px;
+  padding:12px;font-size:14px;font-family:inherit;resize:vertical;
+  margin:12px 0;
+}
+.upload-area textarea:focus{outline:none;border-color:#2B7FD8}
+.upload-btn{
+  padding:10px 24px;background:#2B7FD8;color:#fff;border:none;
+  border-radius:10px;cursor:pointer;font-size:14px;font-weight:600;
+  font-family:inherit;
+}
+.upload-btn:hover{background:#1a5fb0}
+.parse-result{
+  background:#fff;border-radius:14px;padding:20px;
+  border:1px solid #e2e8f0;
+}
+.parse-result h3{font-size:16px;font-weight:700;margin-bottom:14px}
+.parsed-word{
+  display:flex;align-items:center;gap:6px;padding:10px 0;
+  border-bottom:1px solid #f1f5f9;flex-wrap:wrap;
+}
+.parsed-word:last-child{border-bottom:none}
+.parsed-word .pw-word{
+  font-size:16px;font-weight:700;color:#1f2937;min-width:120px;
+}
+.parsed-word .pw-parts{display:flex;align-items:center;gap:4px;flex-wrap:wrap}
+.parsed-word .pw-part{
+  padding:4px 10px;border-radius:6px;font-size:13px;font-weight:600;
+}
+.pw-part.prefix{background:#dbeafe;color:#1e40af}
+.pw-part.root{background:#fef3c7;color:#92400e}
+.pw-part.suffix{background:#dcfce7;color:#166534}
+.pw-part.unknown{background:#f1f5f9;color:#64748b}
+.parsed-word .pw-plus{color:#94a3b8;font-weight:700}
+.parsed-word .pw-play{
+  margin-left:auto;padding:4px 10px;background:#f1f5f9;border:none;
+  border-radius:6px;cursor:pointer;font-size:12px;
+}
+
+/* ========== 构词练习 ========== */
+.quiz-area{
+  background:#f8fafc;border-radius:16px;padding:24px;
+  max-width:800px;margin:0 auto;
+}
+.quiz-question{
+  text-align:center;font-size:18px;font-weight:700;margin-bottom:20px;
+}
+.quiz-question .target{
+  color:#2B7FD8;font-size:22px;
+}
+.quiz-slots{
+  display:flex;justify-content:center;align-items:center;gap:10px;
+  margin-bottom:24px;flex-wrap:wrap;
+}
+.quiz-slot{
+  width:100px;height:70px;border:3px dashed #cbd5e1;border-radius:12px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:20px;font-weight:700;color:#94a3b8;background:#fff;
+  cursor:pointer;transition:all .15s;
+}
+.quiz-slot.filled{border-style:solid;color:#1f2937}
+.quiz-slot.prefix-filled{border-color:#3b82f6;background:#dbeafe}
+.quiz-slot.root-filled{border-color:#f59e0b;background:#fef3c7}
+.quiz-slot.suffix-filled{border-color:#22c55e;background:#dcfce7}
+.quiz-slot-label{
+  font-size:11px;color:#64748b;text-align:center;margin-top:4px;font-weight:400;
+}
+.quiz-options{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:8px;
+}
+.quiz-option{
+  padding:12px;border:2px solid #e2e8f0;border-radius:10px;
+  background:#fff;cursor:pointer;font-size:15px;font-weight:600;
+  text-align:center;transition:all .15s;font-family:inherit;
+}
+.quiz-option:hover{border-color:#2B7FD8}
+.quiz-option.correct{border-color:#22c55e;background:#dcfce7}
+.quiz-option.wrong{border-color:#ef4444;background:#fee2e2}
+.quiz-option:disabled{cursor:default}
+.quiz-score{
+  text-align:center;margin-top:20px;font-size:14px;color:#64748b;
+}
+.quiz-next{
+  display:block;margin:16px auto 0;padding:10px 28px;
+  background:#2B7FD8;color:#fff;border:none;border-radius:10px;
+  cursor:pointer;font-size:14px;font-weight:600;font-family:inherit;
+}
+.quiz-next:hover{background:#1a5fb0}
+
+@media(max-width:768px){
+  .module-grid{grid-template-columns:1fr}
+  .matrix-layout{grid-template-columns:1fr;gap:16px}
+  .matrix-prefix{align-items:center}
+  .matrix-suffix{align-items:center}
+  .quiz-options{grid-template-columns:repeat(2,1fr)}
+}
+</style>
+
+
+<style>
+/* ===== v2.0 统一设计语言（Alex 工作台品牌） ===== */
+.wb-topbar{position:sticky;top:0;z-index:99999;display:flex;align-items:center;gap:14px;background:rgba(254,252,246,.97);border-bottom:1px solid #eee7d8;padding:9px clamp(12px,3vw,26px);box-sizing:border-box;}
+.wb-topbar::before{content:'';position:absolute;left:0;top:0;right:0;height:3px;background:linear-gradient(90deg,#2B7FD8,#F4D758,#E84A5F);}
+.wb-back{flex:none;display:inline-flex;align-items:center;gap:5px;background:rgba(43,127,216,.08);color:#1a5fb0;border:1px solid rgba(43,127,216,.28);border-radius:999px;padding:6px 14px;font-size:.8rem;font-weight:600;text-decoration:none;font-family:'Segoe UI','Microsoft YaHei','PingFang SC',sans-serif;line-height:1.4;}
+.wb-back:hover{background:rgba(43,127,216,.18);}
+.wb-title{display:flex;align-items:baseline;gap:10px;min-width:0;}
+.wb-title b{font-size:1rem;font-weight:700;color:#1A1A2E;white-space:nowrap;}
+.wb-title i{font-style:normal;font-size:.72rem;color:#5a5a72;font-family:Georgia,'Times New Roman',serif;letter-spacing:.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+body{background:#fefcf6!important;}
+.back-to-workbench,.back-btn{display:none!important;}
+@media(max-width:560px){.wb-title b{font-size:.92rem;}.wb-title i{display:none;}.wb-topbar{gap:10px;padding:8px 10px;}}
+
+</style>
+</head>
+<body>
+<div class="wb-topbar"><a href="工作台.html#tools" class="wb-back">← 返回</a><div class="wb-title"><b>🔢 单词矩阵</b><i>Word Matrix</i></div></div>
+
+
+<a href="工作台.html#tools" class="back-to-workbench">返回</a>
+
+<header>
+  <h1>Word Matrix · 词根词缀教学工具</h1>
+  <p>可视化构建词族 · 词根居中 · 前缀在左 · 后缀在右</p>
+</header>
+
+<div class="nav-tabs">
+  <button class="nav-tab active" data-page="home">首页</button>
+  <button class="nav-tab" data-page="matrix">Word Matrix</button>
+  <button class="nav-tab" data-page="library">词素库</button>
+  <button class="nav-tab" data-page="upload">单词上传解析</button>
+  <button class="nav-tab" data-page="quiz">构词练习</button>
+</div>
+
+<main>
+  <!-- 首页 -->
+  <div id="page-home">
+    <div class="module-grid">
+      <div class="module-card" data-page="matrix">
+        <div class="module-icon">🔲</div>
+        <div class="module-title">Word Matrix 可视化</div>
+        <div class="module-desc">选择词根，查看可搭配的前缀和后缀，点击组合生成单词，理解词族构建规律。</div>
+      </div>
+      <div class="module-card" data-page="library">
+        <div class="module-icon">📚</div>
+        <div class="module-title">词素库</div>
+        <div class="module-desc">常见前缀、词根、后缀分类查询，每个词素包含含义和例词，支持点击查看。</div>
+      </div>
+      <div class="module-card" data-page="upload">
+        <div class="module-icon">📤</div>
+        <div class="module-title">单词上传解析</div>
+        <div class="module-desc">粘贴或上传单词列表，自动解析每个单词的词素结构（前缀+词根+后缀）。</div>
+      </div>
+      <div class="module-card" data-page="quiz">
+        <div class="module-icon">🎯</div>
+        <div class="module-title">构词练习</div>
+        <div class="module-desc">根据释义选择正确的前缀、词根、后缀组合，强化词素识别和构词能力。</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Word Matrix -->
+  <div id="page-matrix" hidden>
+    <div class="matrix-container">
+      <div class="matrix-selector">
+        <label style="font-size:14px;font-weight:600;color:#64748b;align-self:center">选择词根：</label>
+        <select id="rootSelect"></select>
+      </div>
+      <div class="matrix-layout">
+        <div class="matrix-col matrix-prefix">
+          <div class="matrix-col-title">前缀 Prefixes</div>
+          <div id="prefixList"></div>
+        </div>
+        <div class="matrix-center">
+          <div class="matrix-arrow">←</div>
+          <div class="matrix-col-title">词根 Base</div>
+          <div class="morpheme-card root-card" id="rootCard">
+            <span id="rootText">port</span>
+            <span class="meaning" id="rootMeaning">携带</span>
+          </div>
+          <div class="matrix-arrow">→</div>
+          <div class="matrix-result">
+            <div class="word" id="matrixWord">port</div>
+            <div class="word-sum" id="matrixSum">port</div>
+            <button class="play-btn" onclick="playMatrixWord()">🔊 发音</button>
+          </div>
+        </div>
+        <div class="matrix-col matrix-suffix">
+          <div class="matrix-col-title">后缀 Suffixes</div>
+          <div id="suffixList"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 词素库 -->
+  <div id="page-library" hidden>
+    <div class="library-section">
+      <h3>常见前缀 Prefixes</h3>
+      <div class="library-grid" id="prefixLibrary"></div>
+    </div>
+    <div class="library-section">
+      <h3>常见词根 Roots / Bases</h3>
+      <div class="library-grid" id="rootLibrary"></div>
+    </div>
+    <div class="library-section">
+      <h3>常见后缀 Suffixes</h3>
+      <div class="library-grid" id="suffixLibrary"></div>
+    </div>
+  </div>
+
+  <!-- 单词上传解析 -->
+  <div id="page-upload" hidden>
+    <div class="upload-area">
+      <h3 style="font-size:16px;font-weight:700;margin-bottom:8px">粘贴单词列表</h3>
+      <p style="font-size:13px;color:#64748b">每行一个单词，或用空格/逗号分隔</p>
+      <textarea id="wordInput" placeholder="例如：
+transportation
+unhappiness
+disconnect
+beautiful
+international"></textarea>
+      <button class="upload-btn" onclick="parseWords()">解析单词</button>
+    </div>
+    <div class="parse-result" id="parseResult" hidden>
+      <h3>解析结果</h3>
+      <div id="parsedList"></div>
+    </div>
+  </div>
+
+  <!-- 构词练习 -->
+  <div id="page-quiz" hidden>
+    <div class="quiz-area">
+      <div class="quiz-question">
+        请选择正确的词素组合：<span class="target" id="quizTarget"></span>
+      </div>
+      <div class="quiz-slots" id="quizSlots"></div>
+      <div class="quiz-options" id="quizOptions"></div>
+      <div class="quiz-score" id="quizScore">得分：0 / 0</div>
+      <button class="quiz-next" id="quizNext" hidden onclick="nextQuiz()">下一题 →</button>
+    </div>
+  </div>
+</main>
+
+<script>
+// ==================== 词素数据库 ====================
+const prefixes = [
+  {morph:'un-', meaning:'不，否定', examples:['unhappy','unable','undo']},
+  {morph:'re-', meaning:'再，重新', examples:['return','review','rebuild']},
+  {morph:'dis-', meaning:'不，分离', examples:['disagree','disconnect','dislike']},
+  {morph:'pre-', meaning:'在...之前', examples:['preview','prepare','predict']},
+  {morph:'mis-', meaning:'错误', examples:['mistake','misunderstand','mislead']},
+  {morph:'in-/im-', meaning:'不，进入', examples:['impossible','invisible','import']},
+  {morph:'ex-', meaning:'出，外', examples:['export','exit','exclude']},
+  {morph:'trans-', meaning:'跨越，转移', examples:['transport','transfer','translate']},
+  {morph:'sub-', meaning:'在...下面', examples:['subway','submarine','submit']},
+  {morph:'inter-', meaning:'在...之间', examples:['international','interact','internet']},
+  {morph:'over-', meaning:'过度，在上', examples:['overcome','overlook','overtime']},
+  {morph:'under-', meaning:'在下，不足', examples:['understand','underline','underestimate']},
+  {morph:'de-', meaning:'去除，向下', examples:['decrease','depart','decode']},
+  {morph:'anti-', meaning:'反对', examples:['antiwar','antibody','antisocial']},
+  {morph:'auto-', meaning:'自己', examples:['automatic','automobile','autograph']},
+  {morph:'bi-', meaning:'二，双', examples:['bicycle','bilingual','biweekly']},
+  {morph:'co-/con-', meaning:'共同', examples:['cooperate','connect','construct']},
+  {morph:'multi-', meaning:'多', examples:['multiply','multimedia','multicultural']},
+  {morph:'super-', meaning:'超级，在上', examples:['superman','supermarket','supervise']},
+  {morph:'tele-', meaning:'远', examples:['telephone','television','telescope']},
+];
+
+const roots = [
+  {morph:'port', meaning:'携带，运送', examples:['transport','export','import','portable']},
+  {morph:'dict', meaning:'说', examples:['dictionary','predict','contradict','dictate']},
+  {morph:'scrib/script', meaning:'写', examples:['describe','manuscript','prescription','subscribe']},
+  {morph:'spect', meaning:'看', examples:['inspect','respect','spectator','prospect']},
+  {morph:'duct', meaning:'引导，带领', examples:['conduct','produce','reduce','introduce']},
+  {morph:'ject', meaning:'投掷', examples:['project','reject','inject','subject']},
+  {morph:'tract', meaning:'拉，拖', examples:['attract','extract','contract','tractor']},
+  {morph:'vis/vid', meaning:'看', examples:['visible','vision','video','provide']},
+  {morph:'aud', meaning:'听', examples:['audio','audience','audition','audible']},
+  {morph:'graph', meaning:'写，画', examples:['photograph','biography','autograph','geography']},
+  {morph:'phon', meaning:'声音', examples:['telephone','microphone','symphony','phonetic']},
+  {morph:'bio', meaning:'生命', examples:['biology','biography','antibiotic','biodiversity']},
+  {morph:'geo', meaning:'地球，土地', examples:['geography','geology','geometry','geothermal']},
+  {morph:'chron', meaning:'时间', examples:['chronic','chronicle','synchronize','chronology']},
+  {morph:'meter/metr', meaning:'测量', examples:['thermometer','kilometer','geometry','metric']},
+  {morph:'log/logy', meaning:'学科，话语', examples:['biology','psychology','dialogue','logic']},
+  {morph:'mit/miss', meaning:'发送', examples:['transmit','mission','submit','permission']},
+  {morph:'form', meaning:'形状', examples:['transform','inform','reform','uniform']},
+  {morph:'struct', meaning:'建造', examples:['construct','structure','instruct','destruction']},
+  {morph:'vert/vers', meaning:'转', examples:['convert','reverse','divert','universe']},
+];
+
+const suffixes = [
+  {morph:'-able/-ible', meaning:'能够...的', examples:['readable','visible','possible','portable']},
+  {morph:'-tion/-sion', meaning:'行为，状态（名词）', examples:['action','decision','transportation','vision']},
+  {morph:'-ment', meaning:'行为，结果（名词）', examples:['development','movement','agreement','government']},
+  {morph:'-ness', meaning:'状态，性质（名词）', examples:['happiness','kindness','darkness','sadness']},
+  {morph:'-er/-or', meaning:'做...的人', examples:['teacher','actor','writer','doctor']},
+  {morph:'-ful', meaning:'充满...的', examples:['beautiful','helpful','careful','wonderful']},
+  {morph:'-less', meaning:'没有...的', examples:['homeless','careless','useless','endless']},
+  {morph:'-ly', meaning:'...地（副词）', examples:['quickly','happily','carefully','slowly']},
+  {morph:'-ize/-ise', meaning:'使...化（动词）', examples:['realize','organize','modernize','recognize']},
+  {morph:'-ous/-ious', meaning:'具有...性质的', examples:['famous','dangerous','curious','serious']},
+  {morph:'-al', meaning:'...的（形容词）', examples:['national','personal','natural','musical']},
+  {morph:'-ive', meaning:'有...倾向的', examples:['active','creative','productive','attractive']},
+  {morph:'-ity/-ty', meaning:'性质，状态（名词）', examples:['ability','reality','loyalty','safety']},
+  {morph:'-ism', meaning:'主义，学说', examples:['capitalism','socialism','optimism','tourism']},
+  {morph:'-ist', meaning:'...主义者，专家', examples:['artist','scientist','tourist','pianist']},
+  {morph:'-en', meaning:'使...（动词）', examples:['widen','strengthen','darken','shorten']},
+  {morph:'-fy', meaning:'使...化（动词）', examples:['beautify','simplify','clarify','identify']},
+  {morph:'-ance/-ence', meaning:'状态，性质（名词）', examples:['importance','difference','patience','confidence']},
+  {morph:'-ic', meaning:'...的（形容词）', examples:['historic','economic','scientific','athletic']},
+  {morph:'-ary/-ory', meaning:'与...有关的', examples:['library','dictionary','laboratory','memory']},
+];
+
+// Word Matrix 数据（词根 -> 可搭配的前缀和后缀）
+const matrixData = {
+  'port': {
+    meaning: '携带，运送',
+    prefixes: ['ex-','im-','trans-','re-','de-','sup-'],
+    suffixes: ['-able','-er','-ation','-folio','-age']
+  },
+  'dict': {
+    meaning: '说',
+    prefixes: ['pre-','con-','contra-','bene-','maledict-'],
+    suffixes: ['-ion','-ator','-ary','-um','-ive']
+  },
+  'spect': {
+    meaning: '看',
+    prefixes: ['in-','re-','pro-','retro-','per-','sus-'],
+    suffixes: ['-ator','-acle','-ion','-ive','-rum']
+  },
+  'duct': {
+    meaning: '引导，带领',
+    prefixes: ['con-','pro-','re-','in-','se-','ab-'],
+    suffixes: ['-ion','-or','-ile','-ive','-ility']
+  },
+  'ject': {
+    meaning: '投掷',
+    prefixes: ['pro-','re-','in-','sub-','ob-','de-'],
+    suffixes: ['-ion','-or','-ile','-ure','-ment']
+  },
+  'struct': {
+    meaning: '建造',
+    prefixes: ['con-','de-','in-','ob-','re-'],
+    suffixes: ['-ure','-ion','-ive','-or','-ural']
+  },
+  'form': {
+    meaning: '形状',
+    prefixes: ['trans-','in-','re-','con-','de-','uni-'],
+    suffixes: ['-ation','-er','-al','-ity','-less','-ful']
+  },
+  'tract': {
+    meaning: '拉，拖',
+    prefixes: ['at-','ex-','con-','de-','sub-','pro-'],
+    suffixes: ['-ion','-or','-ile','-ive','-ability']
+  },
+  'vis': {
+    meaning: '看',
+    prefixes: ['in-','re-','pro-','tele-','super-'],
+    suffixes: ['-ible','-ion','-ual','-it','-age']
+  },
+  'graph': {
+    meaning: '写，画',
+    prefixes: ['photo-','bio-','auto-','geo-','calli-'],
+    suffixes: ['-er','-ic','-y','-ite','-ology']
+  }
+};
+
+// ==================== 导航切换 ====================
+document.querySelectorAll('.nav-tab, .module-card').forEach(el => {
+  el.addEventListener('click', () => {
+    const page = el.dataset.page;
+    if (!page) return;
+    document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+    document.querySelector(`.nav-tab[data-page="${page}"]`)?.classList.add('active');
+    document.querySelectorAll('[id^="page-"]').forEach(p => p.hidden = true);
+    document.getElementById(`page-${page}`).hidden = false;
+    if (page === 'matrix') initMatrix();
+    if (page === 'library') initLibrary();
+    if (page === 'quiz') initQuiz();
+  });
+});
+
+// ==================== Word Matrix ====================
+let selectedPrefix = null;
+let selectedSuffix = null;
+
+function initMatrix() {
+  const select = document.getElementById('rootSelect');
+  select.innerHTML = '';
+  Object.keys(matrixData).forEach(root => {
+    const opt = document.createElement('option');
+    opt.value = root;
+    opt.textContent = `${root} (${matrixData[root].meaning})`;
+    select.appendChild(opt);
+  });
+  select.addEventListener('change', () => loadMatrix(select.value));
+  loadMatrix(select.value);
+}
+
+function loadMatrix(root) {
+  const data = matrixData[root];
+  selectedPrefix = null;
+  selectedSuffix = null;
+
+  document.getElementById('rootText').textContent = root;
+  document.getElementById('rootMeaning').textContent = data.meaning;
+
+  const prefixList = document.getElementById('prefixList');
+  prefixList.innerHTML = '';
+  data.prefixes.forEach(p => {
+    const card = document.createElement('div');
+    card.className = 'morpheme-card prefix-card';
+    card.innerHTML = `${p}<span class="meaning">${getMorphemeMeaning(p, 'prefix')}</span>`;
+    card.onclick = () => {
+      selectedPrefix = selectedPrefix === p ? null : p;
+      updateMatrixSelection();
+    };
+    prefixList.appendChild(card);
+  });
+
+  const suffixList = document.getElementById('suffixList');
+  suffixList.innerHTML = '';
+  data.suffixes.forEach(s => {
+    const card = document.createElement('div');
+    card.className = 'morpheme-card suffix-card';
+    card.innerHTML = `${s}<span class="meaning">${getMorphemeMeaning(s, 'suffix')}</span>`;
+    card.onclick = () => {
+      selectedSuffix = selectedSuffix === s ? null : s;
+      updateMatrixSelection();
+    };
+    suffixList.appendChild(card);
+  });
+
+  updateMatrixResult();
+}
+
+function getMorphemeMeaning(morph, type) {
+  const list = type === 'prefix' ? prefixes : suffixes;
+  const found = list.find(m => m.morph.replace(/-/g,'') === morph.replace(/-/g,''));
+  return found ? found.meaning : '';
+}
+
+function updateMatrixSelection() {
+  document.querySelectorAll('#prefixList .morpheme-card').forEach((card, i) => {
+    const p = matrixData[document.getElementById('rootSelect').value].prefixes[i];
+    card.classList.toggle('selected', selectedPrefix === p);
+  });
+  document.querySelectorAll('#suffixList .morpheme-card').forEach((card, i) => {
+    const s = matrixData[document.getElementById('rootSelect').value].suffixes[i];
+    card.classList.toggle('selected', selectedSuffix === s);
+  });
+  updateMatrixResult();
+}
+
+function updateMatrixResult() {
+  const root = document.getElementById('rootSelect').value;
+  let word = root;
+  let sum = root;
+  if (selectedPrefix) {
+    word = selectedPrefix.replace(/-/g,'') + word;
+    sum = selectedPrefix + ' + ' + sum;
+  }
+  if (selectedSuffix) {
+    word = word + selectedSuffix.replace(/-/g,'');
+    sum = sum + ' + ' + selectedSuffix;
+  }
+  // 简单的拼写调整
+  word = word.replace(/tiontion/g,'tion').replace(/ssion/g,'ssion');
+  document.getElementById('matrixWord').textContent = word;
+  document.getElementById('matrixSum').textContent = sum;
+}
+
+function playMatrixWord() {
+  const word = document.getElementById('matrixWord').textContent;
+  playYoudaoSound(word);
+}
+
+// ==================== 词素库 ====================
+function initLibrary() {
+  const prefixLib = document.getElementById('prefixLibrary');
+  prefixLib.innerHTML = '';
+  prefixes.forEach(p => {
+    const card = document.createElement('div');
+    card.className = 'lib-card lib-prefix';
+    card.innerHTML = `<div class="morph">${p.morph}</div><div class="mean">${p.meaning}</div><div class="examples">${p.examples.slice(0,2).join(', ')}</div>`;
+    card.onclick = () => playYoudaoSound(p.examples[0]);
+    prefixLib.appendChild(card);
+  });
+
+  const rootLib = document.getElementById('rootLibrary');
+  rootLib.innerHTML = '';
+  roots.forEach(r => {
+    const card = document.createElement('div');
+    card.className = 'lib-card lib-root';
+    card.innerHTML = `<div class="morph">${r.morph}</div><div class="mean">${r.meaning}</div><div class="examples">${r.examples.slice(0,2).join(', ')}</div>`;
+    card.onclick = () => playYoudaoSound(r.examples[0]);
+    rootLib.appendChild(card);
+  });
+
+  const suffixLib = document.getElementById('suffixLibrary');
+  suffixLib.innerHTML = '';
+  suffixes.forEach(s => {
+    const card = document.createElement('div');
+    card.className = 'lib-card lib-suffix';
+    card.innerHTML = `<div class="morph">${s.morph}</div><div class="mean">${s.meaning}</div><div class="examples">${s.examples.slice(0,2).join(', ')}</div>`;
+    card.onclick = () => playYoudaoSound(s.examples[0]);
+    suffixLib.appendChild(card);
+  });
+}
+
+// ==================== 单词解析 ====================
+function parseWords() {
+  const input = document.getElementById('wordInput').value.trim();
+  if (!input) return;
+
+  const words = input.split(/[\n,，\s]+/).filter(w => w.length > 0);
+  const result = document.getElementById('parseResult');
+  const list = document.getElementById('parsedList');
+  list.innerHTML = '';
+
+  words.forEach(word => {
+    const parts = analyzeWord(word.toLowerCase());
+    const row = document.createElement('div');
+    row.className = 'parsed-word';
+
+    let partsHtml = '<div class="pw-parts">';
+    parts.forEach((p, i) => {
+      if (i > 0) partsHtml += '<span class="pw-plus">+</span>';
+      partsHtml += `<span class="pw-part ${p.type}">${p.text}${p.meaning ? ' ('+p.meaning+')' : ''}</span>`;
+    });
+    partsHtml += '</div>';
+
+    row.innerHTML = `
+      <span class="pw-word">${word}</span>
+      ${partsHtml}
+      <button class="pw-play" onclick="playYoudaoSound('${word}')">🔊</button>
+    `;
+    list.appendChild(row);
+  });
+
+  result.hidden = false;
+}
+
+function analyzeWord(word) {
+  const parts = [];
+  let remaining = word;
+
+  // 检查前缀
+  const sortedPrefixes = [...prefixes].sort((a,b) => b.morph.replace(/-/g,'').length - a.morph.replace(/-/g,'').length);
+  for (const p of sortedPrefixes) {
+    const morph = p.morph.replace(/-/g,'');
+    if (remaining.startsWith(morph) && remaining.length > morph.length + 2) {
+      parts.push({text: p.morph, type:'prefix', meaning: p.meaning});
+      remaining = remaining.slice(morph.length);
+      break;
+    }
+  }
+
+  // 检查后缀
+  const sortedSuffixes = [...suffixes].sort((a,b) => b.morph.replace(/-/g,'').length - a.morph.replace(/-/g,'').length);
+  let foundSuffix = null;
+  for (const s of sortedSuffixes) {
+    const morph = s.morph.replace(/-/g,'');
+    if (remaining.endsWith(morph) && remaining.length > morph.length + 2) {
+      foundSuffix = {text: s.morph, type:'suffix', meaning: s.meaning};
+      remaining = remaining.slice(0, -morph.length);
+      break;
+    }
+  }
+
+  // 剩余部分作为词根
+  if (remaining.length > 0) {
+    const rootFound = roots.find(r => {
+      const morph = r.morph.split('/')[0];
+      return remaining.includes(morph) || remaining === morph;
+    });
+    parts.push({
+      text: remaining,
+      type: 'root',
+      meaning: rootFound ? rootFound.meaning : '词根'
+    });
+  }
+
+  if (foundSuffix) parts.push(foundSuffix);
+
+  if (parts.length === 0) {
+    parts.push({text: word, type:'unknown', meaning: '未识别'});
+  }
+
+  return parts;
+}
+
+// ==================== 构词练习 ====================
+const quizData = [
+  {target:'transportation', answer:{prefix:'trans-', root:'port', suffix:'-tion'}, meaning:'运输'},
+  {target:'unhappiness', answer:{prefix:'un-', root:'happy', suffix:'-ness'}, meaning:'不幸福'},
+  {target:'disconnect', answer:{prefix:'dis-', root:'connect', suffix:''}, meaning:'断开'},
+  {target:'beautiful', answer:{prefix:'', root:'beauty', suffix:'-ful'}, meaning:'美丽的'},
+  {target:'international', answer:{prefix:'inter-', root:'nation', suffix:'-al'}, meaning:'国际的'},
+  {target:'impossible', answer:{prefix:'im-', root:'possible', suffix:''}, meaning:'不可能的'},
+  {target:'prediction', answer:{prefix:'pre-', root:'dict', suffix:'-ion'}, meaning:'预测'},
+  {target:'construction', answer:{prefix:'con-', root:'struct', suffix:'-ion'}, meaning:'建造'},
+  {target:'invisible', answer:{prefix:'in-', root:'vis', suffix:'-ible'}, meaning:'看不见的'},
+  {target:'photograph', answer:{prefix:'photo-', root:'graph', suffix:''}, meaning:'照片'},
+  {target:'rewrite', answer:{prefix:'re-', root:'write', suffix:''}, meaning:'重写'},
+  {target:'careless', answer:{prefix:'', root:'care', suffix:'-less'}, meaning:'粗心的'},
+  {target:'teacher', answer:{prefix:'', root:'teach', suffix:'-er'}, meaning:'老师'},
+  {target:'development', answer:{prefix:'', root:'develop', suffix:'-ment'}, meaning:'发展'},
+  {target:'submarine', answer:{prefix:'sub-', root:'marine', suffix:''}, meaning:'潜水艇'},
+  {target:'automatic', answer:{prefix:'auto-', root:'mat', suffix:'-ic'}, meaning:'自动的'},
+];
+
+let quizIndex = 0;
+let quizScore = 0;
+let quizAnswered = false;
+let currentSlot = 'prefix';
+
+function initQuiz() {
+  quizIndex = 0;
+  quizScore = 0;
+  loadQuiz();
+}
+
+function loadQuiz() {
+  if (quizIndex >= quizData.length) {
+    document.getElementById('quizTarget').textContent = '练习完成！';
+    document.getElementById('quizSlots').innerHTML = `<div style="font-size:18px;color:#22c55e;font-weight:700">最终得分：${quizScore} / ${quizData.length}</div>`;
+    document.getElementById('quizOptions').innerHTML = '';
+    document.getElementById('quizScore').textContent = '';
+    document.getElementById('quizNext').textContent = '重新开始';
+    document.getElementById('quizNext').hidden = false;
+    document.getElementById('quizNext').onclick = initQuiz;
+    return;
+  }
+
+  quizAnswered = false;
+  currentSlot = 'prefix';
+  const q = quizData[quizIndex];
+  document.getElementById('quizTarget').textContent = `"${q.target}" (${q.meaning})`;
+  document.getElementById('quizScore').textContent = `得分：${quizScore} / ${quizIndex}`;
+  document.getElementById('quizNext').hidden = true;
+
+  const slots = document.getElementById('quizSlots');
+  slots.innerHTML = `
+    <div>
+      <div class="quiz-slot" id="slot-prefix" onclick="selectSlot('prefix')">前缀</div>
+      <div class="quiz-slot-label">Prefix</div>
+    </div>
+    <div style="font-size:24px;color:#94a3b8">+</div>
+    <div>
+      <div class="quiz-slot" id="slot-root" onclick="selectSlot('root')">词根</div>
+      <div class="quiz-slot-label">Root</div>
+    </div>
+    <div style="font-size:24px;color:#94a3b8">+</div>
+    <div>
+      <div class="quiz-slot" id="slot-suffix" onclick="selectSlot('suffix')">后缀</div>
+      <div class="quiz-slot-label">Suffix</div>
+    </div>
+  `;
+  selectSlot('prefix');
+
+  // 生成选项
+  const options = generateQuizOptions(q);
+  const optionsEl = document.getElementById('quizOptions');
+  optionsEl.innerHTML = '';
+  options.forEach(opt => {
+    const btn = document.createElement('button');
+    btn.className = 'quiz-option';
+    btn.textContent = opt;
+    btn.onclick = () => selectOption(opt, q);
+    optionsEl.appendChild(btn);
+  });
+}
+
+function selectSlot(slot) {
+  currentSlot = slot;
+  ['prefix','root','suffix'].forEach(s => {
+    const el = document.getElementById(`slot-${s}`);
+    if (el && !el.classList.contains('filled')) {
+      el.style.borderColor = s === slot ? '#2B7FD8' : '#cbd5e1';
+    }
+  });
+}
+
+function selectOption(opt, q) {
+  if (quizAnswered) return;
+
+  const slotEl = document.getElementById(`slot-${currentSlot}`);
+  if (!slotEl || slotEl.classList.contains('filled')) return;
+
+  slotEl.textContent = opt || '(无)';
+  slotEl.classList.add('filled', `${currentSlot}-filled`);
+
+  // 检查是否所有槽位都填了
+  const prefixFilled = document.getElementById('slot-prefix').classList.contains('filled');
+  const rootFilled = document.getElementById('slot-root').classList.contains('filled');
+  const suffixFilled = document.getElementById('slot-suffix').classList.contains('filled');
+
+  if (prefixFilled && rootFilled && suffixFilled) {
+    checkQuizAnswer(q);
+  } else {
+    // 自动跳到下一个空槽
+    if (!prefixFilled) selectSlot('prefix');
+    else if (!rootFilled) selectSlot('root');
+    else selectSlot('suffix');
+  }
+}
+
+function checkQuizAnswer(q) {
+  quizAnswered = true;
+  const prefixVal = document.getElementById('slot-prefix').textContent.replace('(无)','');
+  const rootVal = document.getElementById('slot-root').textContent.replace('(无)','');
+  const suffixVal = document.getElementById('slot-suffix').textContent.replace('(无)','');
+
+  const correct = (prefixVal === q.answer.prefix.replace(/-/g,'') || (!q.answer.prefix && !prefixVal))
+    && (rootVal === q.answer.root || !rootVal)
+    && (suffixVal === q.answer.suffix.replace(/-/g,'') || (!q.answer.suffix && !suffixVal));
+
+  if (correct) {
+    quizScore++;
+    document.querySelectorAll('.quiz-option').forEach(b => b.disabled = true);
+  } else {
+    document.querySelectorAll('.quiz-option').forEach(b => b.disabled = true);
+  }
+
+  document.getElementById('quizScore').textContent = `得分：${quizScore} / ${quizIndex + 1}`;
+  document.getElementById('quizNext').hidden = false;
+  document.getElementById('quizNext').textContent = '下一题 →';
+  document.getElementById('quizNext').onclick = nextQuiz;
+
+  playYoudaoSound(q.target);
+}
+
+function nextQuiz() {
+  quizIndex++;
+  loadQuiz();
+}
+
+function generateQuizOptions(q) {
+  const options = new Set();
+  options.add(q.answer.prefix || '(无)');
+  options.add(q.answer.root);
+  options.add(q.answer.suffix || '(无)');
+
+  // 添加干扰项
+  const allMorphs = [...prefixes.map(p=>p.morph), ...roots.map(r=>r.morph.split('/')[0]), ...suffixes.map(s=>s.morph)];
+  while (options.size < 9) {
+    const random = allMorphs[Math.floor(Math.random() * allMorphs.length)];
+    options.add(random);
+  }
+
+  return Array.from(options).sort(() => Math.random() - 0.5);
+}
+
+// ==================== 发音 ====================
+function playYoudaoSound(word) {
+  if (!word || word === '(无)') return;
+  const audio = new Audio(`https://dict.youdao.com/dictvoice?type=0&audio=${encodeURIComponent(word)}`);
+  audio.play().catch(() => {
+    if ('speechSynthesis' in window) {
+      const u = new SpeechSynthesisUtterance(word);
+      u.lang = 'en-US';
+      u.rate = 0.8;
+      speechSynthesis.speak(u);
+    }
+  });
+}
+</script>
+
+</body>
+</html>

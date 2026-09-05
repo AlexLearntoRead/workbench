@@ -1,0 +1,1127 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>音素意识训练工具</title>
+<style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    [hidden] { display: none !important; }
+    :root {
+        --blue: #2B7FD8;
+        --blue-dark: #1a5fb0;
+        --red: #ff5c5c;
+        --red-dark: #e64545;
+        --green: #5cb85c;
+        --yellow: #f0ad4e;
+        --purple: #9b59b6;
+        --ink: #1f2937;
+        --ink-soft: #64748b;
+        --bg: #ffffff;
+        --panel: #e8f4fc;
+    }
+    body {
+        font-family: 'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif;
+        background: var(--bg);
+        color: var(--ink);
+        min-height: 100vh;
+    }
+
+    /* 顶部标题栏 */
+    header {
+        position: sticky; top: 0; z-index: 100;
+        background: rgba(255,255,255,.9);
+        backdrop-filter: blur(10px);
+        box-shadow: 0 2px 10px rgba(30,41,59,.06);
+        padding: 12px 26px;
+    }
+    .header-inner {
+        display: flex; justify-content: space-between; align-items: center;
+        flex-wrap: wrap; gap: 10px;
+    }
+    header h1 {
+        font-size: 24px; font-weight: 800;
+        background: linear-gradient(90deg, var(--blue), var(--red));
+        -webkit-background-clip: text; background-clip: text; color: transparent;
+    }
+    .back-btn {
+        font-size: 14px; font-weight: 600; color: var(--ink-soft);
+        background: rgba(255,255,255,.6); border: 1px solid #d3dbe3;
+        border-radius: 9px; padding: 6px 14px; cursor: pointer;
+        transition: all .15s;
+    }
+    .back-btn:hover { background: #fff; border-color: var(--blue); color: var(--blue); }
+
+    /* 主内容区 */
+    main {
+        max-width: 1400px; margin: 0 auto;
+        padding: 24px;
+    }
+
+    /* 层级选择页 */
+    .level-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 24px;
+        margin-top: 20px;
+    }
+    .level-card {
+        background: var(--panel);
+        border-radius: 16px;
+        padding: 24px;
+        cursor: pointer;
+        transition: all .2s;
+        border: 2px solid transparent;
+    }
+    .level-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 24px rgba(0,0,0,.1);
+    }
+    .level-card.word-level { border-left: 6px solid var(--blue); }
+    .level-card.syllable-level { border-left: 6px solid var(--green); }
+    .level-card.phoneme-level { border-left: 6px solid var(--red); }
+    .level-icon {
+        font-size: 48px; margin-bottom: 12px;
+    }
+    .level-title {
+        font-size: 22px; font-weight: 800; margin-bottom: 8px;
+    }
+    .level-desc {
+        font-size: 14px; color: var(--ink-soft); margin-bottom: 16px;
+        line-height: 1.6;
+    }
+    .level-count {
+        font-size: 13px; font-weight: 600;
+        padding: 4px 10px; border-radius: 999px;
+        display: inline-block;
+    }
+    .word-level .level-count { background: rgba(74,159,212,.15); color: var(--blue); }
+    .syllable-level .level-count { background: rgba(92,184,92,.15); color: var(--green); }
+    .phoneme-level .level-count { background: rgba(255,92,92,.15); color: var(--red); }
+
+    /* 训练项目列表页 */
+    .exercise-list {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 16px;
+        margin-top: 20px;
+    }
+    .exercise-card {
+        background: #fff;
+        border: 2px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 20px;
+        cursor: pointer;
+        transition: all .15s;
+    }
+    .exercise-card:hover {
+        border-color: var(--blue);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,.08);
+    }
+    .exercise-num {
+        font-size: 12px; font-weight: 700; color: var(--ink-soft);
+        margin-bottom: 8px;
+    }
+    .exercise-title {
+        font-size: 18px; font-weight: 700; margin-bottom: 8px;
+    }
+    .exercise-desc {
+        font-size: 13px; color: var(--ink-soft); line-height: 1.5;
+    }
+
+    /* 训练界面 */
+    .training-area {
+        background: var(--panel);
+        border-radius: 16px;
+        padding: 32px;
+        margin-top: 20px;
+        min-height: 400px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+    .training-title {
+        font-size: 20px; font-weight: 700; margin-bottom: 24px;
+        text-align: center;
+    }
+    .play-sound-btn {
+        font-size: 18px; font-weight: 600;
+        background: var(--blue); color: #fff;
+        border: none; border-radius: 12px;
+        padding: 16px 32px; cursor: pointer;
+        transition: all .15s;
+        margin-bottom: 24px;
+    }
+    .play-sound-btn:hover { background: var(--blue-dark); transform: translateY(-2px); }
+    .options-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 16px;
+        width: 100%;
+        max-width: 600px;
+    }
+    .option-btn {
+        font-size: 24px; font-weight: 700;
+        background: #fff; color: var(--ink);
+        border: 3px solid #e2e8f0; border-radius: 12px;
+        padding: 24px; cursor: pointer;
+        transition: all .15s;
+        text-align: center;
+    }
+    .option-btn:hover { border-color: var(--blue); background: rgba(74,159,212,.05); }
+    .option-btn.correct { border-color: var(--green); background: rgba(92,184,92,.1); }
+    .option-btn.wrong { border-color: var(--red); background: rgba(255,92,92,.1); }
+
+    .progress-bar {
+        width: 100%; max-width: 600px;
+        height: 8px; background: #e2e8f0;
+        border-radius: 4px; margin-bottom: 24px;
+        overflow: hidden;
+    }
+    .progress-fill {
+        height: 100%; background: linear-gradient(90deg, var(--blue), var(--green));
+        border-radius: 4px;
+        transition: width .3s;
+    }
+    .score-display {
+        font-size: 16px; font-weight: 600; color: var(--ink-soft);
+        margin-bottom: 16px;
+    }
+
+    /* 占位提示 */
+    .placeholder {
+        text-align: center;
+        padding: 60px 20px;
+    }
+    .placeholder-icon {
+        font-size: 64px; margin-bottom: 16px;
+    }
+    .placeholder-text {
+        font-size: 18px; color: var(--ink-soft);
+        line-height: 1.6;
+    }
+
+    @media (max-width: 900px) {
+        .level-grid { grid-template-columns: 1fr; }
+        .options-grid { grid-template-columns: 1fr; }
+    }
+
+/* 返回按钮 */
+.back-to-workbench{
+  position:fixed;bottom:12px;right:12px;z-index:9999;
+  padding:6px 14px;background:#fff;
+  border:2px solid #2B7FD8;border-radius:14px;
+  font-size:12px;font-weight:700;color:#2B7FD8;
+  cursor:pointer;font-family:inherit;white-space:nowrap;
+  box-shadow:0 2px 8px rgba(0,0,0,.12);
+  transition:all .2s;text-decoration:none;
+}
+.back-to-workbench:hover{
+  background:#2B7FD8;color:#fff;
+}
+
+</style>
+
+
+<style>
+/* ===== v2.0 统一设计语言（Alex 工作台品牌） ===== */
+.wb-topbar{position:sticky;top:0;z-index:99999;display:flex;align-items:center;gap:14px;background:rgba(254,252,246,.97);border-bottom:1px solid #eee7d8;padding:9px clamp(12px,3vw,26px);box-sizing:border-box;}
+.wb-topbar::before{content:'';position:absolute;left:0;top:0;right:0;height:3px;background:linear-gradient(90deg,#2B7FD8,#F4D758,#E84A5F);}
+.wb-back{flex:none;display:inline-flex;align-items:center;gap:5px;background:rgba(43,127,216,.08);color:#1a5fb0;border:1px solid rgba(43,127,216,.28);border-radius:999px;padding:6px 14px;font-size:.8rem;font-weight:600;text-decoration:none;font-family:'Segoe UI','Microsoft YaHei','PingFang SC',sans-serif;line-height:1.4;}
+.wb-back:hover{background:rgba(43,127,216,.18);}
+.wb-title{display:flex;align-items:baseline;gap:10px;min-width:0;}
+.wb-title b{font-size:1rem;font-weight:700;color:#1A1A2E;white-space:nowrap;}
+.wb-title i{font-style:normal;font-size:.72rem;color:#5a5a72;font-family:Georgia,'Times New Roman',serif;letter-spacing:.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+body{background:#fefcf6!important;}
+.back-to-workbench,.back-btn{display:none!important;}
+@media(max-width:560px){.wb-title b{font-size:.92rem;}.wb-title i{display:none;}.wb-topbar{gap:10px;padding:8px 10px;}}
+
+</style>
+
+<style>
+/* ===== v4.0 游戏化：泡泡题型 / 反馈动画 / 星星进度 ===== */
+/* 泡泡选项 */
+.options-grid.bubble-mode{max-width:640px;}
+.bubble-mode .option-btn{
+  border-radius:50%;aspect-ratio:1/1;display:flex;align-items:center;justify-content:center;
+  background:radial-gradient(circle at 32% 28%, #fff, #eaf3fe);
+  border:4px solid rgba(43,127,216,.35);
+  font-size:22px;font-weight:800;color:#1a5fb0;
+  box-shadow:0 6px 16px rgba(43,127,216,.16), inset 0 -3px 0 rgba(43,127,216,.10);
+  transition:transform .15s, box-shadow .15s, border-color .15s;
+  animation:bubble-float 3s ease-in-out infinite;
+}
+.bubble-mode .option-btn:nth-child(2){animation-delay:.4s;}
+.bubble-mode .option-btn:nth-child(3){animation-delay:.8s;}
+.bubble-mode .option-btn:nth-child(4){animation-delay:1.2s;}
+.bubble-mode .option-btn:hover{transform:translateY(-4px) scale(1.04);border-color:var(--blue);}
+.bubble-mode .option-btn.correct{background:radial-gradient(circle at 32% 28%, #eafff2, #b8f0cd);border-color:#10b981;color:#047857;animation:none;transform:scale(1.12);box-shadow:0 0 0 6px rgba(16,185,129,.2), 0 8px 20px rgba(16,185,129,.3);}
+.bubble-mode .option-btn.wrong{background:radial-gradient(circle at 32% 28%, #fff1f1, #ffd9d9);border-color:#ef4444;color:#b91c1c;animation:wobble .5s ease;box-shadow:0 0 0 5px rgba(239,68,68,.18);}
+@keyframes bubble-float{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+@keyframes wobble{0%,100%{transform:translateX(0)}20%{transform:translateX(-8px)}40%{transform:translateX(8px)}60%{transform:translateX(-6px)}80%{transform:translateX(6px)}}
+@keyframes pop-in{0%{transform:scale(0)}70%{transform:scale(1.25)}100%{transform:scale(1)}}
+@keyframes star-pop{0%{transform:scale(0) rotate(-30deg);opacity:0}60%{transform:scale(1.4) rotate(8deg);opacity:1}100%{transform:scale(1) rotate(0);opacity:1}}
+
+/* 普通选项也圆润 */
+.option-btn{border-radius:16px;transition:transform .12s, border-color .15s, background .15s;}
+.option-btn:not(:disabled):active{transform:scale(.96);}
+
+/* 反馈条 */
+.feedback-bar{
+  width:100%;max-width:600px;min-height:46px;border-radius:12px;
+  display:none;align-items:center;justify-content:center;gap:8px;
+  font-size:16px;font-weight:700;margin-bottom:16px;padding:10px 16px;text-align:center;
+}
+.feedback-bar.show{display:flex;animation:pop-in .3s ease;}
+.feedback-bar.fb-right{background:rgba(16,185,129,.12);color:#047857;border:2px solid rgba(16,185,129,.35);}
+.feedback-bar.fb-wrong{background:rgba(239,68,68,.10);color:#b91c1c;border:2px solid rgba(239,68,68,.30);}
+.feedback-bar .fb-star{font-size:20px;animation:star-pop .5s ease;}
+
+/* 星星行 */
+.star-row{display:flex;gap:6px;justify-content:center;margin-bottom:14px;min-height:34px;}
+.star-row .star{font-size:30px;opacity:.22;filter:grayscale(1);}
+.star-row .star.on{opacity:1;filter:none;animation:star-pop .5s ease;}
+
+/* 层级进度 */
+.level-progress{height:8px;background:rgba(30,41,59,.08);border-radius:4px;overflow:hidden;margin-top:14px;}
+.level-progress i{display:block;height:100%;border-radius:4px;background:linear-gradient(90deg,#5CA8E8,#2B7FD8);transition:width .5s ease;width:0;}
+.level-card .level-badge{
+  display:none;margin-top:10px;font-size:13px;font-weight:800;color:#8a5a00;
+  background:linear-gradient(90deg,rgba(244,215,88,.55),rgba(244,215,88,.35));
+  border:1px solid rgba(224,181,18,.5);border-radius:999px;padding:5px 12px;text-align:center;
+}
+.level-card.unlocked .level-badge{display:block;}
+.level-card .level-stars{font-size:13px;font-weight:700;color:#8a5a00;margin-left:8px;}
+
+/* 练习卡片完成标记 */
+.exercise-card.done{border-color:rgba(16,185,129,.5);background:rgba(16,185,129,.05);}
+.exercise-card.done .exercise-num::after{content:' ✓ 已完成';color:#047857;font-weight:700;}
+
+/* 完成页 */
+.complete-box{text-align:center;padding:20px;}
+.complete-box .complete-emoji{font-size:56px;margin-bottom:10px;animation:pop-in .5s ease;}
+.complete-box .complete-title{font-size:22px;font-weight:800;margin-bottom:8px;}
+.complete-box .complete-sub{font-size:15px;color:var(--ink-soft);margin-bottom:16px;}
+.complete-box .complete-actions{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;}
+
+/* 自动发音提示 */
+.listen-hint{font-size:13px;color:var(--ink-soft);margin-bottom:10px;display:flex;align-items:center;gap:6px;}
+.listen-hint .pulse-dot{width:9px;height:9px;border-radius:50%;background:var(--red);animation:pulse 1.2s infinite;}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(1.4)}}
+/* ===== v4.1 纯听辨版：选项=发音按钮（不显示英文单词） ===== */
+.q-sound{display:flex;align-items:center;gap:12px;justify-content:center;margin:4px 0 14px;flex-wrap:wrap;}
+.q-play-btn{width:64px;height:64px;border-radius:50%;border:3px solid rgba(43,127,216,.4);background:linear-gradient(145deg,#f3f9ff,#dcecfb);font-size:26px;cursor:pointer;flex:none;box-shadow:0 4px 12px rgba(43,127,216,.2);transition:transform .12s;}
+.q-play-btn:active{transform:scale(.92);}
+.q-emoji{font-size:44px;line-height:1;}
+.q-prompt{font-size:16px;font-weight:800;color:#1a5fb0;background:rgba(43,127,216,.08);border:1px solid rgba(43,127,216,.2);border-radius:12px;padding:8px 14px;}
+.option-btn{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;min-height:108px;padding:14px 10px;cursor:pointer;}
+.opt-emoji{font-size:36px;line-height:1;}
+.opt-cn{font-size:14px;font-weight:700;color:#3a3f47;}
+.opt-sound-badge{position:absolute;top:8px;right:10px;font-size:13px;color:#1a5fb0;background:rgba(43,127,216,.12);border-radius:999px;padding:3px 7px;}
+.option-btn.selected{outline:3px solid #2B7FD8;outline-offset:2px;background:#ffffff;transform:scale(1.04);box-shadow:0 6px 18px rgba(43,127,216,.25);}
+.option-btn.selected::after{content:'再点一次确认';position:absolute;bottom:-22px;left:50%;transform:translateX(-50%);font-size:11px;font-weight:700;color:#1a5fb0;white-space:nowrap;background:#e8f2fc;border-radius:999px;padding:2px 8px;}
+.options-grid{margin-bottom:34px;}
+/* 泡泡模式适配听辨版（圆形放 emoji+中文） */
+.bubble-mode .option-btn{border-radius:50%;min-height:0;aspect-ratio:1/1;padding:8px;}
+.bubble-mode .opt-emoji{font-size:40px;}
+.bubble-mode .opt-cn{font-size:12px;}
+.bubble-mode .opt-sound-badge{top:6px;right:6px;font-size:11px;padding:2px 5px;}
+.bubble-mode .option-btn.selected::after{bottom:-16px;}
+/* ===== v6.0 布局修复 + 游戏化 ===== */
+.game-top{display:flex;align-items:center;justify-content:space-between;gap:10px;max-width:600px;width:100%;margin:0 auto 10px;}
+.combo-display{min-height:32px;font-size:17px;font-weight:800;color:#e84a5f;letter-spacing:1px;}
+.combo-display.big{animation:combo-pop .35s ease;}
+@keyframes combo-pop{0%{transform:scale(.6)}60%{transform:scale(1.35)}100%{transform:scale(1)}}
+/* 题目卡独立成行（不再占用选项网格） */
+#q-sound-holder{max-width:600px;width:100%;margin:0 auto 16px;}
+.q-sound{display:flex;align-items:center;gap:14px;justify-content:center;flex-wrap:wrap;
+  background:linear-gradient(135deg,rgba(43,127,216,.08),rgba(244,215,88,.12));
+  border:2px solid rgba(43,127,216,.22);border-radius:20px;padding:16px 18px;box-sizing:border-box;}
+.q-play-btn{width:64px;height:64px;border-radius:50%;border:3px solid rgba(43,127,216,.4);background:linear-gradient(145deg,#f3f9ff,#dcecfb);font-size:26px;cursor:pointer;flex:none;box-shadow:0 4px 12px rgba(43,127,216,.2);transition:transform .12s;}
+.q-play-btn:active{transform:scale(.92);}
+.q-emoji{font-size:44px;line-height:1;}
+.q-prompt{font-size:16px;font-weight:800;color:#1a5fb0;}
+/* 选项网格：固定 2 列，顺序从左到右 */
+.options-grid{max-width:600px;margin:0 auto 18px;display:grid;grid-template-columns:repeat(2,1fr);gap:16px;}
+.option-btn{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;min-height:112px;padding:14px 10px;cursor:pointer;border-radius:18px;box-sizing:border-box;}
+.opt-emoji{font-size:38px;line-height:1;}
+.opt-cn{font-size:15px;font-weight:700;color:#3a3f47;}
+.opt-sound-badge{position:absolute;top:8px;right:12px;font-size:13px;color:#1a5fb0;background:rgba(43,127,216,.12);border-radius:999px;padding:3px 7px;}
+.option-btn.selected{outline:3px solid #2B7FD8;outline-offset:2px;background:#ffffff;transform:scale(1.04);box-shadow:0 6px 18px rgba(43,127,216,.25);}
+.option-btn.selected::after{content:'再点一次确认';position:absolute;bottom:-20px;left:50%;transform:translateX(-50%);font-size:11px;font-weight:700;color:#1a5fb0;white-space:nowrap;background:#e8f2fc;border-radius:999px;padding:2px 8px;}
+.bubble-mode .option-btn{border-radius:50%;min-height:0;aspect-ratio:1/1;padding:10px;}
+.bubble-mode .opt-emoji{font-size:44px;}
+.bubble-mode .opt-cn{font-size:13px;}
+/* 反馈条移到选项下方 */
+.feedback-bar{max-width:600px;width:100%;margin:0 auto 14px;}
+/* 星星雨 */
+.star-rain{position:fixed;inset:0;pointer-events:none;z-index:9999;overflow:hidden;}
+.star-rain .rain-star{position:absolute;top:-40px;font-size:26px;animation:rain-fall linear forwards;}
+@keyframes rain-fall{0%{transform:translateY(0) rotate(0);opacity:1}100%{transform:translateY(110vh) rotate(360deg);opacity:.6}}
+/* 答对按钮粒子 */
+.option-btn.correct::before{content:'';position:absolute;inset:0;border-radius:inherit;background:radial-gradient(circle,rgba(255,255,255,.9),transparent 60%);animation:correct-flash .6s ease;}
+@keyframes correct-flash{0%{opacity:1;transform:scale(.8)}100%{opacity:0;transform:scale(1.4)}}
+/* 得分弹跳 */
+.score-display{font-size:16px;font-weight:800;color:#1a5fb0;}
+.score-display.bump{animation:bump .3s ease;}
+@keyframes bump{0%{transform:scale(1)}50%{transform:scale(1.25)}100%{transform:scale(1)}}
+</style>
+
+</head>
+<body>
+<div class="wb-topbar"><a href="javascript:void(0)" class="wb-back" id="wb-back">← 返回</a><div class="wb-title"><b>🎧 语音意识</b><i>Phonological Awareness</i></div></div>
+
+<a href="工作台.html#tools" class="back-to-workbench">返回</a>
+
+<header>
+    <div class="header-inner">
+        <h1 id="page-title">音素意识训练工具</h1>
+        <button class="back-btn" id="back-btn" hidden>← 返回</button>
+    </div>
+</header>
+
+<main>
+    <!-- 层级选择页 -->
+    <div id="level-page">
+        <div class="level-grid">
+            <div class="level-card word-level" data-level="word">
+                <div class="level-icon">📝</div>
+                <div class="level-title">单词层<span class="level-stars"></span></div>
+                <div class="level-desc">从单词整体层面训练语音感知，包括数单词、找押韵词、头韵辨别和造押韵词。</div>
+                <span class="level-count">4 项训练</span>
+                <div class="level-progress"><i></i></div>
+                <div class="level-badge">🎖️ 单词小达人</div>
+            </div>
+            <div class="level-card syllable-level" data-level="syllable">
+                <div class="level-icon">🎵</div>
+                <div class="level-title">音节层<span class="level-stars"></span></div>
+                <div class="level-desc">从音节层面训练语音操控，包括音节拼读、音节拆分、声韵拼读和声韵拆分。</div>
+                <span class="level-count">4 项训练</span>
+                <div class="level-progress"><i></i></div>
+                <div class="level-badge">🎖️ 音节小达人</div>
+            </div>
+            <div class="level-card phoneme-level" data-level="phoneme">
+                <div class="level-icon">🔤</div>
+                <div class="level-title">音素层<span class="level-stars"></span></div>
+                <div class="level-desc">从最小语音单位音素层面训练，包括首中尾音辨别、拼读切割和音素增减替换。</div>
+                <span class="level-count">8 项训练</span>
+                <div class="level-progress"><i></i></div>
+                <div class="level-badge">🎖️ 音素小达人</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 训练项目列表页 -->
+    <div id="exercise-page" hidden>
+        <div class="exercise-list" id="exercise-list"></div>
+    </div>
+
+    <!-- 训练界面 -->
+    <div id="training-page" hidden>
+        <div class="training-area">
+            <div class="game-top">
+                <div class="score-display" id="score-display">得分：0 / 0</div>
+                <div class="combo-display" id="combo-display"></div>
+            </div>
+            <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width: 0%"></div></div>
+            <div class="star-row" id="star-row"></div>
+            <div class="training-title" id="training-title"></div>
+            <div class="listen-hint" id="listen-hint"><span class="pulse-dot"></span>先听发音，再选答案</div>
+            <div id="q-sound-holder"></div>
+            <div class="options-grid" id="options-grid"></div>
+            <div class="feedback-bar" id="feedback-bar"></div>
+            <button class="play-sound-btn" id="play-sound-btn">🔊 再听一次</button>
+        </div>
+    </div>
+</main>
+
+<script>
+// 训练项目数据
+const exercises = {
+    word: [
+        { id: 'count-words', title: '数单词', desc: '听一句话，数出里面有多少个单词' },
+        { id: 'find-rhyme', title: '找押韵词', desc: '听一个词，找出和它押韵的词' },
+        { id: 'alliteration', title: '头韵辨别', desc: '听一组词，找出开头发音相同的两个词' },
+        { id: 'make-rhyme', title: '造押韵词', desc: '听一个词，选出一个和它押韵的词' }
+    ],
+    syllable: [
+        { id: 'syllable-blend', title: '音节拼读', desc: '听一个词，从选项里找出它' },
+        { id: 'syllable-split', title: '音节拆分', desc: '听一个词，数出它有几个音节' },
+        { id: 'onset-rime-blend', title: '声母+韵母拼读', desc: '听韵母，加上声母的声音拼成词' },
+        { id: 'onset-rime-split', title: '声母+韵母拆分', desc: '听一个词，找出和它开头声音一样的词' }
+    ],
+    phoneme: [
+        { id: 'first-sound', title: '首音辨别', desc: '听一个词，选出开头声音一样的词' },
+        { id: 'middle-sound', title: '中间音辨别', desc: '听一个词，选出中间声音一样的词' },
+        { id: 'last-sound', title: '尾音辨别', desc: '听一个词，选出结尾声音一样的词' },
+        { id: 'phoneme-blend', title: '音素拼读', desc: '听声音拼成的词，选出它' },
+        { id: 'phoneme-segment', title: '音素切割', desc: '听一个词，数出它由几个声音组成' },
+        { id: 'add-phoneme', title: '加声音变新词', desc: '听一个词，开头加一个声音变成哪个词' },
+        { id: 'replace-phoneme', title: '换声音变新词', desc: '听一个词，换掉一个声音变成哪个词' },
+        { id: 'delete-phoneme', title: '去声音变新词', desc: '听一个词，去掉一个声音变成哪个词' }
+    ]
+};
+
+// 层级名称
+const levelNames = { word: '单词层', syllable: '音节层', phoneme: '音素层' };
+const PER_ROUND = 10;  // 每轮随机抽 10 题
+
+// 当前状态
+let currentLevel = null;
+let currentExercise = null;
+let currentQuestions = [];   // 本轮随机抽取的题目
+let currentQuestion = 0;
+let score = 0;
+let earnedStars = 0;
+let combo = 0;
+let maxCombo = 0;
+let selectedOpt = -1;
+let answered = false;
+
+// ===== 扩充题库（每项 12-14 题，纯听辨，选项零英文） =====
+// sound.text 播放内容（'' 表示不自动播，由家长示范）；sound.emoji 图标；sound.prompt 中文提示
+// options[].text 播放文本（speak:false 不发音）；emoji 图标；cn 中文释义
+const questionBank = {
+    'count-words': [
+        { sound: { text: 'I like apples.', emoji: '👂', prompt: '听一听，这句话有几个词？' }, options: [{ text: '2', emoji: '2', cn: '两个', speak: false }, { text: '3', emoji: '3', cn: '三个', speak: false }, { text: '4', emoji: '4', cn: '四个', speak: false }, { text: '5', emoji: '5', cn: '五个', speak: false }], answer: 1 },
+        { sound: { text: 'The cat is sleeping.', emoji: '👂', prompt: '听一听，这句话有几个词？' }, options: [{ text: '3', emoji: '3', cn: '三个', speak: false }, { text: '4', emoji: '4', cn: '四个', speak: false }, { text: '5', emoji: '5', cn: '五个', speak: false }, { text: '6', emoji: '6', cn: '六个', speak: false }], answer: 1 },
+        { sound: { text: 'She has a red book.', emoji: '👂', prompt: '听一听，这句话有几个词？' }, options: [{ text: '4', emoji: '4', cn: '四个', speak: false }, { text: '5', emoji: '5', cn: '五个', speak: false }, { text: '6', emoji: '6', cn: '六个', speak: false }, { text: '7', emoji: '7', cn: '七个', speak: false }], answer: 1 },
+        { sound: { text: 'We go to school.', emoji: '👂', prompt: '听一听，这句话有几个词？' }, options: [{ text: '3', emoji: '3', cn: '三个', speak: false }, { text: '4', emoji: '4', cn: '四个', speak: false }, { text: '5', emoji: '5', cn: '五个', speak: false }, { text: '6', emoji: '6', cn: '六个', speak: false }], answer: 1 },
+        { sound: { text: 'My mother cooks food.', emoji: '👂', prompt: '听一听，这句话有几个词？' }, options: [{ text: '3', emoji: '3', cn: '三个', speak: false }, { text: '4', emoji: '4', cn: '四个', speak: false }, { text: '5', emoji: '5', cn: '五个', speak: false }, { text: '6', emoji: '6', cn: '六个', speak: false }], answer: 1 },
+        { sound: { text: 'I see a big dog.', emoji: '👂', prompt: '听一听，这句话有几个词？' }, options: [{ text: '4', emoji: '4', cn: '四个', speak: false }, { text: '5', emoji: '5', cn: '五个', speak: false }, { text: '6', emoji: '6', cn: '六个', speak: false }, { text: '7', emoji: '7', cn: '七个', speak: false }], answer: 1 },
+        { sound: { text: 'The sun is hot.', emoji: '👂', prompt: '听一听，这句话有几个词？' }, options: [{ text: '3', emoji: '3', cn: '三个', speak: false }, { text: '4', emoji: '4', cn: '四个', speak: false }, { text: '5', emoji: '5', cn: '五个', speak: false }, { text: '6', emoji: '6', cn: '六个', speak: false }], answer: 1 },
+        { sound: { text: 'He is my friend.', emoji: '👂', prompt: '听一听，这句话有几个词？' }, options: [{ text: '3', emoji: '3', cn: '三个', speak: false }, { text: '4', emoji: '4', cn: '四个', speak: false }, { text: '5', emoji: '5', cn: '五个', speak: false }, { text: '6', emoji: '6', cn: '六个', speak: false }], answer: 1 },
+        { sound: { text: 'I love my cat.', emoji: '👂', prompt: '听一听，这句话有几个词？' }, options: [{ text: '3', emoji: '3', cn: '三个', speak: false }, { text: '4', emoji: '4', cn: '四个', speak: false }, { text: '5', emoji: '5', cn: '五个', speak: false }, { text: '6', emoji: '6', cn: '六个', speak: false }], answer: 1 },
+        { sound: { text: 'She likes ice cream.', emoji: '👂', prompt: '听一听，这句话有几个词？' }, options: [{ text: '3', emoji: '3', cn: '三个', speak: false }, { text: '4', emoji: '4', cn: '四个', speak: false }, { text: '5', emoji: '5', cn: '五个', speak: false }, { text: '6', emoji: '6', cn: '六个', speak: false }], answer: 1 },
+        { sound: { text: 'We play in the park.', emoji: '👂', prompt: '听一听，这句话有几个词？' }, options: [{ text: '4', emoji: '4', cn: '四个', speak: false }, { text: '5', emoji: '5', cn: '五个', speak: false }, { text: '6', emoji: '6', cn: '六个', speak: false }, { text: '7', emoji: '7', cn: '七个', speak: false }], answer: 1 },
+        { sound: { text: 'They read a book.', emoji: '👂', prompt: '听一听，这句话有几个词？' }, options: [{ text: '3', emoji: '3', cn: '三个', speak: false }, { text: '4', emoji: '4', cn: '四个', speak: false }, { text: '5', emoji: '5', cn: '五个', speak: false }, { text: '6', emoji: '6', cn: '六个', speak: false }], answer: 1 }
+    ],
+    'find-rhyme': [
+        { sound: { text: 'cat', emoji: '🐱', prompt: '选出和它押韵的词' }, options: [{ text: 'bat', emoji: '🦇', cn: '蝙蝠' }, { text: 'dog', emoji: '🐶', cn: '小狗' }, { text: 'sun', emoji: '☀️', cn: '太阳' }, { text: 'car', emoji: '🚗', cn: '汽车' }], answer: 0 },
+        { sound: { text: 'tree', emoji: '🌳', prompt: '选出和它押韵的词' }, options: [{ text: 'bee', emoji: '🐝', cn: '蜜蜂' }, { text: 'book', emoji: '📖', cn: '书' }, { text: 'fish', emoji: '🐟', cn: '鱼' }, { text: 'cup', emoji: '☕', cn: '杯子' }], answer: 0 },
+        { sound: { text: 'pig', emoji: '🐷', prompt: '选出和它押韵的词' }, options: [{ text: 'big', emoji: '🐘', cn: '大' }, { text: 'hat', emoji: '🎩', cn: '帽子' }, { text: 'pen', emoji: '✒️', cn: '钢笔' }, { text: 'box', emoji: '📦', cn: '盒子' }], answer: 0 },
+        { sound: { text: 'house', emoji: '🏠', prompt: '选出和它押韵的词' }, options: [{ text: 'mouse', emoji: '🐭', cn: '老鼠' }, { text: 'horse', emoji: '🐴', cn: '马' }, { text: 'home', emoji: '🏡', cn: '家' }, { text: 'hill', emoji: '⛰️', cn: '小山' }], answer: 0 },
+        { sound: { text: 'cake', emoji: '🍰', prompt: '选出和它押韵的词' }, options: [{ text: 'lake', emoji: '🌊', cn: '湖' }, { text: 'cat', emoji: '🐱', cn: '猫' }, { text: 'cup', emoji: '☕', cn: '杯子' }, { text: 'car', emoji: '🚗', cn: '汽车' }], answer: 0 },
+        { sound: { text: 'bed', emoji: '🛏️', prompt: '选出和它押韵的词' }, options: [{ text: 'red', emoji: '❤️', cn: '红色' }, { text: 'bad', emoji: '👎', cn: '坏' }, { text: 'bid', emoji: '📝', cn: '出价' }, { text: 'bud', emoji: '🌱', cn: '嫩芽' }], answer: 0 },
+        { sound: { text: 'goat', emoji: '🐐', prompt: '选出和它押韵的词' }, options: [{ text: 'boat', emoji: '⛵', cn: '小船' }, { text: 'got', emoji: '🤲', cn: '得到' }, { text: 'gut', emoji: '🍖', cn: '内脏' }, { text: 'get', emoji: '🫳', cn: '拿到' }], answer: 0 },
+        { sound: { text: 'rain', emoji: '🌧️', prompt: '选出和它押韵的词' }, options: [{ text: 'train', emoji: '🚂', cn: '火车' }, { text: 'run', emoji: '🏃', cn: '跑步' }, { text: 'ring', emoji: '💍', cn: '戒指' }, { text: 'rug', emoji: '🟫', cn: '地毯' }], answer: 0 },
+        { sound: { text: 'hat', emoji: '🎩', prompt: '选出和它押韵的词' }, options: [{ text: 'cat', emoji: '🐱', cn: '猫' }, { text: 'hot', emoji: '🥵', cn: '热' }, { text: 'hit', emoji: '👊', cn: '打' }, { text: 'hut', emoji: '🏠', cn: '小屋' }], answer: 0 },
+        { sound: { text: 'pen', emoji: '✒️', prompt: '选出和它押韵的词' }, options: [{ text: 'ten', emoji: '🔟', cn: '十' }, { text: 'pin', emoji: '📌', cn: '别针' }, { text: 'pan', emoji: '🍳', cn: '平底锅' }, { text: 'pun', emoji: '🎭', cn: '双关语' }], answer: 0 },
+        { sound: { text: 'ball', emoji: '⚽', prompt: '选出和它押韵的词' }, options: [{ text: 'wall', emoji: '🧱', cn: '墙' }, { text: 'well', emoji: '⛲', cn: '水井' }, { text: 'bell', emoji: '🔔', cn: '铃铛' }, { text: 'bull', emoji: '🐂', cn: '公牛' }], answer: 0 },
+        { sound: { text: 'moon', emoji: '🌙', prompt: '选出和它押韵的词' }, options: [{ text: 'spoon', emoji: '🥄', cn: '勺子' }, { text: 'sun', emoji: '☀️', cn: '太阳' }, { text: 'noon', emoji: '🕛', cn: '中午' }, { text: 'soon', emoji: '⏳', cn: '很快' }], answer: 0 },
+        { sound: { text: 'sock', emoji: '🧦', prompt: '选出和它押韵的词' }, options: [{ text: 'lock', emoji: '🔒', cn: '锁' }, { text: 'rock', emoji: '🪨', cn: '石头' }, { text: 'rack', emoji: '🗄️', cn: '架子' }, { text: 'duck', emoji: '🦆', cn: '鸭子' }], answer: 0 },
+        { sound: { text: 'hen', emoji: '🐔', prompt: '选出和它押韵的词' }, options: [{ text: 'men', emoji: '👨', cn: '男人们' }, { text: 'man', emoji: '👨‍🦱', cn: '男人' }, { text: 'pin', emoji: '📌', cn: '别针' }, { text: 'pan', emoji: '🍳', cn: '平底锅' }], answer: 0 }
+    ],
+    'alliteration': [
+        { sound: { text: 'cat, dog, car, sun', emoji: '👂', prompt: '哪两个词开头的声音一样？' }, options: [{ text: 'cat, car', emoji: '🐱🚗', cn: '猫和汽车' }, { text: 'cat, dog', emoji: '🐱🐶', cn: '猫和小狗' }, { text: 'dog, sun', emoji: '🐶☀️', cn: '小狗和太阳' }, { text: 'car, sun', emoji: '🚗☀️', cn: '汽车和太阳' }], answer: 0 },
+        { sound: { text: 'fish, frog, book, ball', emoji: '👂', prompt: '哪两个词开头的声音一样？' }, options: [{ text: 'fish, frog', emoji: '🐟🐸', cn: '鱼和青蛙' }, { text: 'fish, book', emoji: '🐟📖', cn: '鱼和书' }, { text: 'frog, ball', emoji: '🐸⚽', cn: '青蛙和球' }, { text: 'book, fish', emoji: '📖🐟', cn: '书和鱼' }], answer: 0 },
+        { sound: { text: 'apple, ant, banana, cat', emoji: '👂', prompt: '哪两个词开头的声音一样？' }, options: [{ text: 'apple, ant', emoji: '🍎🐜', cn: '苹果和蚂蚁' }, { text: 'apple, banana', emoji: '🍎🍌', cn: '苹果和香蕉' }, { text: 'ant, cat', emoji: '🐜🐱', cn: '蚂蚁和猫' }, { text: 'banana, cat', emoji: '🍌🐱', cn: '香蕉和猫' }], answer: 0 },
+        { sound: { text: 'sun, snake, tiger, turtle', emoji: '👂', prompt: '哪两个词开头的声音一样？' }, options: [{ text: 'sun, snake', emoji: '☀️🐍', cn: '太阳和蛇' }, { text: 'sun, tiger', emoji: '☀️🐯', cn: '太阳和老虎' }, { text: 'snake, turtle', emoji: '🐍🐢', cn: '蛇和乌龟' }, { text: 'tiger, turtle', emoji: '🐯🐢', cn: '老虎和乌龟' }], answer: 0 },
+        { sound: { text: 'moon, monkey, nose, night', emoji: '👂', prompt: '哪两个词开头的声音一样？' }, options: [{ text: 'moon, monkey', emoji: '🌙🐵', cn: '月亮和猴子' }, { text: 'moon, nose', emoji: '🌙👃', cn: '月亮和鼻子' }, { text: 'monkey, night', emoji: '🐵🌙', cn: '猴子和夜晚' }, { text: 'nose, moon', emoji: '👃🌙', cn: '鼻子和月亮' }], answer: 0 },
+        { sound: { text: 'pig, panda, dog, deer', emoji: '👂', prompt: '哪两个词开头的声音一样？' }, options: [{ text: 'pig, panda', emoji: '🐷🐼', cn: '小猪和熊猫' }, { text: 'pig, dog', emoji: '🐷🐶', cn: '小猪和小狗' }, { text: 'dog, deer', emoji: '🐶🦌', cn: '小狗和鹿' }, { text: 'panda, deer', emoji: '🐼🦌', cn: '熊猫和鹿' }], answer: 0 },
+        { sound: { text: 'table, tiger, cat, cup', emoji: '👂', prompt: '哪两个词开头的声音一样？' }, options: [{ text: 'table, cat', emoji: '🪑🐱', cn: '桌子和猫' }, { text: 'table, tiger', emoji: '🪑🐯', cn: '桌子和老虎' }, { text: 'cat, cup', emoji: '🐱☕', cn: '猫和杯子' }, { text: 'tiger, cup', emoji: '🐯☕', cn: '老虎和杯子' }], answer: 1 },
+        { sound: { text: 'king, kite, moon, map', emoji: '👂', prompt: '哪两个词开头的声音一样？' }, options: [{ text: 'king, kite', emoji: '🤴🪁', cn: '国王和风筝' }, { text: 'king, moon', emoji: '🤴🌙', cn: '国王和月亮' }, { text: 'moon, map', emoji: '🌙🗺️', cn: '月亮和地图' }, { text: 'kite, map', emoji: '🪁🗺️', cn: '风筝和地图' }], answer: 0 },
+        { sound: { text: 'boat, ball, book, hat', emoji: '👂', prompt: '哪两个词开头的声音一样？' }, options: [{ text: 'boat, ball', emoji: '⛵⚽', cn: '船和球' }, { text: 'book, hat', emoji: '📖🎩', cn: '书和帽子' }, { text: 'boat, book', emoji: '⛵📖', cn: '船和书' }, { text: 'ball, hat', emoji: '⚽🎩', cn: '球和帽子' }], answer: 0 },
+        { sound: { text: 'lion, lamp, sun, sock', emoji: '👂', prompt: '哪两个词开头的声音一样？' }, options: [{ text: 'lion, lamp', emoji: '🦁💡', cn: '狮子和台灯' }, { text: 'lion, sun', emoji: '🦁☀️', cn: '狮子和太阳' }, { text: 'sun, sock', emoji: '☀️🧦', cn: '太阳和袜子' }, { text: 'lamp, sock', emoji: '💡🧦', cn: '台灯和袜子' }], answer: 0 }
+    ],
+    'make-rhyme': [
+        { sound: { text: 'hat', emoji: '🎩', prompt: '选一个和它押韵的词' }, options: [{ text: 'cat', emoji: '🐱', cn: '猫' }, { text: 'hot', emoji: '🥵', cn: '热' }, { text: 'hit', emoji: '👊', cn: '打' }, { text: 'hut', emoji: '🏠', cn: '小屋' }], answer: 0 },
+        { sound: { text: 'pen', emoji: '✒️', prompt: '选一个和它押韵的词' }, options: [{ text: 'ten', emoji: '🔟', cn: '十' }, { text: 'pin', emoji: '📌', cn: '别针' }, { text: 'pan', emoji: '🍳', cn: '平底锅' }, { text: 'pun', emoji: '🎭', cn: '双关语' }], answer: 0 },
+        { sound: { text: 'big', emoji: '🐘', prompt: '选一个和它押韵的词' }, options: [{ text: 'pig', emoji: '🐷', cn: '小猪' }, { text: 'bag', emoji: '👜', cn: '包' }, { text: 'beg', emoji: '🙏', cn: '恳求' }, { text: 'bug', emoji: '🐛', cn: '小虫' }], answer: 0 },
+        { sound: { text: 'cup', emoji: '☕', prompt: '选一个和它押韵的词' }, options: [{ text: 'up', emoji: '⬆️', cn: '向上' }, { text: 'cap', emoji: '🧢', cn: '棒球帽' }, { text: 'cop', emoji: '👮', cn: '警察' }, { text: 'cut', emoji: '🔪', cn: '切' }], answer: 0 },
+        { sound: { text: 'leg', emoji: '🦵', prompt: '选一个和它押韵的词' }, options: [{ text: 'egg', emoji: '🥚', cn: '鸡蛋' }, { text: 'lag', emoji: '🐌', cn: '落后' }, { text: 'log', emoji: '🪵', cn: '木头' }, { text: 'lug', emoji: '🧳', cn: '拖拽' }], answer: 0 },
+        { sound: { text: 'sun', emoji: '☀️', prompt: '选一个和它押韵的词' }, options: [{ text: 'run', emoji: '🏃', cn: '跑步' }, { text: 'ran', emoji: '🏇', cn: '跑过' }, { text: 'rin', emoji: '❓', cn: '不是词' }, { text: 'ron', emoji: '❓', cn: '不是词' }], answer: 0 },
+        { sound: { text: 'dog', emoji: '🐶', prompt: '选一个和它押韵的词' }, options: [{ text: 'log', emoji: '🪵', cn: '木头' }, { text: 'lag', emoji: '🐌', cn: '落后' }, { text: 'leg', emoji: '🦵', cn: '腿' }, { text: 'lug', emoji: '🧳', cn: '拖拽' }], answer: 0 },
+        { sound: { text: 'cat', emoji: '🐱', prompt: '选一个和它押韵的词' }, options: [{ text: 'bat', emoji: '🦇', cn: '蝙蝠' }, { text: 'bet', emoji: '🎲', cn: '打赌' }, { text: 'bit', emoji: '🔩', cn: '一点点' }, { text: 'but', emoji: '🙅', cn: '但是' }], answer: 0 },
+        { sound: { text: 'tree', emoji: '🌳', prompt: '选一个和它押韵的词' }, options: [{ text: 'bee', emoji: '🐝', cn: '蜜蜂' }, { text: 'buy', emoji: '🛒', cn: '买' }, { text: 'boy', emoji: '👦', cn: '男孩' }, { text: 'bow', emoji: '🎀', cn: '蝴蝶结' }], answer: 0 },
+        { sound: { text: 'book', emoji: '📖', prompt: '选一个和它押韵的词' }, options: [{ text: 'cook', emoji: '👨‍🍳', cn: '厨师' }, { text: 'cake', emoji: '🍰', cn: '蛋糕' }, { text: 'cat', emoji: '🐱', cn: '猫' }, { text: 'cut', emoji: '🔪', cn: '切' }], answer: 0 },
+        { sound: { text: 'mouse', emoji: '🐭', prompt: '选一个和它押韵的词' }, options: [{ text: 'house', emoji: '🏠', cn: '房子' }, { text: 'horse', emoji: '🐴', cn: '马' }, { text: 'hose', emoji: '🚿', cn: '水管' }, { text: 'hiss', emoji: '🐍', cn: '嘶嘶声' }], answer: 0 },
+        { sound: { text: 'bell', emoji: '🔔', prompt: '选一个和它押韵的词' }, options: [{ text: 'well', emoji: '⛲', cn: '水井' }, { text: 'wall', emoji: '🧱', cn: '墙' }, { text: 'will', emoji: '💪', cn: '愿意' }, { text: 'wool', emoji: '🧶', cn: '羊毛' }], answer: 0 }
+    ],
+    'syllable-blend': [
+        { sound: { text: 'happy', emoji: '👂', prompt: '听到的是哪个词？' }, options: [{ text: 'happy', emoji: '😊', cn: '开心' }, { text: 'happen', emoji: '💥', cn: '发生' }, { text: 'hippo', emoji: '🦛', cn: '河马' }, { text: 'harpy', emoji: '🦅', cn: '鹰身女妖' }], answer: 0 },
+        { sound: { text: 'banana', emoji: '👂', prompt: '听到的是哪个词？' }, options: [{ text: 'banana', emoji: '🍌', cn: '香蕉' }, { text: 'bandana', emoji: '🧣', cn: '头巾' }, { text: 'barnana', emoji: '🌾', cn: '谷仓' }, { text: 'bonana', emoji: '🎈', cn: '气球' }], answer: 0 },
+        { sound: { text: 'apple', emoji: '👂', prompt: '听到的是哪个词？' }, options: [{ text: 'apple', emoji: '🍎', cn: '苹果' }, { text: 'apply', emoji: '💼', cn: '申请' }, { text: 'ample', emoji: '✅', cn: '充足' }, { text: 'angle', emoji: '📐', cn: '角度' }], answer: 0 },
+        { sound: { text: 'doctor', emoji: '👂', prompt: '听到的是哪个词？' }, options: [{ text: 'doctor', emoji: '👨‍⚕️', cn: '医生' }, { text: 'docket', emoji: '📋', cn: '单据' }, { text: 'dolphin', emoji: '🐬', cn: '海豚' }, { text: 'domino', emoji: '🎲', cn: '多米诺' }], answer: 0 },
+        { sound: { text: 'music', emoji: '👂', prompt: '听到的是哪个词？' }, options: [{ text: 'music', emoji: '🎵', cn: '音乐' }, { text: 'musing', emoji: '🤔', cn: '沉思' }, { text: 'mussel', emoji: '🦪', cn: '贻贝' }, { text: 'mystic', emoji: '🔮', cn: '神秘' }], answer: 0 },
+        { sound: { text: 'water', emoji: '💧', prompt: '听到的是哪个词？' }, options: [{ text: 'water', emoji: '💧', cn: '水' }, { text: 'winter', emoji: '❄️', cn: '冬天' }, { text: 'waiter', emoji: '🤵', cn: '服务员' }, { text: 'whiter', emoji: '⚪', cn: '更白' }], answer: 0 },
+        { sound: { text: 'tiger', emoji: '🐯', prompt: '听到的是哪个词？' }, options: [{ text: 'tiger', emoji: '🐯', cn: '老虎' }, { text: 'trigger', emoji: '🔫', cn: '扳机' }, { text: 'ticket', emoji: '🎫', cn: '票' }, { text: 'turtle', emoji: '🐢', cn: '乌龟' }], answer: 0 },
+        { sound: { text: 'monkey', emoji: '🐵', prompt: '听到的是哪个词？' }, options: [{ text: 'monkey', emoji: '🐵', cn: '猴子' }, { text: 'money', emoji: '💰', cn: '钱' }, { text: 'honey', emoji: '🍯', cn: '蜂蜜' }, { text: 'monday', emoji: '📅', cn: '周一' }], answer: 0 },
+        { sound: { text: 'rabbit', emoji: '🐰', prompt: '听到的是哪个词？' }, options: [{ text: 'rabbit', emoji: '🐰', cn: '兔子' }, { text: 'ribbon', emoji: '🎀', cn: '丝带' }, { text: 'robber', emoji: '🦹', cn: '强盗' }, { text: 'rubbish', emoji: '🗑️', cn: '垃圾' }], answer: 0 },
+        { sound: { text: 'seven', emoji: '7️⃣', prompt: '听到的是哪个词？' }, options: [{ text: 'seven', emoji: '7️⃣', cn: '七' }, { text: 'eleven', emoji: '1️⃣1️⃣', cn: '十一' }, { text: 'raven', emoji: '🐦‍⬛', cn: '乌鸦' }, { text: 'sivan', emoji: '❓', cn: '不是词' }], answer: 0 },
+        { sound: { text: 'pencil', emoji: '✏️', prompt: '听到的是哪个词？' }, options: [{ text: 'pencil', emoji: '✏️', cn: '铅笔' }, { text: 'pennies', emoji: '🪙', cn: '便士' }, { text: 'people', emoji: '👥', cn: '人们' }, { text: 'parcel', emoji: '📦', cn: '包裹' }], answer: 0 },
+        { sound: { text: 'balloon', emoji: '🎈', prompt: '听到的是哪个词？' }, options: [{ text: 'balloon', emoji: '🎈', cn: '气球' }, { text: 'balcony', emoji: '🏢', cn: '阳台' }, { text: 'ballad', emoji: '🎤', cn: '歌谣' }, { text: 'ballot', emoji: '🗳️', cn: '选票' }], answer: 0 }
+    ],
+    'syllable-split': [
+        { sound: { text: 'apple', emoji: '🍎', prompt: '它有几个音节？' }, options: [{ text: '1', emoji: '1', cn: '一个', speak: false }, { text: '2', emoji: '2', cn: '两个', speak: false }, { text: '3', emoji: '3', cn: '三个', speak: false }, { text: '4', emoji: '4', cn: '四个', speak: false }], answer: 1 },
+        { sound: { text: 'banana', emoji: '🍌', prompt: '它有几个音节？' }, options: [{ text: '2', emoji: '2', cn: '两个', speak: false }, { text: '3', emoji: '3', cn: '三个', speak: false }, { text: '4', emoji: '4', cn: '四个', speak: false }, { text: '5', emoji: '5', cn: '五个', speak: false }], answer: 1 },
+        { sound: { text: 'cat', emoji: '🐱', prompt: '它有几个音节？' }, options: [{ text: '1', emoji: '1', cn: '一个', speak: false }, { text: '2', emoji: '2', cn: '两个', speak: false }, { text: '3', emoji: '3', cn: '三个', speak: false }, { text: '4', emoji: '4', cn: '四个', speak: false }], answer: 0 },
+        { sound: { text: 'elephant', emoji: '🐘', prompt: '它有几个音节？' }, options: [{ text: '2', emoji: '2', cn: '两个', speak: false }, { text: '3', emoji: '3', cn: '三个', speak: false }, { text: '4', emoji: '4', cn: '四个', speak: false }, { text: '5', emoji: '5', cn: '五个', speak: false }], answer: 1 },
+        { sound: { text: 'computer', emoji: '💻', prompt: '它有几个音节？' }, options: [{ text: '2', emoji: '2', cn: '两个', speak: false }, { text: '3', emoji: '3', cn: '三个', speak: false }, { text: '4', emoji: '4', cn: '四个', speak: false }, { text: '5', emoji: '5', cn: '五个', speak: false }], answer: 1 },
+        { sound: { text: 'water', emoji: '💧', prompt: '它有几个音节？' }, options: [{ text: '1', emoji: '1', cn: '一个', speak: false }, { text: '2', emoji: '2', cn: '两个', speak: false }, { text: '3', emoji: '3', cn: '三个', speak: false }, { text: '4', emoji: '4', cn: '四个', speak: false }], answer: 1 },
+        { sound: { text: 'happy', emoji: '😊', prompt: '它有几个音节？' }, options: [{ text: '1', emoji: '1', cn: '一个', speak: false }, { text: '2', emoji: '2', cn: '两个', speak: false }, { text: '3', emoji: '3', cn: '三个', speak: false }, { text: '4', emoji: '4', cn: '四个', speak: false }], answer: 1 },
+        { sound: { text: 'tiger', emoji: '🐯', prompt: '它有几个音节？' }, options: [{ text: '1', emoji: '1', cn: '一个', speak: false }, { text: '2', emoji: '2', cn: '两个', speak: false }, { text: '3', emoji: '3', cn: '三个', speak: false }, { text: '4', emoji: '4', cn: '四个', speak: false }], answer: 1 },
+        { sound: { text: 'monkey', emoji: '🐵', prompt: '它有几个音节？' }, options: [{ text: '1', emoji: '1', cn: '一个', speak: false }, { text: '2', emoji: '2', cn: '两个', speak: false }, { text: '3', emoji: '3', cn: '三个', speak: false }, { text: '4', emoji: '4', cn: '四个', speak: false }], answer: 1 },
+        { sound: { text: 'seven', emoji: '7️⃣', prompt: '它有几个音节？' }, options: [{ text: '1', emoji: '1', cn: '一个', speak: false }, { text: '2', emoji: '2', cn: '两个', speak: false }, { text: '3', emoji: '3', cn: '三个', speak: false }, { text: '4', emoji: '4', cn: '四个', speak: false }], answer: 1 },
+        { sound: { text: 'balloon', emoji: '🎈', prompt: '它有几个音节？' }, options: [{ text: '1', emoji: '1', cn: '一个', speak: false }, { text: '2', emoji: '2', cn: '两个', speak: false }, { text: '3', emoji: '3', cn: '三个', speak: false }, { text: '4', emoji: '4', cn: '四个', speak: false }], answer: 1 },
+        { sound: { text: 'hippo', emoji: '🦛', prompt: '它有几个音节？' }, options: [{ text: '1', emoji: '1', cn: '一个', speak: false }, { text: '2', emoji: '2', cn: '两个', speak: false }, { text: '3', emoji: '3', cn: '三个', speak: false }, { text: '4', emoji: '4', cn: '四个', speak: false }], answer: 1 }
+    ],
+    'onset-rime-blend': [
+        { sound: { text: 'at', emoji: '🔊', prompt: '前面加上 /c/ 的声音，变成哪个词？' }, options: [{ text: 'cat', emoji: '🐱', cn: '猫' }, { text: 'bat', emoji: '🦇', cn: '蝙蝠' }, { text: 'hat', emoji: '🎩', cn: '帽子' }, { text: 'sat', emoji: '🪑', cn: '坐' }], answer: 0 },
+        { sound: { text: 'all', emoji: '🔊', prompt: '前面加上 /b/ 的声音，变成哪个词？' }, options: [{ text: 'ball', emoji: '⚽', cn: '球' }, { text: 'bell', emoji: '🔔', cn: '铃铛' }, { text: 'bill', emoji: '🧾', cn: '账单' }, { text: 'bull', emoji: '🐂', cn: '公牛' }], answer: 0 },
+        { sound: { text: 'ip', emoji: '🔊', prompt: '前面加上 /sh/ 的声音，变成哪个词？' }, options: [{ text: 'ship', emoji: '🚢', cn: '轮船' }, { text: 'shop', emoji: '🛍️', cn: '商店' }, { text: 'shape', emoji: '🔷', cn: '形状' }, { text: 'sheep', emoji: '🐑', cn: '绵羊' }], answer: 0 },
+        { sound: { text: 'ee', emoji: '🔊', prompt: '前面加上 /tr/ 的声音，变成哪个词？' }, options: [{ text: 'tree', emoji: '🌳', cn: '树' }, { text: 'try', emoji: '🔄', cn: '尝试' }, { text: 'tray', emoji: '🍽️', cn: '托盘' }, { text: 'troy', emoji: '🏰', cn: '特洛伊' }], answer: 0 },
+        { sound: { text: 'ay', emoji: '🔊', prompt: '前面加上 /tr/ 的声音，变成哪个词？' }, options: [{ text: 'tray', emoji: '🍽️', cn: '托盘' }, { text: 'try', emoji: '🔄', cn: '尝试' }, { text: 'tree', emoji: '🌳', cn: '树' }, { text: 'troy', emoji: '🏰', cn: '特洛伊' }], answer: 0 },
+        { sound: { text: 'op', emoji: '🔊', prompt: '前面加上 /st/ 的声音，变成哪个词？' }, options: [{ text: 'stop', emoji: '🛑', cn: '停下' }, { text: 'step', emoji: '🪜', cn: '台阶' }, { text: 'star', emoji: '⭐', cn: '星星' }, { text: 'store', emoji: '🏪', cn: '商店' }], answer: 0 },
+        { sound: { text: 'un', emoji: '🔊', prompt: '前面加上 /s/ 的声音，变成哪个词？' }, options: [{ text: 'sun', emoji: '☀️', cn: '太阳' }, { text: 'sin', emoji: '😈', cn: '罪' }, { text: 'son', emoji: '👦', cn: '儿子' }, { text: 'san', emoji: '❓', cn: '不是词' }], answer: 0 },
+        { sound: { text: 'ell', emoji: '🔊', prompt: '前面加上 /b/ 的声音，变成哪个词？' }, options: [{ text: 'bell', emoji: '🔔', cn: '铃铛' }, { text: 'bill', emoji: '🧾', cn: '账单' }, { text: 'bull', emoji: '🐂', cn: '公牛' }, { text: 'ball', emoji: '⚽', cn: '球' }], answer: 0 },
+        { sound: { text: 'ick', emoji: '🔊', prompt: '前面加上 /ch/ 的声音，变成哪个词？' }, options: [{ text: 'chick', emoji: '🐥', cn: '小鸡' }, { text: 'check', emoji: '✅', cn: '检查' }, { text: 'cheek', emoji: '😊', cn: '脸颊' }, { text: 'cheap', emoji: '🏷️', cn: '便宜' }], answer: 0 },
+        { sound: { text: 'ock', emoji: '🔊', prompt: '前面加上 /s/ 的声音，变成哪个词？' }, options: [{ text: 'sock', emoji: '🧦', cn: '袜子' }, { text: 'sick', emoji: '🤒', cn: '生病' }, { text: 'sack', emoji: '👜', cn: '麻袋' }, { text: 'seek', emoji: '🔍', cn: '寻找' }], answer: 0 },
+        { sound: { text: 'ook', emoji: '🔊', prompt: '前面加上 /b/ 的声音，变成哪个词？' }, options: [{ text: 'book', emoji: '📖', cn: '书' }, { text: 'bake', emoji: '🧁', cn: '烘焙' }, { text: 'bike', emoji: '🚲', cn: '自行车' }, { text: 'bark', emoji: '🐕', cn: '狗叫' }], answer: 0 },
+        { sound: { text: 'eat', emoji: '🔊', prompt: '前面加上 /m/ 的声音，变成哪个词？' }, options: [{ text: 'meat', emoji: '🥩', cn: '肉' }, { text: 'mat', emoji: '🟫', cn: '垫子' }, { text: 'mit', emoji: '❓', cn: '不是词' }, { text: 'mote', emoji: '❓', cn: '不是词' }], answer: 0 }
+    ],
+    'onset-rime-split': [
+        { sound: { text: 'cat', emoji: '🐱', prompt: '哪个词和它开头的声音一样？' }, options: [{ text: 'cap', emoji: '🧢', cn: '棒球帽' }, { text: 'sun', emoji: '☀️', cn: '太阳' }, { text: 'big', emoji: '🐘', cn: '大' }, { text: 'ten', emoji: '🔟', cn: '十' }], answer: 0 },
+        { sound: { text: 'ship', emoji: '🚢', prompt: '哪个词和它开头的声音一样？' }, options: [{ text: 'shoe', emoji: '👟', cn: '鞋子' }, { text: 'sun', emoji: '☀️', cn: '太阳' }, { text: 'cat', emoji: '🐱', cn: '猫' }, { text: 'top', emoji: '🧥', cn: '上衣' }], answer: 0 },
+        { sound: { text: 'tree', emoji: '🌳', prompt: '哪个词和它开头的声音一样？' }, options: [{ text: 'train', emoji: '🚂', cn: '火车' }, { text: 'dog', emoji: '🐶', cn: '小狗' }, { text: 'pen', emoji: '✒️', cn: '钢笔' }, { text: 'moon', emoji: '🌙', cn: '月亮' }], answer: 0 },
+        { sound: { text: 'black', emoji: '⚫', prompt: '哪个词和它开头的声音一样？' }, options: [{ text: 'blue', emoji: '🔵', cn: '蓝色' }, { text: 'sun', emoji: '☀️', cn: '太阳' }, { text: 'big', emoji: '🐘', cn: '大' }, { text: 'ten', emoji: '🔟', cn: '十' }], answer: 0 },
+        { sound: { text: 'green', emoji: '🟢', prompt: '哪个词和它开头的声音一样？' }, options: [{ text: 'grape', emoji: '🍇', cn: '葡萄' }, { text: 'red', emoji: '❤️', cn: '红色' }, { text: 'goat', emoji: '🐐', cn: '山羊' }, { text: 'gum', emoji: '🍬', cn: '口香糖' }], answer: 0 },
+        { sound: { text: 'dog', emoji: '🐶', prompt: '哪个词和它开头的声音一样？' }, options: [{ text: 'duck', emoji: '🦆', cn: '鸭子' }, { text: 'book', emoji: '📖', cn: '书' }, { text: 'goat', emoji: '🐐', cn: '山羊' }, { text: 'nose', emoji: '👃', cn: '鼻子' }], answer: 0 },
+        { sound: { text: 'fish', emoji: '🐟', prompt: '哪个词和它开头的声音一样？' }, options: [{ text: 'fan', emoji: '🪭', cn: '扇子' }, { text: 'sun', emoji: '☀️', cn: '太阳' }, { text: 'ship', emoji: '🚢', cn: '轮船' }, { text: 'hat', emoji: '🎩', cn: '帽子' }], answer: 0 },
+        { sound: { text: 'monkey', emoji: '🐵', prompt: '哪个词和它开头的声音一样？' }, options: [{ text: 'moon', emoji: '🌙', cn: '月亮' }, { text: 'nose', emoji: '👃', cn: '鼻子' }, { text: 'king', emoji: '🤴', cn: '国王' }, { text: 'book', emoji: '📖', cn: '书' }], answer: 0 },
+        { sound: { text: 'house', emoji: '🏠', prompt: '哪个词和它开头的声音一样？' }, options: [{ text: 'hat', emoji: '🎩', cn: '帽子' }, { text: 'sun', emoji: '☀️', cn: '太阳' }, { text: 'nose', emoji: '👃', cn: '鼻子' }, { text: 'moon', emoji: '🌙', cn: '月亮' }], answer: 0 },
+        { sound: { text: 'tiger', emoji: '🐯', prompt: '哪个词和它开头的声音一样？' }, options: [{ text: 'table', emoji: '🪑', cn: '桌子' }, { text: 'cat', emoji: '🐱', cn: '猫' }, { text: 'moon', emoji: '🌙', cn: '月亮' }, { text: 'pen', emoji: '✒️', cn: '钢笔' }], answer: 0 },
+        { sound: { text: 'phone', emoji: '📱', prompt: '哪个词和它开头的声音一样？' }, options: [{ text: 'fan', emoji: '🪭', cn: '扇子' }, { text: 'pig', emoji: '🐷', cn: '小猪' }, { text: 'moon', emoji: '🌙', cn: '月亮' }, { text: 'ten', emoji: '🔟', cn: '十' }], answer: 0 },
+        { sound: { text: 'queen', emoji: '👸', prompt: '哪个词和它开头的声音一样？' }, options: [{ text: 'quiet', emoji: '🤫', cn: '安静' }, { text: 'king', emoji: '🤴', cn: '国王' }, { text: 'cat', emoji: '🐱', cn: '猫' }, { text: 'sun', emoji: '☀️', cn: '太阳' }], answer: 0 }
+    ],
+    'first-sound': [
+        { sound: { text: 'apple', emoji: '🍎', prompt: '哪个词和它开头的声音一样？' }, options: [{ text: 'ant', emoji: '🐜', cn: '蚂蚁' }, { text: 'banana', emoji: '🍌', cn: '香蕉' }, { text: 'cat', emoji: '🐱', cn: '猫' }, { text: 'dog', emoji: '🐶', cn: '小狗' }], answer: 0 },
+        { sound: { text: 'banana', emoji: '🍌', prompt: '哪个词和它开头的声音一样？' }, options: [{ text: 'ball', emoji: '⚽', cn: '球' }, { text: 'moon', emoji: '🌙', cn: '月亮' }, { text: 'nose', emoji: '👃', cn: '鼻子' }, { text: 'pen', emoji: '✒️', cn: '钢笔' }], answer: 0 },
+        { sound: { text: 'cat', emoji: '🐱', prompt: '哪个词和它开头的声音一样？' }, options: [{ text: 'cup', emoji: '☕', cn: '杯子' }, { text: 'sun', emoji: '☀️', cn: '太阳' }, { text: 'top', emoji: '🧥', cn: '上衣' }, { text: 'fish', emoji: '🐟', cn: '鱼' }], answer: 0 },
+        { sound: { text: 'dog', emoji: '🐶', prompt: '哪个词和它开头的声音一样？' }, options: [{ text: 'duck', emoji: '🦆', cn: '鸭子' }, { text: 'book', emoji: '📖', cn: '书' }, { text: 'goat', emoji: '🐐', cn: '山羊' }, { text: 'nose', emoji: '👃', cn: '鼻子' }], answer: 0 },
+        { sound: { text: 'fish', emoji: '🐟', prompt: '哪个词和它开头的声音一样？' }, options: [{ text: 'fan', emoji: '🪭', cn: '扇子' }, { text: 'sun', emoji: '☀️', cn: '太阳' }, { text: 'ship', emoji: '🚢', cn: '轮船' }, { text: 'hat', emoji: '🎩', cn: '帽子' }], answer: 0 },
+        { sound: { text: 'green', emoji: '🟢', prompt: '哪个词和它开头的声音一样？' }, options: [{ text: 'grape', emoji: '🍇', cn: '葡萄' }, { text: 'red', emoji: '❤️', cn: '红色' }, { text: 'goat', emoji: '🐐', cn: '山羊' }, { text: 'nose', emoji: '👃', cn: '鼻子' }], answer: 0 },
+        { sound: { text: 'house', emoji: '🏠', prompt: '哪个词和它开头的声音一样？' }, options: [{ text: 'hat', emoji: '🎩', cn: '帽子' }, { text: 'sun', emoji: '☀️', cn: '太阳' }, { text: 'nose', emoji: '👃', cn: '鼻子' }, { text: 'moon', emoji: '🌙', cn: '月亮' }], answer: 0 },
+        { sound: { text: 'monkey', emoji: '🐵', prompt: '哪个词和它开头的声音一样？' }, options: [{ text: 'moon', emoji: '🌙', cn: '月亮' }, { text: 'nose', emoji: '👃', cn: '鼻子' }, { text: 'king', emoji: '🤴', cn: '国王' }, { text: 'book', emoji: '📖', cn: '书' }], answer: 0 },
+        { sound: { text: 'tiger', emoji: '🐯', prompt: '哪个词和它开头的声音一样？' }, options: [{ text: 'table', emoji: '🪑', cn: '桌子' }, { text: 'cat', emoji: '🐱', cn: '猫' }, { text: 'moon', emoji: '🌙', cn: '月亮' }, { text: 'pen', emoji: '✒️', cn: '钢笔' }], answer: 0 },
+        { sound: { text: 'pig', emoji: '🐷', prompt: '哪个词和它开头的声音一样？' }, options: [{ text: 'pen', emoji: '✒️', cn: '钢笔' }, { text: 'ten', emoji: '🔟', cn: '十' }, { text: 'big', emoji: '🐘', cn: '大' }, { text: 'sun', emoji: '☀️', cn: '太阳' }], answer: 0 },
+        { sound: { text: 'sun', emoji: '☀️', prompt: '哪个词和它开头的声音一样？' }, options: [{ text: 'sock', emoji: '🧦', cn: '袜子' }, { text: 'cat', emoji: '🐱', cn: '猫' }, { text: 'moon', emoji: '🌙', cn: '月亮' }, { text: 'pen', emoji: '✒️', cn: '钢笔' }], answer: 0 },
+        { sound: { text: 'book', emoji: '📖', prompt: '哪个词和它开头的声音一样？' }, options: [{ text: 'ball', emoji: '⚽', cn: '球' }, { text: 'dog', emoji: '🐶', cn: '小狗' }, { text: 'moon', emoji: '🌙', cn: '月亮' }, { text: 'pen', emoji: '✒️', cn: '钢笔' }], answer: 0 },
+        { sound: { text: 'milk', emoji: '🥛', prompt: '哪个词和它开头的声音一样？' }, options: [{ text: 'mouse', emoji: '🐭', cn: '老鼠' }, { text: 'book', emoji: '📖', cn: '书' }, { text: 'sun', emoji: '☀️', cn: '太阳' }, { text: 'ten', emoji: '🔟', cn: '十' }], answer: 0 },
+        { sound: { text: 'nest', emoji: '🪺', prompt: '哪个词和它开头的声音一样？' }, options: [{ text: 'nose', emoji: '👃', cn: '鼻子' }, { text: 'moon', emoji: '🌙', cn: '月亮' }, { text: 'pen', emoji: '✒️', cn: '钢笔' }, { text: 'cat', emoji: '🐱', cn: '猫' }], answer: 0 }
+    ],
+    'middle-sound': [
+        { sound: { text: 'cat', emoji: '🐱', prompt: '哪个词和它中间的声音一样？' }, options: [{ text: 'bat', emoji: '🦇', cn: '蝙蝠' }, { text: 'book', emoji: '📖', cn: '书' }, { text: 'sun', emoji: '☀️', cn: '太阳' }, { text: 'pig', emoji: '🐷', cn: '小猪' }], answer: 0 },
+        { sound: { text: 'bed', emoji: '🛏️', prompt: '哪个词和它中间的声音一样？' }, options: [{ text: 'ten', emoji: '🔟', cn: '十' }, { text: 'dog', emoji: '🐶', cn: '小狗' }, { text: 'big', emoji: '🐘', cn: '大' }, { text: 'cup', emoji: '☕', cn: '杯子' }], answer: 0 },
+        { sound: { text: 'pig', emoji: '🐷', prompt: '哪个词和它中间的声音一样？' }, options: [{ text: 'fish', emoji: '🐟', cn: '鱼' }, { text: 'sun', emoji: '☀️', cn: '太阳' }, { text: 'bed', emoji: '🛏️', cn: '床' }, { text: 'bat', emoji: '🦇', cn: '蝙蝠' }], answer: 0 },
+        { sound: { text: 'cup', emoji: '☕', prompt: '哪个词和它中间的声音一样？' }, options: [{ text: 'sun', emoji: '☀️', cn: '太阳' }, { text: 'cat', emoji: '🐱', cn: '猫' }, { text: 'pig', emoji: '🐷', cn: '小猪' }, { text: 'ten', emoji: '🔟', cn: '十' }], answer: 0 },
+        { sound: { text: 'dog', emoji: '🐶', prompt: '哪个词和它中间的声音一样？' }, options: [{ text: 'top', emoji: '🧥', cn: '上衣' }, { text: 'hat', emoji: '🎩', cn: '帽子' }, { text: 'bed', emoji: '🛏️', cn: '床' }, { text: 'pen', emoji: '✒️', cn: '钢笔' }], answer: 0 },
+        { sound: { text: 'hen', emoji: '🐔', prompt: '哪个词和它中间的声音一样？' }, options: [{ text: 'red', emoji: '❤️', cn: '红色' }, { text: 'big', emoji: '🐘', cn: '大' }, { text: 'cat', emoji: '🐱', cn: '猫' }, { text: 'cup', emoji: '☕', cn: '杯子' }], answer: 0 },
+        { sound: { text: 'box', emoji: '📦', prompt: '哪个词和它中间的声音一样？' }, options: [{ text: 'top', emoji: '🧥', cn: '上衣' }, { text: 'ten', emoji: '🔟', cn: '十' }, { text: 'hat', emoji: '🎩', cn: '帽子' }, { text: 'pig', emoji: '🐷', cn: '小猪' }], answer: 0 },
+        { sound: { text: 'sun', emoji: '☀️', prompt: '哪个词和它中间的声音一样？' }, options: [{ text: 'cup', emoji: '☕', cn: '杯子' }, { text: 'cat', emoji: '🐱', cn: '猫' }, { text: 'red', emoji: '❤️', cn: '红色' }, { text: 'big', emoji: '🐘', cn: '大' }], answer: 0 },
+        { sound: { text: 'pen', emoji: '✒️', prompt: '哪个词和它中间的声音一样？' }, options: [{ text: 'ten', emoji: '🔟', cn: '十' }, { text: 'cat', emoji: '🐱', cn: '猫' }, { text: 'dog', emoji: '🐶', cn: '小狗' }, { text: 'sun', emoji: '☀️', cn: '太阳' }], answer: 0 },
+        { sound: { text: 'fish', emoji: '🐟', prompt: '哪个词和它中间的声音一样？' }, options: [{ text: 'pig', emoji: '🐷', cn: '小猪' }, { text: 'bed', emoji: '🛏️', cn: '床' }, { text: 'cup', emoji: '☕', cn: '杯子' }, { text: 'sun', emoji: '☀️', cn: '太阳' }], answer: 0 },
+        { sound: { text: 'hat', emoji: '🎩', prompt: '哪个词和它中间的声音一样？' }, options: [{ text: 'cat', emoji: '🐱', cn: '猫' }, { text: 'ten', emoji: '🔟', cn: '十' }, { text: 'pig', emoji: '🐷', cn: '小猪' }, { text: 'cup', emoji: '☕', cn: '杯子' }], answer: 0 },
+        { sound: { text: 'book', emoji: '📖', prompt: '哪个词和它中间的声音一样？' }, options: [{ text: 'cook', emoji: '👨‍🍳', cn: '厨师' }, { text: 'cat', emoji: '🐱', cn: '猫' }, { text: 'pen', emoji: '✒️', cn: '钢笔' }, { text: 'sun', emoji: '☀️', cn: '太阳' }], answer: 0 },
+        { sound: { text: 'duck', emoji: '🦆', prompt: '哪个词和它中间的声音一样？' }, options: [{ text: 'cup', emoji: '☕', cn: '杯子' }, { text: 'ten', emoji: '🔟', cn: '十' }, { text: 'pig', emoji: '🐷', cn: '小猪' }, { text: 'bed', emoji: '🛏️', cn: '床' }], answer: 0 },
+        { sound: { text: 'red', emoji: '❤️', prompt: '哪个词和它中间的声音一样？' }, options: [{ text: 'bed', emoji: '🛏️', cn: '床' }, { text: 'pig', emoji: '🐷', cn: '小猪' }, { text: 'cat', emoji: '🐱', cn: '猫' }, { text: 'cup', emoji: '☕', cn: '杯子' }], answer: 0 }
+    ],
+    'last-sound': [
+        { sound: { text: 'cat', emoji: '🐱', prompt: '哪个词和它结尾的声音一样？' }, options: [{ text: 'hat', emoji: '🎩', cn: '帽子' }, { text: 'dog', emoji: '🐶', cn: '小狗' }, { text: 'sun', emoji: '☀️', cn: '太阳' }, { text: 'book', emoji: '📖', cn: '书' }], answer: 0 },
+        { sound: { text: 'dog', emoji: '🐶', prompt: '哪个词和它结尾的声音一样？' }, options: [{ text: 'pig', emoji: '🐷', cn: '小猪' }, { text: 'bed', emoji: '🛏️', cn: '床' }, { text: 'ten', emoji: '🔟', cn: '十' }, { text: 'cup', emoji: '☕', cn: '杯子' }], answer: 0 },
+        { sound: { text: 'sun', emoji: '☀️', prompt: '哪个词和它结尾的声音一样？' }, options: [{ text: 'moon', emoji: '🌙', cn: '月亮' }, { text: 'fan', emoji: '🪭', cn: '扇子' }, { text: 'cat', emoji: '🐱', cn: '猫' }, { text: 'red', emoji: '❤️', cn: '红色' }], answer: 0 },
+        { sound: { text: 'book', emoji: '📖', prompt: '哪个词和它结尾的声音一样？' }, options: [{ text: 'duck', emoji: '🦆', cn: '鸭子' }, { text: 'top', emoji: '🧥', cn: '上衣' }, { text: 'sun', emoji: '☀️', cn: '太阳' }, { text: 'bed', emoji: '🛏️', cn: '床' }], answer: 0 },
+        { sound: { text: 'fish', emoji: '🐟', prompt: '哪个词和它结尾的声音一样？' }, options: [{ text: 'brush', emoji: '🪥', cn: '牙刷' }, { text: 'bus', emoji: '🚌', cn: '公交车' }, { text: 'dog', emoji: '🐶', cn: '小狗' }, { text: 'moon', emoji: '🌙', cn: '月亮' }], answer: 0 },
+        { sound: { text: 'cup', emoji: '☕', prompt: '哪个词和它结尾的声音一样？' }, options: [{ text: 'top', emoji: '🧥', cn: '上衣' }, { text: 'hat', emoji: '🎩', cn: '帽子' }, { text: 'sun', emoji: '☀️', cn: '太阳' }, { text: 'pig', emoji: '🐷', cn: '小猪' }], answer: 0 },
+        { sound: { text: 'bed', emoji: '🛏️', prompt: '哪个词和它结尾的声音一样？' }, options: [{ text: 'red', emoji: '❤️', cn: '红色' }, { text: 'dog', emoji: '🐶', cn: '小狗' }, { text: 'moon', emoji: '🌙', cn: '月亮' }, { text: 'cat', emoji: '🐱', cn: '猫' }], answer: 0 },
+        { sound: { text: 'bus', emoji: '🚌', prompt: '哪个词和它结尾的声音一样？' }, options: [{ text: 'glass', emoji: '🥛', cn: '玻璃杯' }, { text: 'dog', emoji: '🐶', cn: '小狗' }, { text: 'cat', emoji: '🐱', cn: '猫' }, { text: 'moon', emoji: '🌙', cn: '月亮' }], answer: 0 },
+        { sound: { text: 'pig', emoji: '🐷', prompt: '哪个词和它结尾的声音一样？' }, options: [{ text: 'big', emoji: '🐘', cn: '大' }, { text: 'ten', emoji: '🔟', cn: '十' }, { text: 'sun', emoji: '☀️', cn: '太阳' }, { text: 'cup', emoji: '☕', cn: '杯子' }], answer: 0 },
+        { sound: { text: 'hat', emoji: '🎩', prompt: '哪个词和它结尾的声音一样？' }, options: [{ text: 'cat', emoji: '🐱', cn: '猫' }, { text: 'pig', emoji: '🐷', cn: '小猪' }, { text: 'sun', emoji: '☀️', cn: '太阳' }, { text: 'book', emoji: '📖', cn: '书' }], answer: 0 },
+        { sound: { text: 'moon', emoji: '🌙', prompt: '哪个词和它结尾的声音一样？' }, options: [{ text: 'sun', emoji: '☀️', cn: '太阳' }, { text: 'fan', emoji: '🪭', cn: '扇子' }, { text: 'bed', emoji: '🛏️', cn: '床' }, { text: 'pig', emoji: '🐷', cn: '小猪' }], answer: 0 },
+        { sound: { text: 'duck', emoji: '🦆', prompt: '哪个词和它结尾的声音一样？' }, options: [{ text: 'book', emoji: '📖', cn: '书' }, { text: 'ten', emoji: '🔟', cn: '十' }, { text: 'sun', emoji: '☀️', cn: '太阳' }, { text: 'pig', emoji: '🐷', cn: '小猪' }], answer: 0 },
+        { sound: { text: 'ten', emoji: '🔟', prompt: '哪个词和它结尾的声音一样？' }, options: [{ text: 'sun', emoji: '☀️', cn: '太阳' }, { text: 'moon', emoji: '🌙', cn: '月亮' }, { text: 'cat', emoji: '🐱', cn: '猫' }, { text: 'dog', emoji: '🐶', cn: '小狗' }], answer: 0 },
+        { sound: { text: 'red', emoji: '❤️', prompt: '哪个词和它结尾的声音一样？' }, options: [{ text: 'bed', emoji: '🛏️', cn: '床' }, { text: 'cat', emoji: '🐱', cn: '猫' }, { text: 'sun', emoji: '☀️', cn: '太阳' }, { text: 'pig', emoji: '🐷', cn: '小猪' }], answer: 0 }
+    ],
+    'phoneme-blend': [
+        { sound: { text: '', emoji: '🔊', prompt: '拼一拼：/k/ + /a/ + /t/（请家长念给孩子听），选出拼成的词' }, options: [{ text: 'cat', emoji: '🐱', cn: '猫' }, { text: 'cut', emoji: '🔪', cn: '切' }, { text: 'cot', emoji: '🛏️', cn: '小床' }, { text: 'cit', emoji: '❓', cn: '不是词' }], answer: 0 },
+        { sound: { text: '', emoji: '🔊', prompt: '拼一拼：/d/ + /o/ + /g/（请家长念给孩子听），选出拼成的词' }, options: [{ text: 'dog', emoji: '🐶', cn: '小狗' }, { text: 'dig', emoji: '⛏️', cn: '挖' }, { text: 'dag', emoji: '❓', cn: '不是词' }, { text: 'dug', emoji: '🕳️', cn: '挖过' }], answer: 0 },
+        { sound: { text: '', emoji: '🔊', prompt: '拼一拼：/p/ + /i/ + /g/（请家长念给孩子听），选出拼成的词' }, options: [{ text: 'pig', emoji: '🐷', cn: '小猪' }, { text: 'peg', emoji: '🧷', cn: '衣夹' }, { text: 'pag', emoji: '❓', cn: '不是词' }, { text: 'pug', emoji: '🐕', cn: '巴哥犬' }], answer: 0 },
+        { sound: { text: '', emoji: '🔊', prompt: '拼一拼：/s/ + /u/ + /n/（请家长念给孩子听），选出拼成的词' }, options: [{ text: 'sun', emoji: '☀️', cn: '太阳' }, { text: 'sin', emoji: '😈', cn: '罪' }, { text: 'son', emoji: '👦', cn: '儿子' }, { text: 'san', emoji: '❓', cn: '不是词' }], answer: 0 },
+        { sound: { text: '', emoji: '🔊', prompt: '拼一拼：/b/ + /e/ + /d/（请家长念给孩子听），选出拼成的词' }, options: [{ text: 'bed', emoji: '🛏️', cn: '床' }, { text: 'bad', emoji: '👎', cn: '坏' }, { text: 'bid', emoji: '📝', cn: '出价' }, { text: 'bud', emoji: '🌱', cn: '嫩芽' }], answer: 0 },
+        { sound: { text: '', emoji: '🔊', prompt: '拼一拼：/h/ + /a/ + /t/（请家长念给孩子听），选出拼成的词' }, options: [{ text: 'hat', emoji: '🎩', cn: '帽子' }, { text: 'hot', emoji: '🥵', cn: '热' }, { text: 'hit', emoji: '👊', cn: '打' }, { text: 'hut', emoji: '🏠', cn: '小屋' }], answer: 0 },
+        { sound: { text: '', emoji: '🔊', prompt: '拼一拼：/m/ + /a/ + /p/（请家长念给孩子听），选出拼成的词' }, options: [{ text: 'map', emoji: '🗺️', cn: '地图' }, { text: 'mop', emoji: '🧹', cn: '拖把' }, { text: 'mip', emoji: '❓', cn: '不是词' }, { text: 'mup', emoji: '❓', cn: '不是词' }], answer: 0 },
+        { sound: { text: '', emoji: '🔊', prompt: '拼一拼：/r/ + /e/ + /d/（请家长念给孩子听），选出拼成的词' }, options: [{ text: 'red', emoji: '❤️', cn: '红色' }, { text: 'rid', emoji: '🙄', cn: '摆脱' }, { text: 'rod', emoji: '🎣', cn: '鱼竿' }, { text: 'rud', emoji: '❓', cn: '不是词' }], answer: 0 },
+        { sound: { text: '', emoji: '🔊', prompt: '拼一拼：/f/ + /i/ + /sh/（请家长念给孩子听），选出拼成的词' }, options: [{ text: 'fish', emoji: '🐟', cn: '鱼' }, { text: 'fash', emoji: '❓', cn: '不是词' }, { text: 'fosh', emoji: '❓', cn: '不是词' }, { text: 'fush', emoji: '❓', cn: '不是词' }], answer: 0 },
+        { sound: { text: '', emoji: '🔊', prompt: '拼一拼：/b/ + /o/ + /x/（请家长念给孩子听），选出拼成的词' }, options: [{ text: 'box', emoji: '📦', cn: '盒子' }, { text: 'bax', emoji: '❓', cn: '不是词' }, { text: 'bex', emoji: '❓', cn: '不是词' }, { text: 'bux', emoji: '❓', cn: '不是词' }], answer: 0 },
+        { sound: { text: '', emoji: '🔊', prompt: '拼一拼：/s/ + /i/ + /t/（请家长念给孩子听），选出拼成的词' }, options: [{ text: 'sit', emoji: '🪑', cn: '坐' }, { text: 'set', emoji: '🎾', cn: '一组' }, { text: 'sat', emoji: '🪑', cn: '坐过' }, { text: 'sot', emoji: '❓', cn: '不是词' }], answer: 0 },
+        { sound: { text: '', emoji: '🔊', prompt: '拼一拼：/c/ + /u/ + /p/（请家长念给孩子听），选出拼成的词' }, options: [{ text: 'cup', emoji: '☕', cn: '杯子' }, { text: 'cap', emoji: '🧢', cn: '棒球帽' }, { text: 'cop', emoji: '👮', cn: '警察' }, { text: 'cip', emoji: '❓', cn: '不是词' }], answer: 0 },
+        { sound: { text: '', emoji: '🔊', prompt: '拼一拼：/t/ + /e/ + /n/（请家长念给孩子听），选出拼成的词' }, options: [{ text: 'ten', emoji: '🔟', cn: '十' }, { text: 'tan', emoji: '🏖️', cn: '棕褐色' }, { text: 'tin', emoji: '🥫', cn: '罐头' }, { text: 'tun', emoji: '❓', cn: '不是词' }], answer: 0 },
+        { sound: { text: '', emoji: '🔊', prompt: '拼一拼：/b/ + /a/ + /t/（请家长念给孩子听），选出拼成的词' }, options: [{ text: 'bat', emoji: '🦇', cn: '蝙蝠' }, { text: 'bet', emoji: '🎲', cn: '打赌' }, { text: 'bit', emoji: '🔩', cn: '一点点' }, { text: 'but', emoji: '🙅', cn: '但是' }], answer: 0 }
+    ],
+    'phoneme-segment': [
+        { sound: { text: 'cat', emoji: '🐱', prompt: '它由几个声音组成？' }, options: [{ text: '2', emoji: '2', cn: '两个', speak: false }, { text: '3', emoji: '3', cn: '三个', speak: false }, { text: '4', emoji: '4', cn: '四个', speak: false }, { text: '5', emoji: '5', cn: '五个', speak: false }], answer: 1 },
+        { sound: { text: 'dog', emoji: '🐶', prompt: '它由几个声音组成？' }, options: [{ text: '2', emoji: '2', cn: '两个', speak: false }, { text: '3', emoji: '3', cn: '三个', speak: false }, { text: '4', emoji: '4', cn: '四个', speak: false }, { text: '5', emoji: '5', cn: '五个', speak: false }], answer: 1 },
+        { sound: { text: 'fish', emoji: '🐟', prompt: '它由几个声音组成？' }, options: [{ text: '2', emoji: '2', cn: '两个', speak: false }, { text: '3', emoji: '3', cn: '三个', speak: false }, { text: '4', emoji: '4', cn: '四个', speak: false }, { text: '5', emoji: '5', cn: '五个', speak: false }], answer: 1 },
+        { sound: { text: 'tree', emoji: '🌳', prompt: '它由几个声音组成？' }, options: [{ text: '2', emoji: '2', cn: '两个', speak: false }, { text: '3', emoji: '3', cn: '三个', speak: false }, { text: '4', emoji: '4', cn: '四个', speak: false }, { text: '5', emoji: '5', cn: '五个', speak: false }], answer: 1 },
+        { sound: { text: 'apple', emoji: '🍎', prompt: '它由几个声音组成？' }, options: [{ text: '3', emoji: '3', cn: '三个', speak: false }, { text: '4', emoji: '4', cn: '四个', speak: false }, { text: '5', emoji: '5', cn: '五个', speak: false }, { text: '6', emoji: '6', cn: '六个', speak: false }], answer: 1 },
+        { sound: { text: 'sun', emoji: '☀️', prompt: '它由几个声音组成？' }, options: [{ text: '2', emoji: '2', cn: '两个', speak: false }, { text: '3', emoji: '3', cn: '三个', speak: false }, { text: '4', emoji: '4', cn: '四个', speak: false }, { text: '5', emoji: '5', cn: '五个', speak: false }], answer: 1 },
+        { sound: { text: 'book', emoji: '📖', prompt: '它由几个声音组成？' }, options: [{ text: '2', emoji: '2', cn: '两个', speak: false }, { text: '3', emoji: '3', cn: '三个', speak: false }, { text: '4', emoji: '4', cn: '四个', speak: false }, { text: '5', emoji: '5', cn: '五个', speak: false }], answer: 1 },
+        { sound: { text: 'green', emoji: '🟢', prompt: '它由几个声音组成？' }, options: [{ text: '3', emoji: '3', cn: '三个', speak: false }, { text: '4', emoji: '4', cn: '四个', speak: false }, { text: '5', emoji: '5', cn: '五个', speak: false }, { text: '6', emoji: '6', cn: '六个', speak: false }], answer: 1 },
+        { sound: { text: 'hat', emoji: '🎩', prompt: '它由几个声音组成？' }, options: [{ text: '2', emoji: '2', cn: '两个', speak: false }, { text: '3', emoji: '3', cn: '三个', speak: false }, { text: '4', emoji: '4', cn: '四个', speak: false }, { text: '5', emoji: '5', cn: '五个', speak: false }], answer: 1 },
+        { sound: { text: 'pig', emoji: '🐷', prompt: '它由几个声音组成？' }, options: [{ text: '2', emoji: '2', cn: '两个', speak: false }, { text: '3', emoji: '3', cn: '三个', speak: false }, { text: '4', emoji: '4', cn: '四个', speak: false }, { text: '5', emoji: '5', cn: '五个', speak: false }], answer: 1 },
+        { sound: { text: 'duck', emoji: '🦆', prompt: '它由几个声音组成？' }, options: [{ text: '2', emoji: '2', cn: '两个', speak: false }, { text: '3', emoji: '3', cn: '三个', speak: false }, { text: '4', emoji: '4', cn: '四个', speak: false }, { text: '5', emoji: '5', cn: '五个', speak: false }], answer: 1 },
+        { sound: { text: 'moon', emoji: '🌙', prompt: '它由几个声音组成？' }, options: [{ text: '2', emoji: '2', cn: '两个', speak: false }, { text: '3', emoji: '3', cn: '三个', speak: false }, { text: '4', emoji: '4', cn: '四个', speak: false }, { text: '5', emoji: '5', cn: '五个', speak: false }], answer: 1 }
+    ],
+    'add-phoneme': [
+        { sound: { text: 'at', emoji: '🔊', prompt: '开头加上 /s/ 的声音，变成哪个词？' }, options: [{ text: 'scat', emoji: '😼', cn: '走开' }, { text: 'sat', emoji: '🪑', cn: '坐' }, { text: 'cast', emoji: '🎣', cn: '抛投' }, { text: 'cats', emoji: '🐱🐱', cn: '猫们' }], answer: 0 },
+        { sound: { text: 'top', emoji: '🧥', prompt: '开头加上 /s/ 的声音，变成哪个词？' }, options: [{ text: 'stop', emoji: '🛑', cn: '停下' }, { text: 'sop', emoji: '❓', cn: '不是词' }, { text: 'stir', emoji: '🥄', cn: '搅拌' }, { text: 'tops', emoji: '🫲', cn: '顶部们' }], answer: 0 },
+        { sound: { text: 'ut', emoji: '🔊', prompt: '开头加上 /n/ 的声音，变成哪个词？' }, options: [{ text: 'nut', emoji: '🥜', cn: '坚果' }, { text: 'but', emoji: '🙅', cn: '但是' }, { text: 'cut', emoji: '🔪', cn: '切' }, { text: 'hut', emoji: '🏠', cn: '小屋' }], answer: 0 },
+        { sound: { text: 'at', emoji: '🔊', prompt: '开头加上 /c/ 的声音，变成哪个词？' }, options: [{ text: 'cat', emoji: '🐱', cn: '猫' }, { text: 'act', emoji: '🎭', cn: '表演' }, { text: 'tack', emoji: '📌', cn: '图钉' }, { text: 'acts', emoji: '🎬', cn: '表演们' }], answer: 0 },
+        { sound: { text: 'it', emoji: '🔊', prompt: '开头加上 /s/ 的声音，变成哪个词？' }, options: [{ text: 'sit', emoji: '🪑', cn: '坐' }, { text: 'its', emoji: '🫲', cn: '它的' }, { text: 'stir', emoji: '🥄', cn: '搅拌' }, { text: 'list', emoji: '📃', cn: '清单' }], answer: 0 },
+        { sound: { text: 'un', emoji: '🔊', prompt: '开头加上 /s/ 的声音，变成哪个词？' }, options: [{ text: 'sun', emoji: '☀️', cn: '太阳' }, { text: 'sin', emoji: '😈', cn: '罪' }, { text: 'son', emoji: '👦', cn: '儿子' }, { text: 'san', emoji: '❓', cn: '不是词' }], answer: 0 },
+        { sound: { text: 'op', emoji: '🔊', prompt: '开头加上 /p/ 的声音，变成哪个词？' }, options: [{ text: 'pop', emoji: '🍿', cn: '爆米花' }, { text: 'hop', emoji: '🐰', cn: '跳' }, { text: 'mop', emoji: '🧹', cn: '拖把' }, { text: 'top', emoji: '🧥', cn: '上衣' }], answer: 0 },
+        { sound: { text: 'all', emoji: '🔊', prompt: '开头加上 /f/ 的声音，变成哪个词？' }, options: [{ text: 'fall', emoji: '🍂', cn: '落下' }, { text: 'fell', emoji: '🪓', cn: '砍倒' }, { text: 'fill', emoji: '🫙', cn: '装满' }, { text: 'full', emoji: '🈵', cn: '满的' }], answer: 0 },
+        { sound: { text: 'ell', emoji: '🔊', prompt: '开头加上 /b/ 的声音，变成哪个词？' }, options: [{ text: 'bell', emoji: '🔔', cn: '铃铛' }, { text: 'bill', emoji: '🧾', cn: '账单' }, { text: 'bull', emoji: '🐂', cn: '公牛' }, { text: 'ball', emoji: '⚽', cn: '球' }], answer: 0 },
+        { sound: { text: 'ock', emoji: '🔊', prompt: '开头加上 /r/ 的声音，变成哪个词？' }, options: [{ text: 'rock', emoji: '🪨', cn: '石头' }, { text: 'rack', emoji: '🗄️', cn: '架子' }, { text: 'rick', emoji: '❓', cn: '不是词' }, { text: 'ruck', emoji: '❓', cn: '不是词' }], answer: 0 },
+        { sound: { text: 'oat', emoji: '🔊', prompt: '开头加上 /g/ 的声音，变成哪个词？' }, options: [{ text: 'goat', emoji: '🐐', cn: '山羊' }, { text: 'gate', emoji: '🚪', cn: '大门' }, { text: 'get', emoji: '🫳', cn: '拿到' }, { text: 'got', emoji: '🤲', cn: '得到' }], answer: 0 },
+        { sound: { text: 'up', emoji: '🔊', prompt: '开头加上 /c/ 的声音，变成哪个词？' }, options: [{ text: 'cup', emoji: '☕', cn: '杯子' }, { text: 'cap', emoji: '🧢', cn: '棒球帽' }, { text: 'cop', emoji: '👮', cn: '警察' }, { text: 'cip', emoji: '❓', cn: '不是词' }], answer: 0 }
+    ],
+    'replace-phoneme': [
+        { sound: { text: 'cat', emoji: '🐱', prompt: '把开头的 /k/ 换成 /b/，变成哪个词？' }, options: [{ text: 'bat', emoji: '🦇', cn: '蝙蝠' }, { text: 'bet', emoji: '🎲', cn: '打赌' }, { text: 'bit', emoji: '🔩', cn: '一点点' }, { text: 'but', emoji: '🙅', cn: '但是' }], answer: 0 },
+        { sound: { text: 'dog', emoji: '🐶', prompt: '把中间的 /o/ 换成 /i/，变成哪个词？' }, options: [{ text: 'dig', emoji: '⛏️', cn: '挖' }, { text: 'dag', emoji: '❓', cn: '不是词' }, { text: 'dug', emoji: '🕳️', cn: '挖过' }, { text: 'deg', emoji: '❓', cn: '不是词' }], answer: 0 },
+        { sound: { text: 'sun', emoji: '☀️', prompt: '把开头的 /s/ 换成 /r/，变成哪个词？' }, options: [{ text: 'run', emoji: '🏃', cn: '跑步' }, { text: 'ran', emoji: '🏇', cn: '跑过' }, { text: 'rin', emoji: '❓', cn: '不是词' }, { text: 'ron', emoji: '❓', cn: '不是词' }], answer: 0 },
+        { sound: { text: 'bed', emoji: '🛏️', prompt: '把结尾的 /d/ 换成 /t/，变成哪个词？' }, options: [{ text: 'bet', emoji: '🎲', cn: '打赌' }, { text: 'bat', emoji: '🦇', cn: '蝙蝠' }, { text: 'bit', emoji: '🔩', cn: '一点点' }, { text: 'but', emoji: '🙅', cn: '但是' }], answer: 0 },
+        { sound: { text: 'pig', emoji: '🐷', prompt: '把开头的 /p/ 换成 /w/，变成哪个词？' }, options: [{ text: 'wig', emoji: '👱', cn: '假发' }, { text: 'wag', emoji: '🐕', cn: '摇摆' }, { text: 'weg', emoji: '❓', cn: '不是词' }, { text: 'wug', emoji: '❓', cn: '不是词' }], answer: 0 },
+        { sound: { text: 'cup', emoji: '☕', prompt: '把中间的 /u/ 换成 /a/，变成哪个词？' }, options: [{ text: 'cap', emoji: '🧢', cn: '棒球帽' }, { text: 'cop', emoji: '👮', cn: '警察' }, { text: 'cip', emoji: '❓', cn: '不是词' }, { text: 'cep', emoji: '❓', cn: '不是词' }], answer: 0 },
+        { sound: { text: 'hat', emoji: '🎩', prompt: '把开头的 /h/ 换成 /c/，变成哪个词？' }, options: [{ text: 'cat', emoji: '🐱', cn: '猫' }, { text: 'cut', emoji: '🔪', cn: '切' }, { text: 'cot', emoji: '🛏️', cn: '小床' }, { text: 'cit', emoji: '❓', cn: '不是词' }], answer: 0 },
+        { sound: { text: 'man', emoji: '👨', prompt: '把开头的 /m/ 换成 /v/，变成哪个词？' }, options: [{ text: 'van', emoji: '🚐', cn: '面包车' }, { text: 'ven', emoji: '❓', cn: '不是词' }, { text: 'vin', emoji: '❓', cn: '不是词' }, { text: 'von', emoji: '❓', cn: '不是词' }], answer: 0 },
+        { sound: { text: 'ten', emoji: '🔟', prompt: '把开头的 /t/ 换成 /p/，变成哪个词？' }, options: [{ text: 'pen', emoji: '✒️', cn: '钢笔' }, { text: 'pin', emoji: '📌', cn: '别针' }, { text: 'pan', emoji: '🍳', cn: '平底锅' }, { text: 'pun', emoji: '🎭', cn: '双关语' }], answer: 0 },
+        { sound: { text: 'big', emoji: '🐘', prompt: '把开头的 /b/ 换成 /p/，变成哪个词？' }, options: [{ text: 'pig', emoji: '🐷', cn: '小猪' }, { text: 'peg', emoji: '🧷', cn: '衣夹' }, { text: 'pag', emoji: '❓', cn: '不是词' }, { text: 'pug', emoji: '🐕', cn: '巴哥犬' }], answer: 0 },
+        { sound: { text: 'red', emoji: '❤️', prompt: '把开头的 /r/ 换成 /b/，变成哪个词？' }, options: [{ text: 'bed', emoji: '🛏️', cn: '床' }, { text: 'bad', emoji: '👎', cn: '坏' }, { text: 'bid', emoji: '📝', cn: '出价' }, { text: 'bud', emoji: '🌱', cn: '嫩芽' }], answer: 0 },
+        { sound: { text: 'mouse', emoji: '🐭', prompt: '把开头的 /m/ 换成 /h/，变成哪个词？' }, options: [{ text: 'house', emoji: '🏠', cn: '房子' }, { text: 'horse', emoji: '🐴', cn: '马' }, { text: 'hose', emoji: '🚿', cn: '水管' }, { text: 'hiss', emoji: '🐍', cn: '嘶嘶声' }], answer: 0 }
+    ],
+    'delete-phoneme': [
+        { sound: { text: 'cat', emoji: '🐱', prompt: '去掉开头的 /k/，剩下哪个词？' }, options: [{ text: 'at', emoji: '🍴', cn: '在' }, { text: 'ta', emoji: '❓', cn: '不是词' }, { text: 'act', emoji: '🎭', cn: '表演' }, { text: 'tac', emoji: '❓', cn: '不是词' }], answer: 0 },
+        { sound: { text: 'dog', emoji: '🐶', prompt: '去掉结尾的 /g/，剩下哪个词？' }, options: [{ text: 'do', emoji: '✅', cn: '做' }, { text: 'od', emoji: '❓', cn: '不是词' }, { text: 'dot', emoji: '🔴', cn: '圆点' }, { text: 'dough', emoji: '🍞', cn: '面团' }], answer: 0 },
+        { sound: { text: 'stop', emoji: '🛑', prompt: '去掉开头的 /s/，剩下哪个词？' }, options: [{ text: 'top', emoji: '🧥', cn: '上衣' }, { text: 'pot', emoji: '🍯', cn: '罐子' }, { text: 'spot', emoji: '⚪', cn: '斑点' }, { text: 'post', emoji: '📮', cn: '邮局' }], answer: 0 },
+        { sound: { text: 'boat', emoji: '⛵', prompt: '去掉开头的 /b/，剩下哪个词？' }, options: [{ text: 'oat', emoji: '🥣', cn: '燕麦' }, { text: 'goat', emoji: '🐐', cn: '山羊' }, { text: 'coat', emoji: '🧥', cn: '外套' }, { text: 'boot', emoji: '🥾', cn: '靴子' }], answer: 0 },
+        { sound: { text: 'smile', emoji: '😊', prompt: '去掉开头的 /s/，剩下哪个词？' }, options: [{ text: 'mile', emoji: '🛣️', cn: '英里' }, { text: 'smile', emoji: '😊', cn: '微笑' }, { text: 'miles', emoji: '🛣️', cn: '英里们' }, { text: 'mild', emoji: '🫥', cn: '温和' }], answer: 0 },
+        { sound: { text: 'swing', emoji: '🛝', prompt: '去掉开头的 /s/，剩下哪个词？' }, options: [{ text: 'wing', emoji: '🪽', cn: '翅膀' }, { text: 'swing', emoji: '🛝', cn: '秋千' }, { text: 'swim', emoji: '🏊', cn: '游泳' }, { text: 'swan', emoji: '🦢', cn: '天鹅' }], answer: 0 },
+        { sound: { text: 'star', emoji: '⭐', prompt: '去掉开头的 /s/，剩下哪个词？' }, options: [{ text: 'tar', emoji: '🛢️', cn: '沥青' }, { text: 'star', emoji: '⭐', cn: '星星' }, { text: 'stir', emoji: '🥄', cn: '搅拌' }, { text: 'tart', emoji: '🥧', cn: '果馅饼' }], answer: 0 },
+        { sound: { text: 'clock', emoji: '🕐', prompt: '去掉开头的 /c/，剩下哪个词？' }, options: [{ text: 'lock', emoji: '🔒', cn: '锁' }, { text: 'clock', emoji: '🕐', cn: '钟' }, { text: 'cluck', emoji: '🐔', cn: '咯咯叫' }, { text: 'clack', emoji: '❓', cn: '咔嗒' }], answer: 0 },
+        { sound: { text: 'glove', emoji: '🧤', prompt: '去掉开头的 /g/，剩下哪个词？' }, options: [{ text: 'love', emoji: '❤️', cn: '爱' }, { text: 'glove', emoji: '🧤', cn: '手套' }, { text: 'lover', emoji: '💑', cn: '爱人' }, { text: 'lovely', emoji: '🥰', cn: '可爱' }], answer: 0 },
+        { sound: { text: 'blue', emoji: '🔵', prompt: '去掉开头的 /b/，剩下哪个词？' }, options: [{ text: 'loo', emoji: '🚻', cn: '洗手间' }, { text: 'blue', emoji: '🔵', cn: '蓝色' }, { text: 'glue', emoji: '🩹', cn: '胶水' }, { text: 'clue', emoji: '🔎', cn: '线索' }], answer: 0 },
+        { sound: { text: 'clap', emoji: '👏', prompt: '去掉开头的 /c/，剩下哪个词？' }, options: [{ text: 'lap', emoji: '🦵', cn: '大腿' }, { text: 'clap', emoji: '👏', cn: '拍手' }, { text: 'slap', emoji: '🖐️', cn: '拍打' }, { text: 'flap', emoji: '🪽', cn: '拍动' }], answer: 0 },
+        { sound: { text: 'spot', emoji: '⚪', prompt: '去掉开头的 /s/，剩下哪个词？' }, options: [{ text: 'pot', emoji: '🍯', cn: '罐子' }, { text: 'pat', emoji: '🤚', cn: '轻拍' }, { text: 'pit', emoji: '🕳️', cn: '坑' }, { text: 'put', emoji: '📥', cn: '放' }], answer: 0 }
+    ]
+};
+
+// ===== 进度存档 =====
+const PROG_KEY = 'alex_pa_progress_v1';
+let progress = { done: {}, stars: 0, master: {}, totalScore: 0, bestCombo: 0 };
+try {
+    const saved = JSON.parse(localStorage.getItem(PROG_KEY) || 'null');
+    if (saved) progress = saved;
+    if (typeof progress.totalScore !== 'number') progress.totalScore = 0;
+    if (typeof progress.bestCombo !== 'number') progress.bestCombo = 0;
+} catch (e) {}
+
+function saveProgress() {
+    try { localStorage.setItem(PROG_KEY, JSON.stringify(progress)); } catch (e) {}
+}
+
+// ===== 音效（WebAudio 合成，无需音频文件） =====
+let actx = null;
+function getCtx() {
+    try {
+        if (!actx) actx = new (window.AudioContext || window.webkitAudioContext)();
+        if (actx.state === 'suspended') actx.resume();
+        return actx;
+    } catch (e) { return null; }
+}
+function tone(freq, dur, when, type, vol) {
+    const ctx = getCtx();
+    if (!ctx) return;
+    try {
+        const o = ctx.createOscillator();
+        const g = ctx.createGain();
+        o.type = type || 'sine';
+        o.frequency.value = freq;
+        const t0 = ctx.currentTime + (when || 0);
+        g.gain.setValueAtTime(0.0001, t0);
+        g.gain.exponentialRampToValueAtTime(vol || 0.2, t0 + 0.02);
+        g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+        o.connect(g); g.connect(ctx.destination);
+        o.start(t0); o.stop(t0 + dur + 0.05);
+    } catch (e) {}
+}
+function sfxClick() { tone(520, 0.07, 0, 'sine', 0.12); }
+function sfxRight() { tone(660, 0.12, 0, 'sine', 0.18); tone(880, 0.16, 0.1, 'sine', 0.18); }
+function sfxCombo() { tone(660, 0.1, 0, 'sine', 0.16); tone(880, 0.1, 0.09, 'sine', 0.16); tone(1100, 0.18, 0.18, 'sine', 0.16); }
+function sfxWrong() { tone(220, 0.22, 0, 'sawtooth', 0.12); }
+function sfxWin() { [523, 659, 784, 1047].forEach((f, i) => tone(f, 0.18, i * 0.12, 'sine', 0.18)); }
+
+// DOM元素
+const levelPage = document.getElementById('level-page');
+const exercisePage = document.getElementById('exercise-page');
+const trainingPage = document.getElementById('training-page');
+const backBtn = document.getElementById('back-btn');
+const wbBack = document.getElementById('wb-back');
+const pageTitle = document.getElementById('page-title');
+const exerciseList = document.getElementById('exercise-list');
+const trainingTitle = document.getElementById('training-title');
+const playSoundBtn = document.getElementById('play-sound-btn');
+const optionsGrid = document.getElementById('options-grid');
+const scoreDisplay = document.getElementById('score-display');
+const progressFill = document.getElementById('progress-fill');
+const feedbackBar = document.getElementById('feedback-bar');
+const starRow = document.getElementById('star-row');
+const listenHint = document.getElementById('listen-hint');
+const comboDisplay = document.getElementById('combo-display');
+const qSoundHolder = document.getElementById('q-sound-holder');
+
+// ===== 返回：逐级返回 =====
+function handleBack() {
+    if (!trainingPage.hidden) { showExercisePage(); return; }
+    if (!exercisePage.hidden) { showLevelPage(); return; }
+    location.href = '工作台.html#tools';
+}
+if (wbBack) wbBack.addEventListener('click', handleBack);
+if (backBtn) backBtn.addEventListener('click', handleBack);
+
+// 层级卡片点击
+document.querySelectorAll('.level-card').forEach(card => {
+    card.addEventListener('click', () => {
+        currentLevel = card.dataset.level;
+        showExercisePage();
+    });
+});
+
+function showLevelPage() {
+    levelPage.hidden = false;
+    exercisePage.hidden = true;
+    trainingPage.hidden = true;
+    if (backBtn) backBtn.hidden = true;
+    pageTitle.textContent = '音素意识训练工具';
+    refreshLevelProgress();
+}
+
+function refreshLevelProgress() {
+    const totals = { word: 4, syllable: 4, phoneme: 8 };
+    Object.keys(totals).forEach(lv => {
+        const card = document.querySelector('.level-card[data-level="' + lv + '"]');
+        if (!card) return;
+        let done = 0;
+        exercises[lv].forEach(ex => { if (progress.done[ex.id]) done++; });
+        const pct = Math.round(done / totals[lv] * 100);
+        const bar = card.querySelector('.level-progress i');
+        if (bar) bar.style.width = pct + '%';
+        const st = card.querySelector('.level-stars');
+        if (st) st.textContent = '⭐' + countLevelStars(lv);
+        card.classList.toggle('unlocked', done >= totals[lv]);
+        if (done >= totals[lv]) progress.master[lv] = true;
+    });
+    saveProgress();
+}
+
+function countLevelStars(lv) {
+    let s = 0;
+    exercises[lv].forEach(ex => { if (progress.done[ex.id]) s++; });
+    return s;
+}
+
+function showExercisePage() {
+    levelPage.hidden = true;
+    exercisePage.hidden = false;
+    trainingPage.hidden = true;
+    if (backBtn) backBtn.hidden = false;
+    pageTitle.textContent = levelNames[currentLevel] + ' - 训练项目';
+
+    exerciseList.innerHTML = '';
+    exercises[currentLevel].forEach((ex, idx) => {
+        const card = document.createElement('div');
+        card.className = 'exercise-card' + (progress.done[ex.id] ? ' done' : '');
+        card.innerHTML = `
+            <div class="exercise-num">训练 ${idx + 1}</div>
+            <div class="exercise-title">${ex.title}</div>
+            <div class="exercise-desc">${ex.desc}</div>
+        `;
+        card.addEventListener('click', () => startExercise(ex));
+        exerciseList.appendChild(card);
+    });
+}
+
+// 随机打乱
+function shuffle(arr) {
+    const a = arr.slice();
+    for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        const t = a[i]; a[i] = a[j]; a[j] = t;
+    }
+    return a;
+}
+
+function startExercise(ex) {
+    currentExercise = ex;
+    const pool = questionBank[ex.id] || [];
+    currentQuestions = shuffle(pool).slice(0, PER_ROUND);  // 每轮随机抽 10 题
+    currentQuestion = 0;
+    score = 0;
+    earnedStars = 0;
+    combo = 0;
+    maxCombo = 0;
+    selectedOpt = -1;
+    answered = false;
+
+    levelPage.hidden = true;
+    exercisePage.hidden = true;
+    trainingPage.hidden = false;
+    if (backBtn) backBtn.hidden = false;
+    pageTitle.textContent = ex.title;
+    feedbackBar.className = 'feedback-bar';
+    feedbackBar.style.display = 'none';
+    comboDisplay.textContent = '';
+
+    showQuestion();
+}
+
+// 播放文本（逗号分隔依次播）
+function playText(text) {
+    if (!text) return;
+    if (String(text).indexOf(',') > -1) {
+        const parts = String(text).split(',').map(s => s.trim()).filter(Boolean);
+        parts.forEach((p, i) => setTimeout(() => playYoudaoSound(p), i * 750));
+    } else {
+        playYoudaoSound(String(text));
+    }
+}
+
+function showQuestion() {
+    if (currentQuestion >= currentQuestions.length) {
+        showTrainingComplete();
+        return;
+    }
+    const q = currentQuestions[currentQuestion];
+    selectedOpt = -1;
+    answered = false;
+
+    trainingTitle.textContent = '第 ' + (currentQuestion + 1) + ' 题 / 共 ' + currentQuestions.length + ' 题';
+    scoreDisplay.textContent = '得分：' + score;
+    progressFill.style.width = ((currentQuestion / currentQuestions.length) * 100) + '%';
+    feedbackBar.className = 'feedback-bar';
+    feedbackBar.style.display = 'none';
+    listenHint.style.display = 'flex';
+    renderStars(currentQuestion, currentQuestions.length);
+
+    // 题目卡（独立于选项网格）
+    qSoundHolder.innerHTML = '';
+    const qBox = document.createElement('div');
+    qBox.className = 'q-sound';
+    qBox.innerHTML = '<button class="q-play-btn" id="q-play-btn" title="播放">🔊</button>' +
+        '<span class="q-emoji">' + (q.sound.emoji || '👂') + '</span>' +
+        '<span class="q-prompt">' + q.sound.prompt + '</span>';
+    qSoundHolder.appendChild(qBox);
+    const qPlay = qBox.querySelector('#q-play-btn');
+    qPlay.addEventListener('click', () => { sfxClick(); playText(q.sound.text); });
+
+    // 选项网格只放 4 个选项
+    optionsGrid.innerHTML = '';
+    optionsGrid.className = 'options-grid';
+    if (['first-sound', 'middle-sound', 'last-sound'].includes(currentExercise.id)) {
+        optionsGrid.classList.add('bubble-mode');
+    }
+    q.options.forEach((opt, idx) => {
+        const btn = document.createElement('button');
+        btn.className = 'option-btn';
+        btn.innerHTML = '<span class="opt-sound-badge">🔊</span>' +
+            '<span class="opt-emoji">' + opt.emoji + '</span>' +
+            '<span class="opt-cn">' + opt.cn + '</span>';
+        btn.addEventListener('click', () => onOptionClick(idx, btn));
+        optionsGrid.appendChild(btn);
+    });
+
+    // 自动示范发音
+    clearTimeout(window._paTimer);
+    if (q.sound.text) {
+        window._paTimer = setTimeout(() => { playText(q.sound.text); }, 550);
+    } else {
+        listenHint.textContent = '家长示范发音，孩子听选项选';
+    }
+}
+
+function renderStars(answered, total) {
+    const got = Math.max(0, score > 0 ? Math.ceil(score / 10) : 0);
+    let html = '';
+    for (let i = 0; i < total; i++) {
+        html += '<span class="star' + (i < got ? ' on' : '') + '">⭐</span>';
+    }
+    starRow.innerHTML = html;
+}
+
+// 选项点击：先听后选
+function onOptionClick(idx, btn) {
+    if (answered) return;
+    const q = currentQuestions[currentQuestion];
+    const opt = q.options[idx];
+
+    if (selectedOpt === idx) {
+        checkAnswer(idx, q.answer, btn);
+        return;
+    }
+    const buttons = optionsGrid.querySelectorAll('.option-btn');
+    buttons.forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+    selectedOpt = idx;
+    if (opt.speak !== false) { sfxClick(); playText(opt.text); }
+}
+
+function checkAnswer(selected, correct, btn) {
+    if (answered) return;
+    answered = true;
+    const buttons = optionsGrid.querySelectorAll('.option-btn');
+    const q = currentQuestions[currentQuestion];
+    const isRight = selected === correct;
+    const gained = isRight ? (combo >= 2 ? 15 : 10) : 0;
+
+    buttons.forEach((b, i) => {
+        b.disabled = true;
+        b.classList.remove('selected');
+        if (i === correct) b.classList.add('correct');
+        if (i === selected && !isRight) b.classList.add('wrong');
+    });
+
+    listenHint.style.display = 'none';
+
+    if (isRight) {
+        combo++;
+        if (combo > maxCombo) maxCombo = combo;
+        score += gained;
+        earnedStars++;
+        scoreDisplay.textContent = '得分：' + score;
+        scoreDisplay.classList.remove('bump'); void scoreDisplay.offsetWidth; scoreDisplay.classList.add('bump');
+        if (combo >= 3) {
+            sfxCombo();
+            comboDisplay.textContent = '🔥 连对 ' + combo + ' 题！';
+            comboDisplay.classList.remove('big'); void comboDisplay.offsetWidth; comboDisplay.classList.add('big');
+            feedbackBar.className = 'feedback-bar show fb-right';
+            feedbackBar.innerHTML = '<span class="fb-star">⭐</span> 太棒了！连对 ' + combo + ' 题，+' + gained + ' 分！';
+        } else {
+            sfxRight();
+            comboDisplay.textContent = combo >= 2 ? '✨ 连对 ' + combo + ' 题' : '';
+            feedbackBar.className = 'feedback-bar show fb-right';
+            feedbackBar.innerHTML = '<span class="fb-star">⭐</span> 太棒了！+' + gained + ' 分';
+        }
+        setTimeout(() => { if (q.options[correct].speak !== false) playText(q.options[correct].text); }, 350);
+        setTimeout(next, 1400);
+    } else {
+        sfxWrong();
+        combo = 0;
+        comboDisplay.textContent = '';
+        feedbackBar.className = 'feedback-bar show fb-wrong';
+        const correctText = q.options[correct].cn;
+        feedbackBar.innerHTML = '🤔 再听听看，正确答案是「' + correctText + '」';
+        setTimeout(() => { if (q.options[correct].speak !== false) playText(q.options[correct].text); }, 450);
+        setTimeout(next, 2300);
+    }
+}
+
+function next() {
+    currentQuestion++;
+    showQuestion();
+}
+
+// 星星雨
+function starRain() {
+    try {
+        const rain = document.createElement('div');
+        rain.className = 'star-rain';
+        const emojis = ['⭐', '🌟', '✨', '🎉', '💫'];
+        for (let i = 0; i < 24; i++) {
+            const s = document.createElement('span');
+            s.className = 'rain-star';
+            s.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+            s.style.left = (Math.random() * 96) + '%';
+            s.style.animationDuration = (1.4 + Math.random() * 1.6) + 's';
+            s.style.animationDelay = (Math.random() * 0.6) + 's';
+            s.style.fontSize = (18 + Math.random() * 20) + 'px';
+            rain.appendChild(s);
+        }
+        document.body.appendChild(rain);
+        setTimeout(() => rain.remove(), 3800);
+    } catch (e) {}
+}
+
+function showTrainingComplete() {
+    const total = currentQuestions.length;
+    const pct = total > 0 ? Math.round(score / (total * 10) * 100) : 0;
+    const stars = pct >= 100 ? 3 : pct >= 60 ? 2 : 1;
+    progressFill.style.width = '100%';
+    scoreDisplay.textContent = '得分：' + score;
+    listenHint.style.display = 'none';
+    feedbackBar.className = 'feedback-bar';
+    feedbackBar.style.display = 'none';
+
+    let starHtml = '';
+    for (let i = 0; i < 3; i++) starHtml += '<span class="star' + (i < stars ? ' on' : '') + '">⭐</span>';
+    starRow.innerHTML = starHtml;
+
+    // 积分与连击记录
+    progress.totalScore += score;
+    if (maxCombo > progress.bestCombo) progress.bestCombo = maxCombo;
+    progress.done[currentExercise.id] = true;
+    saveProgress();
+
+    if (stars === 3) sfxWin();
+
+    trainingTitle.textContent = '训练完成！';
+    playSoundBtn.hidden = true;
+    optionsGrid.className = 'options-grid';
+    optionsGrid.innerHTML = `
+        <div class="placeholder" style="grid-column: span 2;">
+            <div class="complete-box">
+                <div class="complete-emoji">${stars === 3 ? '🏆' : stars === 2 ? '🎉' : '💪'}</div>
+                <div class="complete-title">${stars === 3 ? '太厉害了，三颗星！' : stars === 2 ? '很棒，继续加油！' : '完成啦，再来一次拿三颗星！'}</div>
+                <div class="star-row" style="margin:0 0 12px;">${starHtml}</div>
+                <div class="complete-sub">本场得分 ${score} 分 · 最高连对 ${maxCombo} 题${maxCombo >= 5 ? ' 🔥' : ''} · 累计积分 ${progress.totalScore} 分</div>
+                <div class="complete-sub" style="margin-top:4px;">答对 ${Math.round(pct * total / 100)} / ${total} 题 · 已记入进度 ✅</div>
+                <div class="complete-actions">
+                    <button class="play-sound-btn" onclick="startExercise(currentExercise)" style="margin:0;">🔄 再练一次（重新抽题）</button>
+                    <button class="play-sound-btn" onclick="showExercisePage()" style="margin:0;background:var(--green);">📋 返回训练列表</button>
+                </div>
+            </div>
+        </div>
+    `;
+    if (stars === 3) setTimeout(starRain, 200);
+    refreshLevelProgress();
+}
+
+// 播放发音（有道美音，失败降级浏览器语音）
+function playYoudaoSound(word) {
+    if (!word) return;
+    const audio = new Audio('https://dict.youdao.com/dictvoice?type=0&audio=' + encodeURIComponent(word));
+    audio.play().catch(e => {
+        if ('speechSynthesis' in window) {
+            const utterance = new SpeechSynthesisUtterance(word);
+            utterance.lang = 'en-US';
+            utterance.rate = 0.8;
+            speechSynthesis.speak(utterance);
+        }
+    });
+}
+
+// 手动播放按钮
+playSoundBtn.addEventListener('click', () => {
+    const q = currentQuestions[currentQuestion];
+    if (!q) return;
+    sfxClick();
+    playText(q.sound.text);
+});
+
+// 初始刷新层级进度
+refreshLevelProgress();
+</script>
+
+</body>
+</html>

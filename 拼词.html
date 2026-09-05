@@ -1,0 +1,1874 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Alex·拼词工具 | LTR家庭英语</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden}
+body{
+  background:#fff;
+  color:#333;
+  font-family:'Noto Sans SC','PingFang SC','Microsoft YaHei',sans-serif;
+  -webkit-font-smoothing:antialiased;
+  user-select:none;
+  display:flex;flex-direction:column;}
+/* 顶部栏 */
+.topbar{
+  display:flex;flex-direction:column;align-items:center;
+  padding:16px 24px 6px;gap:10px;flex-shrink:0;
+  background:transparent;
+}
+.topbar-row1{
+  display:flex;align-items:stretch;justify-content:space-between;
+  width:100%;
+}
+.topbar-row1 > *{display:flex;align-items:center}
+.topbar-row2{
+  display:flex;align-items:center;justify-content:center;gap:12px;
+  width:100%;
+}
+.topbar-row3{
+  display:flex;align-items:center;justify-content:center;gap:12px;
+  margin-top:18px;
+}
+
+/* 级别切换 */
+.level-tabs{
+  display:flex;background:#fff;border-radius:22px;padding:4px;
+  border:2.5px solid #2B7FD8;
+}
+.level-tabs button{
+  padding:6px 20px;border:none;background:transparent;border-radius:16px;
+  cursor:pointer;font-size:14px;font-weight:700;color:#999;
+  font-family:inherit;transition:all .2s;
+}
+.level-tabs button.active{background:#2B7FD8;color:#fff}
+
+/* US/UK切换 */
+.pron-switch{display:flex;background:#fff;border-radius:18px;padding:3px;border:2.5px solid #2B7FD8}
+.pron-switch button{
+  padding:5px 12px;border:none;background:transparent;border-radius:12px;
+  cursor:pointer;font-size:12px;font-weight:700;color:#999;font-family:inherit;
+}
+.pron-switch button.active{background:#2B7FD8;color:#fff}
+
+/* 音标切换 */
+.ipa-toggle{
+  padding:5px 12px;border-radius:12px;border:2px solid #2B7FD8;
+  background:#fff;cursor:pointer;font-size:11px;font-weight:700;
+  color:#2B7FD8;font-family:inherit;transition:all .2s;
+}
+.ipa-toggle.active{background:#2B7FD8;color:#fff}
+
+/* 发音按钮 */
+.speaker-btn{
+  width:48px;height:48px;border:none;cursor:pointer;
+  background:transparent;color:#2B7FD8;font-size:28px;
+  display:flex;align-items:center;justify-content:center;
+  transition:all .2s;
+}
+.speaker-btn:hover{transform:scale(1.1)}
+
+/* 拼词框 */
+.display-boxes{display:flex;align-items:center;gap:0}
+.display-box{
+  width:118px;height:96px;border:3px solid #2B7FD8;
+  background:transparent;
+  display:flex;align-items:center;justify-content:center;
+  transition:all .15s;position:relative;cursor:pointer;
+}
+.display-box + .display-box{border-left:none}
+.display-box:hover{background:rgba(74,159,212,0.08)}
+.display-box.waiting-fill{
+  background:#fff8e1;border-color:#ffb300;
+  animation:pulse 1.5s infinite;
+}
+@keyframes pulse{
+  0%,100%{box-shadow:0 0 0 0 rgba(255,179,0,.4)}
+  50%{box-shadow:0 0 0 6px rgba(255,179,0,0)}
+}
+.display-box .box-letter{
+  font-family:Arial,Helvetica,sans-serif;font-size:56px;font-weight:700;color:#333;
+}
+.display-box .box-letter.silent{color:#bbb;text-decoration:line-through}
+.display-box .remove-x{
+  position:absolute;top:3px;right:6px;font-size:16px;color:#999;
+  cursor:pointer;opacity:0;transition:opacity .2s;line-height:1;
+}
+.display-box:hover .remove-x{opacity:1}
+
+/* 增减框按钮 */
+.box-controls{display:flex;flex-direction:column;gap:6px}
+.box-ctrl-btn{
+  width:32px;height:32px;border-radius:50%;border:none;cursor:pointer;
+  font-size:18px;font-weight:700;display:flex;align-items:center;justify-content:center;
+  transition:all .2s;color:#fff;background:#2B7FD8;
+}
+.box-ctrl-btn:hover{background:#1a5fb0;transform:scale(1.1)}
+
+/* 操作按钮 */
+.util-btn{
+  padding:4px 12px;border-radius:12px;border:none;cursor:pointer;
+  font-size:13px;font-weight:700;font-family:inherit;transition:all .2s;
+  color:#fff;background:#ff5c5c;
+}
+.util-btn:hover{background:#e84a4a;transform:translateY(-1px)}
+
+/* 字素库区域 */
+.library{
+  flex:1;overflow:auto;padding:30px 30px 30px;
+}
+.library::-webkit-scrollbar{width:6px;height:6px}
+.library::-webkit-scrollbar-track{background:transparent}
+.library::-webkit-scrollbar-thumb{background:#a8d0e6;border-radius:3px}
+
+/* 初级 - 字母网格 */
+.alphabet-grid{
+  display:grid;grid-template-columns:repeat(7, 80px);
+  grid-auto-rows:80px;gap:12px;
+  justify-content:center;align-content:center;
+  width:100%;height:100%;
+}
+.alphabet-grid .grapheme{
+  width:100%;height:100%;font-size:38px;padding:0;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+}
+
+/* 中级 - 左右布局 */
+.level2-area{
+  display:flex;gap:100px;align-items:flex-start;
+  justify-content:center;
+  padding:0 20px;width:100%;max-width:1200px;margin:0 auto;
+}
+.level2-left{display:flex;flex-direction:column;gap:10px;flex-shrink:0;flex:1;max-width:520px;margin-left:20px}
+.level2-title{
+  font-size:18px;font-weight:700;color:#2B7FD8;margin-bottom:4px;
+  font-family:'Noto Sans SC',sans-serif;
+}
+.digraph-row{display:flex;align-items:center;gap:10px;height:60px}
+.row-label{
+  width:110px;font-size:20px;font-weight:700;text-align:left;
+  flex-shrink:0;font-style:normal;white-space:nowrap;
+}
+.row-graphemes{
+  display:grid;grid-template-columns:repeat(6,1fr);gap:10px;
+}
+.row-graphemes .grapheme{padding:12px 8px 8px;font-size:26px;min-width:64px}
+.row-graphemes .grapheme.large-letter{font-size:32px}
+.level2-right-wrap{
+  display:flex;align-items:center;gap:8px;flex-shrink:0;flex:1;max-width:520px;
+  justify-content:flex-start;margin-left:-20px;
+}
+.vertical-title{
+  writing-mode:vertical-rl;
+  text-orientation:upright;
+  font-size:20px;font-weight:700;color:#2B7FD8;
+  font-family:'Noto Sans SC',sans-serif;
+  letter-spacing:4px;
+}
+.level2-right{
+  display:flex;flex-direction:column;gap:10px;
+  flex-shrink:0;
+}
+.level2-row{
+  display:flex;gap:10px;justify-content:flex-start;height:60px;align-items:center;
+}
+.level2-right .grapheme{
+  padding:12px 8px 8px;font-size:26px;min-width:64px;
+  text-align:center;
+}
+.level2-right .grapheme.large-letter{font-size:32px}
+
+/* 高级 - 5层级首中尾横向 */
+.tier-row{
+  display:grid;grid-template-columns:120px 1fr;
+  gap:10px;margin-bottom:12px;align-items:start;
+}
+.tier-controls{
+  display:flex;gap:6px;align-items:flex-start;padding-top:4px;
+}
+.tier-btn{
+  padding:8px 0;border-radius:8px;border:none;cursor:pointer;
+  font-size:13px;font-weight:700;font-family:inherit;
+  background:#d0d0d0;color:#333;transition:all .2s;flex:1;text-align:center;
+}
+.tier-btn.all:hover{background:#2B7FD8;color:#fff}
+.tier-btn.none:hover{background:#ff5c5c;color:#fff}
+.tier-content{
+  display:grid;grid-template-columns:3fr 1.5fr 2.5fr 0.8fr;
+  gap:8px;align-items:start;
+}
+.phoneme-col{display:flex;flex-direction:column;gap:4px;min-width:0}
+.col-title{
+  font-size:10px;font-weight:700;color:#999;margin-bottom:4px;
+  text-transform:uppercase;letter-spacing:.05em;
+}
+.phoneme-grid{display:grid;gap:5px}
+.phoneme-grid.col-onset{grid-template-columns:repeat(8,1fr)}
+.phoneme-grid.col-vowel{grid-template-columns:repeat(4,1fr)}
+.phoneme-grid.col-coda{grid-template-columns:repeat(7,1fr)}
+.phoneme-grid.col-suffix{grid-template-columns:1fr}
+.phoneme-grid .grapheme{
+  padding:8px 4px;font-size:15px;min-width:0;width:100%;
+  border-radius:6px;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  word-break:break-all;line-height:1.1;
+}
+
+/* 高级紧凑布局 */
+.tier-row-compact{
+  display:grid;grid-template-columns:110px 1fr;
+  gap:6px;margin-bottom:4px;align-items:start;
+}
+.tier-name{
+  font-size:11px;font-weight:700;color:#2B7FD8;
+  padding-top:4px;line-height:1.2;
+  font-family:'Noto Sans SC',sans-serif;
+}
+.tier-content-compact{
+  display:grid;grid-template-columns:3fr 1.5fr 2.5fr 0.8fr;
+  gap:4px;align-items:start;
+}
+.phoneme-col-compact{display:flex;flex-direction:column;gap:2px;min-width:0}
+.phoneme-grid-compact{
+  display:flex;flex-wrap:wrap;gap:3px;
+}
+.phoneme-grid-compact .grapheme{
+  padding:2px 5px;border-radius:4px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  line-height:1.1;flex:0 0 auto;
+}
+
+/* 字素胶囊 */
+.grapheme{
+  position:relative;padding:4px 8px;border-radius:10px;cursor:pointer;
+  font-size:26px;font-weight:700;color:#333;
+  transition:all .12s;text-align:center;
+  font-family:Arial,Helvetica,sans-serif;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  line-height:1;min-width:40px;border:2px solid #ddd;
+  background:transparent;
+}
+.grapheme:hover{transform:translateY(-2px);filter:brightness(1.05)}
+.grapheme:active{transform:translateY(1px);filter:brightness(0.95)}
+.grapheme.hidden{opacity:.2}
+.grapheme .grapheme-text{line-height:1.1}
+.grapheme .grapheme-ipa{
+  font-size:12px;font-weight:400;color:#fff;margin-top:2px;
+  font-family:'Noto Sans SC',sans-serif;line-height:1;
+  display:none;white-space:nowrap;
+}
+.grapheme .mini-speaker{
+  position:absolute;top:2px;right:4px;font-size:12px;cursor:pointer;
+  opacity:0.8;transition:opacity .2s;line-height:1;
+}
+.grapheme .mini-speaker:hover{opacity:1;transform:scale(1.2)}
+.grapheme.show-ipa .grapheme-ipa{display:block}
+.floating-tooltip{
+  position:fixed;z-index:2147483647;
+  background:#fff;color:#333;padding:6px 12px;border-radius:6px;
+  font-size:14px;font-weight:700;font-family:'Noto Sans SC',sans-serif;
+  box-shadow:0 4px 12px rgba(0,0,0,.2);
+  border:1.5px solid #2B7FD8;
+  transform:translate(-50%,-100%);
+  white-space:nowrap;pointer-events:none;
+}
+
+/* 字素设置面板 */
+.tier-settings-overlay{
+  position:fixed;top:0;left:0;right:0;bottom:0;
+  background:rgba(0,0,0,0.5);z-index:100000;
+  display:flex;align-items:center;justify-content:center;
+}
+.tier-settings-panel{
+  background:#fff;border-radius:16px;width:90%;max-width:900px;
+  max-height:85vh;display:flex;flex-direction:column;
+  box-shadow:0 10px 40px rgba(0,0,0,0.3);
+}
+.tier-settings-header{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:16px 24px;border-bottom:2px solid #e0e0e0;
+}
+.tier-settings-header h3{
+  font-size:18px;font-weight:700;color:#333;font-family:'Noto Sans SC',sans-serif;
+}
+.tier-settings-close{
+  background:none;border:none;font-size:24px;cursor:pointer;
+  color:#999;width:32px;height:32px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+}
+.tier-settings-close:hover{background:#f0f0f0;color:#333}
+.tier-settings-body{
+  flex:1;overflow-y:auto;padding:16px 24px;}
+.tier-setting-tier{
+  margin-bottom:20px;
+}
+.tier-setting-tier-title{
+  font-size:15px;font-weight:700;color:#2B7FD8;margin-bottom:8px;
+  display:flex;align-items:center;gap:10px;
+}
+.tier-setting-tier-title button{
+  font-size:11px;padding:3px 10px;border-radius:8px;
+  border:1.5px solid #2B7FD8;background:transparent;color:#2B7FD8;
+  cursor:pointer;font-weight:700;
+}
+.tier-setting-tier-title button:hover{background:#2B7FD8;color:#fff}
+.tier-setting-group{
+  display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;
+}
+.tier-setting-group-label{
+  font-size:12px;font-weight:700;color:#999;width:50px;flex-shrink:0;
+  padding-top:6px;
+}
+.tier-setting-item{
+  display:flex;align-items:center;gap:4px;
+  padding:4px 8px;border-radius:6px;border:1.5px solid #ddd;
+  cursor:pointer;font-size:13px;font-weight:700;
+  font-family:Arial,sans-serif;transition:all .15s;
+  user-select:none;
+}
+.tier-setting-item.checked{
+  background:#2B7FD8;border-color:#2B7FD8;color:#fff;
+}
+.tier-setting-item.checked.vowel{
+  background:#ff5c5c;border-color:#ff5c5c;
+}
+.tier-settings-footer{
+  display:flex;justify-content:flex-end;gap:12px;
+  padding:16px 24px;border-top:2px solid #e0e0e0;
+}
+
+/* 字素颜色 - 马卡龙实心框白字 */
+.g-letter{background:#2B7FD8;border-color:#2B7FD8;color:#fff}
+.g-letter.is-vowel{background:#ff5c5c;border-color:#ff5c5c;color:#fff}
+.g-digraph{background:#2B7FD8;border-color:#2B7FD8;color:#fff}
+.g-rvowel{background:#ff5c5c;border-color:#ff5c5c;color:#fff}
+.g-vteam{background:#ff5c5c;border-color:#ff5c5c;color:#fff}
+.g-diphthong{background:#ff5c5c;border-color:#ff5c5c;color:#fff}
+.g-other{background:#2B7FD8;border-color:#2B7FD8;color:#fff}
+.g-onset{background:#2B7FD8;border-color:#2B7FD8;color:#fff}
+.g-vowel{background:#ff5c5c;border-color:#ff5c5c;color:#fff}
+.g-coda{background:#2B7FD8;border-color:#2B7FD8;color:#fff}
+.g-suffix{background:#2B7FD8;border-color:#2B7FD8;color:#fff}
+.g-magice{background:#ff5c5c;border-color:#ff5c5c;color:#fff}
+
+.lbl-digraph{color:#5a9a7a}
+.lbl-rvowel{color:#c9a84c}
+.lbl-vteam{color:#d070a0}
+.lbl-diphthong{color:#d07050}
+.lbl-other{color:#a05050}
+
+@media(max-width:900px){
+  .display-box{width:56px;height:50px}
+  .display-box .box-letter{font-size:26px}
+  .grapheme{font-size:18px;padding:6px 10px}
+}
+
+/* 返回按钮 */
+.back-to-workbench{
+  position:fixed;bottom:12px;right:12px;z-index:9999;
+  padding:6px 14px;background:#fff;
+  border:2px solid #2B7FD8;border-radius:14px;
+  font-size:12px;font-weight:700;color:#2B7FD8;
+  cursor:pointer;font-family:inherit;white-space:nowrap;
+  box-shadow:0 2px 8px rgba(0,0,0,.12);
+  transition:all .2s;text-decoration:none;
+}
+.back-to-workbench:hover{
+  background:#2B7FD8;color:#fff;
+}
+
+</style>
+
+
+<style>
+/* ===== v2.0 统一设计语言（Alex 工作台品牌） ===== */
+.wb-topbar{position:sticky;top:0;z-index:99999;display:flex;align-items:center;gap:14px;background:rgba(254,252,246,.97);border-bottom:1px solid #eee7d8;padding:9px clamp(12px,3vw,26px);box-sizing:border-box;}
+.wb-topbar::before{content:'';position:absolute;left:0;top:0;right:0;height:3px;background:linear-gradient(90deg,#2B7FD8,#F4D758,#E84A5F);}
+.wb-back{flex:none;display:inline-flex;align-items:center;gap:5px;background:rgba(43,127,216,.08);color:#1a5fb0;border:1px solid rgba(43,127,216,.28);border-radius:999px;padding:6px 14px;font-size:.8rem;font-weight:600;text-decoration:none;font-family:'Segoe UI','Microsoft YaHei','PingFang SC',sans-serif;line-height:1.4;}
+.wb-back:hover{background:rgba(43,127,216,.18);}
+.wb-title{display:flex;align-items:baseline;gap:10px;min-width:0;}
+.wb-title b{font-size:1rem;font-weight:700;color:#1A1A2E;white-space:nowrap;}
+.wb-title i{font-style:normal;font-size:.72rem;color:#5a5a72;font-family:Georgia,'Times New Roman',serif;letter-spacing:.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+body{background:#fefcf6!important;}
+.back-to-workbench,.back-btn{display:none!important;}
+@media(max-width:560px){.wb-title b{font-size:.92rem;}.wb-title i{display:none;}.wb-topbar{gap:10px;padding:8px 10px;}}
+
+/* ===== v9.0 两侧功能栏（原布局零改动） ===== */
+.side-rail{
+  position:fixed;top:140px;left:12px;width:174px;z-index:150;
+  background:rgba(254,252,246,.66);border:1.5px solid rgba(232,223,200,.85);border-radius:16px;
+  padding:12px;box-shadow:0 6px 20px rgba(30,41,59,.10);
+  -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);
+  font-family:'Noto Sans SC',sans-serif;max-height:calc(100vh - 190px);min-height:0;overflow-y:auto;
+  display:flex;flex-direction:column;
+}
+.side-rail.right{left:auto;right:12px;width:202px;}
+.rail-title{font-size:14px;font-weight:800;color:#1a5fb0;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;}
+.rail-close{background:#eee;border:none;border-radius:50%;width:22px;height:22px;font-size:12px;cursor:pointer;color:#666;line-height:1;}
+.rail-body{display:flex;flex-direction:column;gap:8px;}
+.rail-empty{font-size:12px;color:#9aa;line-height:1.6;}
+.rail-sub{font-size:13px;font-weight:800;color:#8a5a00;text-align:center;margin:2px 0 4px;}
+.rail-btn{
+  padding:10px 12px;border-radius:12px;border:2px solid rgba(43,127,216,.32);
+  background:#fff;font-size:14px;font-weight:800;color:#1a5fb0;cursor:pointer;
+  text-align:left;font-family:inherit;display:flex;flex-direction:column;gap:2px;transition:all .15s;
+}
+.rail-btn:hover{background:rgba(43,127,216,.08);transform:translateY(-1px);}
+.rail-btn span{font-size:11px;font-weight:400;color:#889;line-height:1.4;}
+.rail-btn.pink{border-color:rgba(240,168,208,.65);color:#b04a7a;}
+.rail-btn.pink:hover{background:rgba(240,168,208,.1);}
+.fam-pill-v{
+  display:flex;align-items:center;justify-content:space-between;gap:8px;
+  padding:10px 14px;border-radius:11px;border:1.5px solid rgba(43,127,216,.32);
+  background:rgba(255,255,255,.92);cursor:pointer;font-size:17px;font-weight:700;color:#1a5fb0;font-family:Arial,sans-serif;
+  transition:all .12s;min-width:0;
+}
+#familyRailBody{display:flex;flex-direction:column;gap:7px;}
+#familyRailBody .rail-empty{text-align:center;}
+#familyRailBody .fam-pill-v{width:100%;box-sizing:border-box;margin:0;}
+#familyRailBody .fp-play{font-size:14px;}
+.fam-pill-v:hover{background:#2B7FD8;color:#fff;}
+.fam-pill-v .fp-play{font-size:11px;opacity:.65;}
+.rail-fab{
+  position:fixed;left:14px;bottom:26px;z-index:170;width:50px;height:50px;border-radius:50%;
+  background:#2B7FD8;color:#fff;font-size:21px;border:none;cursor:pointer;
+  box-shadow:0 4px 16px rgba(43,127,216,.45);display:none;align-items:center;justify-content:center;
+  font-family:'Noto Sans SC',sans-serif;transition:transform .15s;
+}
+.rail-fab:active{transform:scale(.9);}
+.rail-fab.fab-right{left:auto;right:14px;background:#e88cb8;}
+/* 慢速拼读逐框高亮（只加高亮，不改布局） */
+.display-box.blend-active{background:rgba(244,215,88,.42)!important;border-color:#F4D758!important;box-shadow:0 0 0 4px rgba(244,215,88,.28);}
+/* 拼读挑战卡片（右栏内） */
+.ch-card{display:none;flex-direction:column;gap:6px;margin-top:2px;padding:0;box-shadow:none;border:none;background:transparent;width:auto;max-height:none;overflow:visible;}
+.ch-card.on{display:flex;}
+.ch-card.on{display:flex;}
+.ch-head{font-size:13px;font-weight:800;color:#b04a7a;display:flex;justify-content:space-between;align-items:center;}
+.ch-num{font-size:11px;color:#889;font-weight:600;}
+.ch-progress{height:6px;background:rgba(30,41,59,.08);border-radius:4px;overflow:hidden;}
+.ch-progress i{display:block;height:100%;background:linear-gradient(90deg,#f0a8d0,#e84a5f);width:0;transition:width .4s;}
+.ch-word{display:flex;align-items:center;gap:6px;background:linear-gradient(135deg,rgba(240,168,208,.14),rgba(244,215,88,.14));border:1.5px solid rgba(240,168,208,.4);border-radius:10px;padding:6px 8px;flex-wrap:wrap;}
+.ch-emoji{font-size:24px;}
+.ch-cn{font-size:14px;font-weight:800;color:#b04a7a;}
+.ch-spell{font-size:12.5px;color:#b48a00;font-weight:800;display:none;}
+.ch-word.reveal .ch-spell{display:inline;}
+.ch-play{padding:6px 8px;border-radius:9px;border:none;background:#e88cb8;color:#fff;font-size:12px;font-weight:800;cursor:pointer;font-family:inherit;}
+.ch-play:active{transform:scale(.96);}
+.ch-fb{min-height:18px;font-size:11.5px;font-weight:700;text-align:center;line-height:1.35;}
+.ch-fb.ok{color:#047857;}
+.ch-fb.no{color:#b91c1c;}
+.ch-actions{display:flex;gap:4px;justify-content:center;flex-wrap:wrap;}
+.ch-actions button{padding:7px 12px;border-radius:10px;border:none;cursor:pointer;font-size:13px;font-weight:800;font-family:inherit;}
+.ch-ok{background:#2B7FD8;color:#fff;}
+.ch-hint{background:#fff;color:#8a5a00;border:1.5px solid #F4D758!important;}
+.ch-out{background:#eee;color:#666;}
+.ch-score{font-size:11.5px;font-weight:800;color:#e84a5f;text-align:center;}
+.ch-hint-txt{font-size:10px;color:#9aa;text-align:center;line-height:1.4;}
+</style>
+</head>
+<body>
+<div class="wb-topbar"><a href="工作台.html#tools" class="wb-back">← 返回</a><div class="wb-title"><b>🧩 拼词</b><i>Phonics</i></div></div>
+
+<a href="工作台.html#tools" class="back-to-workbench">返回</a>
+
+<div class="topbar">
+  <div class="topbar-row1">
+    <div class="level-tabs">
+      <button class="active" onclick="setLevel(1,this)">初级</button>
+      <button onclick="setLevel(2,this)">中级</button>
+      <button onclick="setLevel(3,this)">高级</button>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px">
+      <div class="pron-switch">
+        <button class="active" onclick="setPron('us',this)">US</button>
+        <button onclick="setPron('uk',this)">UK</button>
+      </div>
+      <button class="ipa-toggle" id="ipaToggle" onclick="toggleIpa()">显示音标</button>
+      <button class="ipa-toggle" id="tierSettingsBtn" onclick="openTierSettings()" style="display:none">字素设置</button>
+    </div>
+  </div>
+  <div class="topbar-row2">
+    <button class="speaker-btn" onclick="playBuiltWord()">🔊</button>
+    <div class="display-boxes" id="displayBoxes">
+      <div class="display-box" onclick="clearBox(this)"></div>
+      <div class="display-box" onclick="clearBox(this)"></div>
+      <div class="display-box" onclick="clearBox(this)"></div>
+      <div class="display-box" onclick="clearBox(this)"></div>
+    </div>
+    <div class="box-controls">
+      <button class="box-ctrl-btn" onclick="addBox()">+</button>
+      <button class="box-ctrl-btn" onclick="removeBox()">−</button>
+    </div>
+  </div>
+  <div class="topbar-row3">
+    <button class="util-btn" onclick="undo()">撤销</button>
+    <button class="util-btn" onclick="clearAll()">清空</button>
+  </div>
+</div>
+
+<div class="library" id="library"></div>
+
+<!-- 字素设置面板 -->
+<div class="tier-settings-overlay" id="tierSettingsOverlay" style="display:none">
+  <div class="tier-settings-panel">
+    <div class="tier-settings-header">
+      <h3>字素显示设置</h3>
+      <button class="tier-settings-close" onclick="closeTierSettings()">×</button>
+    </div>
+    <div class="tier-settings-body" id="tierSettingsBody"></div>
+    <div class="tier-settings-footer">
+      <button class="util-btn" onclick="resetTierVisibility()">全部恢复</button>
+      <button class="util-btn" style="background:#2B7FD8" onclick="applyTierSettings()">应用设置</button>
+    </div>
+  </div>
+</div>
+
+<audio id="audioPlayer" style="display:none"></audio>
+<audio id="phonemePlayer" style="display:none"></audio>
+<audio id="wordPlayer" style="display:none"></audio>
+
+<script>
+let pronType = 'us';
+let currentLevel = 1;
+
+function setPron(type, btn){
+  pronType = type;
+  document.querySelectorAll('.pron-switch button').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+// 音标到文件名映射
+const phoneticToFile = {
+  'æ':'æ.mp3','eɪ':'eɪ.mp3','b':'b.mp3','k':'k.mp3','s':'s.mp3',
+  'd':'d.mp3','ɛ':'ɛ.mp3','i':'i.mp3','f':'f.mp3','ɡ':'ɡ.mp3',
+  'dʒ':'dʒ.mp3','h':'h.mp3','ɪ':'ɪ.mp3','aɪ':'aɪ.mp3','l':'l.MP3',
+  'm':'m.mp3','n':'n.mp3','ɑ':'ɑ.mp3','oʊ':'oʊ.mp3','p':'p.mp3',
+  'kw':'kw.MP3','r':'r.MP3','z':'z.mp3','t':'t.mp3','ʌ':'ʌ.mp3',
+  'juː':'juː.mp3','v':'v.mp3','w':'w.mp3','ks':'ks.mp3','ɡz':'ɡz.mp3',
+  'j':'j.mp3','θ':'θ.mp3','ð':'ð.mp3','ʃ':'ʃ.mp3',
+  'ŋ':'ŋ.mp3','tʃ':'tʃ.mp3','ɔr':'ɔr.mp3','ɔɪ':'ɔɪ.mp3','u':'u.mp3',
+  'ʊ':'ʊ.mp3','aʊ':'aʊ.mp3','ɜr':'ɜr.mp3','ɑr':'ɑr.mp3','ɔ':'ɔ.mp3','ə':'ə.mp3'
+};
+
+// 辅音连缀 → 例词 + 字素在单词中的起始时间(秒) + 时长(秒)
+// 点击小喇叭截取播放单词中字素部分的发音，从有道词典调用
+const clusterExamples = {
+  // 首音辅音连缀（字素在单词开头，跳过开头短暂静音）
+  'sc':{word:'school',start:0.05,duration:0.35},
+  'sk':{word:'sky',start:0.05,duration:0.3},
+  'sl':{word:'sleep',start:0.05,duration:0.3},
+  'sm':{word:'small',start:0.05,duration:0.3},
+  'sn':{word:'snow',start:0.05,duration:0.3},
+  'sp':{word:'speak',start:0.05,duration:0.3},
+  'st':{word:'stop',start:0.05,duration:0.3},
+  'sw':{word:'swim',start:0.05,duration:0.3},
+  'br':{word:'bread',start:0.05,duration:0.25},
+  'cr':{word:'cry',start:0.05,duration:0.25},
+  'dr':{word:'drink',start:0.05,duration:0.25},
+  'fr':{word:'friend',start:0.05,duration:0.25},
+  'gr':{word:'green',start:0.05,duration:0.25},
+  'pr':{word:'pray',start:0.05,duration:0.25},
+  'tr':{word:'tree',start:0.05,duration:0.25},
+  'bl':{word:'blue',start:0.05,duration:0.25},
+  'cl':{word:'clean',start:0.05,duration:0.25},
+  'fl':{word:'fly',start:0.05,duration:0.25},
+  'gl':{word:'glad',start:0.05,duration:0.25},
+  'pl':{word:'play',start:0.05,duration:0.25},
+  'tw':{word:'twin',start:0.05,duration:0.25},
+  'shr':{word:'shrink',start:0.05,duration:0.35},
+  'thr':{word:'three',start:0.05,duration:0.35},
+  'scr':{word:'screen',start:0.05,duration:0.35},
+  'spl':{word:'splash',start:0.05,duration:0.35},
+  'spr':{word:'spring',start:0.05,duration:0.35},
+  'squ':{word:'square',start:0.05,duration:0.35},
+  'str':{word:'street',start:0.05,duration:0.35},
+  // 尾音辅音连缀（字素在单词末尾，根据单词长度设置起始时间）
+  'ct':{word:'act',start:0.15,duration:0.3},
+  'ft':{word:'left',start:0.2,duration:0.3},
+  'lt':{word:'salt',start:0.25,duration:0.3},
+  'nt':{word:'ant',start:0.15,duration:0.3},
+  'pt':{word:'apt',start:0.15,duration:0.3},
+  'xt':{word:'next',start:0.25,duration:0.35},
+  'ld':{word:'old',start:0.2,duration:0.3},
+  'lf':{word:'self',start:0.2,duration:0.3},
+  'lp':{word:'help',start:0.2,duration:0.3},
+  'mp':{word:'jump',start:0.25,duration:0.3},
+  'nch':{word:'lunch',start:0.3,duration:0.35},
+  'nd':{word:'hand',start:0.25,duration:0.3},
+  'lk':{word:'milk',start:0.2,duration:0.3},
+  'rk':{word:'park',start:0.25,duration:0.3},
+  'sk':{word:'desk',start:0.2,duration:0.3},
+  'sp':{word:'wasp',start:0.25,duration:0.3},
+  'ss':{word:'class',start:0.3,duration:0.35},
+  'zz':{word:'jazz',start:0.25,duration:0.35},
+  'ff':{word:'off',start:0.15,duration:0.3},
+  'll':{word:'bell',start:0.2,duration:0.35},
+  'dge':{word:'bridge',start:0.35,duration:0.35},
+  'tch':{word:'watch',start:0.3,duration:0.35},
+  'ng':{word:'sing',start:0.25,duration:0.35},
+  'nk':{word:'bank',start:0.25,duration:0.35}
+};
+
+// Web Audio API 上下文（用于精确截取音频）
+let audioCtx = null;
+function getAudioContext(){
+  if(!audioCtx){
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  }
+  return audioCtx;
+}
+
+// 精确截取并播放音频片段
+function playAudioClip(url, start, duration){
+  const ctx = getAudioContext();
+  // 先恢复context（浏览器自动暂停策略）
+  if(ctx.state === 'suspended') ctx.resume();
+  
+  fetch(url)
+    .then(response => response.arrayBuffer())
+    .then(arrayBuffer => ctx.decodeAudioData(arrayBuffer))
+    .then(audioBuffer => {
+      const source = ctx.createBufferSource();
+      source.buffer = audioBuffer;
+      source.connect(ctx.destination);
+      // 精确播放：从start开始，播放duration秒
+      source.start(0, start, duration);
+    })
+    .catch(err => {
+      console.error('音频截取失败，降级为普通播放:', err);
+      // 降级：用普通audio元素播放
+      const p = document.getElementById('wordPlayer');
+      p.src = url;
+      p.currentTime = start;
+      p.play().then(() => {
+        setTimeout(() => p.pause(), duration * 1000);
+      }).catch(() => {});
+    });
+}
+
+function playPhoneme(phonetic){
+  if(!phonetic || phonetic.indexOf('silent') >= 0) return;
+  const first = phonetic.split(',')[0].replace(/[\/\s]/g,'').trim();
+  // 辅音连缀：用Web Audio API精确截取播放单词中字素部分的发音
+  if(clusterExamples[first]){
+    const cfg = clusterExamples[first];
+    const url = 'https://dict.youdao.com/dictvoice?type=0&audio=' + encodeURIComponent(cfg.word);
+    playAudioClip(url, cfg.start, cfg.duration);
+    return;
+  }
+  const file = phoneticToFile[first];
+  if(file){
+    const p = document.getElementById('phonemePlayer');
+    p.src = 'ipa/' + encodeURIComponent(file);
+    p.play().catch(function(){ fallbackSpeak(first); });
+  } else {
+    fallbackSpeak(first);
+  }
+}
+
+function fallbackSpeak(phoneme){
+  if('speechSynthesis' in window){
+    const examples = {
+      'æ':'cat','ɛ':'bed','ɪ':'sit','ʌ':'cup','ʊ':'book','ə':'about',
+      'eɪ':'day','aɪ':'my','ɔɪ':'boy','oʊ':'go','aʊ':'now','juː':'use',
+      'i':'see','u':'food','ɑ':'car','ɔ':'law','ɜr':'bird','ɑr':'star','ɔr':'for'
+    };
+    const word = examples[phoneme] || phoneme;
+    const u = new SpeechSynthesisUtterance(word);
+    u.lang='en-US';u.rate=0.7;speechSynthesis.speak(u);
+  }
+}
+
+// 26字母（带音素音标）
+const alphabetData = {
+  a:'/æ/', b:'/b/', c:'/k/,/s/', d:'/d/', e:'/ɛ/', f:'/f/',
+  g:'/ɡ/,/dʒ/', h:'/h/', i:'/ɪ/', j:'/dʒ/', k:'/k/', l:'/l/',
+  m:'/m/', n:'/n/', o:'/ɑ/', p:'/p/', q:'/kw/', r:'/r/',
+  s:'/s/,/z/', t:'/t/', u:'/ʌ/', v:'/v/', w:'/w/', x:'/ks/',
+  y:'/j/', z:'/z/'
+};
+const alphabet = 'abcdefghijklmnopqrstuvwxyz'.split('').map(l => ({
+  text:l, phonetic:alphabetData[l] || '', cls:'g-letter'
+}));
+
+// 中级左侧分类
+const level2Categories = [
+  {label:'辅音二合', lblCls:'lbl-digraph', items:[
+    {text:'ch',phonetic:'/tʃ/',cls:'g-digraph'},
+    {text:'ph',phonetic:'/f/',cls:'g-digraph'},
+    {text:'sh',phonetic:'/ʃ/',cls:'g-digraph'},
+    {text:'th',phonetic:'/θ/,/ð/',cls:'g-digraph'},
+    {text:'wh',phonetic:'/w/',cls:'g-digraph'}
+  ]},
+  {label:'R控制元音', lblCls:'lbl-rvowel', items:[
+    {text:'ar',phonetic:'/ɑr/',cls:'g-rvowel'},
+    {text:'er',phonetic:'/ɜr/',cls:'g-rvowel'},
+    {text:'ir',phonetic:'/ɜr/',cls:'g-rvowel'},
+    {text:'or',phonetic:'/ɔr/',cls:'g-rvowel'},
+    {text:'ur',phonetic:'/ɜr/',cls:'g-rvowel'}
+  ]},
+  {label:'元音组合', lblCls:'lbl-vteam', items:[
+    {text:'ai',phonetic:'/eɪ/',cls:'g-vteam'},
+    {text:'au',phonetic:'/ɔ/',cls:'g-vteam'},
+    {text:'aw',phonetic:'/ɔ/',cls:'g-vteam'},
+    {text:'ay',phonetic:'/eɪ/',cls:'g-vteam'},
+    {text:'ea',phonetic:'/i/,/ɛ/',cls:'g-vteam'}
+  ]},
+  {label:'元音组合', lblCls:'lbl-vteam', items:[
+    {text:'ee',phonetic:'/i/',cls:'g-vteam'},
+    {text:'igh',phonetic:'/aɪ/',cls:'g-vteam'},
+    {text:'oa',phonetic:'/oʊ/',cls:'g-vteam'},
+    {text:'oo',phonetic:'/u/,/ʊ/',cls:'g-vteam'},
+    {text:'ow',phonetic:'/oʊ/,/aʊ/',cls:'g-vteam'}
+  ]},
+  {label:'双元音', lblCls:'lbl-diphthong', items:[
+    {text:'oi',phonetic:'/ɔɪ/',cls:'g-diphthong'},
+    {text:'ou',phonetic:'/aʊ/',cls:'g-diphthong'},
+    {text:'ow',phonetic:'/aʊ/',cls:'g-diphthong'},
+    {text:'oy',phonetic:'/ɔɪ/',cls:'g-diphthong'}
+  ]},
+  {label:'其他', lblCls:'lbl-other', items:[
+    {text:'ck',phonetic:'/k/',cls:'g-other'},
+    {text:'ed',phonetic:'/d/,/t/,/ɪd/',cls:'g-other'},
+    {text:'ing',phonetic:'/ɪŋ/',cls:'g-other'},
+    {text:'ng',phonetic:'/ŋ/',cls:'g-other'},
+    {text:'nk',phonetic:'/ŋk/',cls:'g-other'}
+  ]}
+];
+
+// 高级5层级（首中尾横向）
+const tiers = [
+  {name:'层级1·基础CVC', onsets:[
+    {text:'b',phonetic:'/b/',cls:'g-onset'},{text:'c',phonetic:'/k/,/s/',cls:'g-onset'},
+    {text:'d',phonetic:'/d/',cls:'g-onset'},{text:'f',phonetic:'/f/',cls:'g-onset'},
+    {text:'g',phonetic:'/ɡ/,/dʒ/',cls:'g-onset'},{text:'h',phonetic:'/h/',cls:'g-onset'},
+    {text:'j',phonetic:'/dʒ/',cls:'g-onset'},{text:'k',phonetic:'/k/',cls:'g-onset'},
+    {text:'l',phonetic:'/l/',cls:'g-onset'},{text:'m',phonetic:'/m/',cls:'g-onset'},
+    {text:'n',phonetic:'/n/',cls:'g-onset'},{text:'p',phonetic:'/p/',cls:'g-onset'},
+    {text:'r',phonetic:'/r/',cls:'g-onset'},{text:'s',phonetic:'/s/,/z/',cls:'g-onset'},
+    {text:'t',phonetic:'/t/',cls:'g-onset'},{text:'v',phonetic:'/v/',cls:'g-onset'},
+    {text:'w',phonetic:'/w/',cls:'g-onset'},{text:'y',phonetic:'/j/',cls:'g-onset'},
+    {text:'z',phonetic:'/z/',cls:'g-onset'}
+  ], vowels:[
+    {text:'a',phonetic:'/æ/',cls:'g-vowel'},{text:'e',phonetic:'/ɛ/',cls:'g-vowel'},
+    {text:'i',phonetic:'/ɪ/',cls:'g-vowel'},{text:'o',phonetic:'/ɑ/',cls:'g-vowel'},
+    {text:'u',phonetic:'/ʌ/',cls:'g-vowel'},{text:'y',phonetic:'/aɪ/',cls:'g-vowel'},
+    {text:'a_e',phonetic:'/eɪ/',cls:'g-magice',magicE:true},
+    {text:'i_e',phonetic:'/aɪ/',cls:'g-magice',magicE:true},
+    {text:'o_e',phonetic:'/oʊ/',cls:'g-magice',magicE:true},
+    {text:'u_e',phonetic:'/juː/,/u/',cls:'g-magice',magicE:true}
+  ], codas:[
+    {text:'b',phonetic:'/b/',cls:'g-coda'},{text:'d',phonetic:'/d/',cls:'g-coda'},
+    {text:'g',phonetic:'/ɡ/',cls:'g-coda'},{text:'k',phonetic:'/k/',cls:'g-coda'},
+    {text:'m',phonetic:'/m/',cls:'g-coda'},{text:'n',phonetic:'/n/',cls:'g-coda'},
+    {text:'p',phonetic:'/p/',cls:'g-coda'},{text:'s',phonetic:'/s/',cls:'g-coda'},
+    {text:'t',phonetic:'/t/',cls:'g-coda'},{text:'x',phonetic:'/ks/',cls:'g-coda'}
+  ], suffixes:[
+    {text:'e',phonetic:'(silent e)',cls:'g-suffix',silent:true}
+  ]},
+  {name:'层级2·二合&R控制', onsets:[
+    {text:'ch',phonetic:'/tʃ/',cls:'g-onset'},{text:'sh',phonetic:'/ʃ/',cls:'g-onset'},
+    {text:'th',phonetic:'/θ/,/ð/',cls:'g-onset'},{text:'ph',phonetic:'/f/',cls:'g-onset'},
+    {text:'wh',phonetic:'/w/',cls:'g-onset'}
+  ], vowels:[
+    {text:'ar',phonetic:'/ɑr/',cls:'g-vowel'},{text:'er',phonetic:'/ɜr/',cls:'g-vowel'},
+    {text:'ir',phonetic:'/ɜr/',cls:'g-vowel'},{text:'or',phonetic:'/ɔr/',cls:'g-vowel'},
+    {text:'ur',phonetic:'/ɜr/',cls:'g-vowel'}
+  ], codas:[
+    {text:'c',phonetic:'/k/',cls:'g-coda'},{text:'f',phonetic:'/f/',cls:'g-coda'},
+    {text:'l',phonetic:'/l/',cls:'g-coda'},{text:'r',phonetic:'/r/',cls:'g-coda'},
+    {text:'s',phonetic:'/s/',cls:'g-coda'},{text:'z',phonetic:'/z/',cls:'g-coda'},
+    {text:'ff',phonetic:'/f/',cls:'g-coda'},{text:'ll',phonetic:'/l/',cls:'g-coda'},
+    {text:'ss',phonetic:'/s/',cls:'g-coda'},{text:'zz',phonetic:'/z/',cls:'g-coda'},
+    {text:'v',phonetic:'/v/',cls:'g-coda'}
+  ], suffixes:[
+    {text:'s',phonetic:'/s/,/z/',cls:'g-suffix'},
+    {text:'es',phonetic:'/ɪz/',cls:'g-suffix'}
+  ]},
+  {name:'层级3·连缀&元音组合', onsets:[
+    {text:'sc',phonetic:'/sk/',cls:'g-onset'},{text:'sk',phonetic:'/sk/',cls:'g-onset'},
+    {text:'sl',phonetic:'/sl/',cls:'g-onset'},{text:'sm',phonetic:'/sm/',cls:'g-onset'},
+    {text:'sn',phonetic:'/sn/',cls:'g-onset'},{text:'sp',phonetic:'/sp/',cls:'g-onset'},
+    {text:'st',phonetic:'/st/',cls:'g-onset'},{text:'sw',phonetic:'/sw/',cls:'g-onset'},
+    {text:'br',phonetic:'/br/',cls:'g-onset'},{text:'cr',phonetic:'/kr/',cls:'g-onset'},
+    {text:'dr',phonetic:'/dr/',cls:'g-onset'},{text:'fr',phonetic:'/fr/',cls:'g-onset'},
+    {text:'gr',phonetic:'/ɡr/',cls:'g-onset'},{text:'pr',phonetic:'/pr/',cls:'g-onset'},
+    {text:'tr',phonetic:'/tr/',cls:'g-onset'},{text:'bl',phonetic:'/bl/',cls:'g-onset'},
+    {text:'cl',phonetic:'/kl/',cls:'g-onset'},{text:'fl',phonetic:'/fl/',cls:'g-onset'},
+    {text:'gl',phonetic:'/ɡl/',cls:'g-onset'},{text:'pl',phonetic:'/pl/',cls:'g-onset'},
+    {text:'tw',phonetic:'/tw/',cls:'g-onset'}
+  ], vowels:[
+    {text:'ai',phonetic:'/eɪ/',cls:'g-vowel'},{text:'ea',phonetic:'/i/,/ɛ/',cls:'g-vowel'},
+    {text:'ee',phonetic:'/i/',cls:'g-vowel'},{text:'ie',phonetic:'/aɪ/,/i/',cls:'g-vowel'},
+    {text:'oa',phonetic:'/oʊ/',cls:'g-vowel'},{text:'oi',phonetic:'/ɔɪ/',cls:'g-vowel'},
+    {text:'oo',phonetic:'/u/,/ʊ/',cls:'g-vowel'},{text:'ou',phonetic:'/aʊ/',cls:'g-vowel'},
+    {text:'ow',phonetic:'/aʊ/,/oʊ/',cls:'g-vowel'}
+  ], codas:[
+    {text:'ct',phonetic:'/kt/',cls:'g-coda'},{text:'ft',phonetic:'/ft/',cls:'g-coda'},
+    {text:'lt',phonetic:'/lt/',cls:'g-coda'},{text:'nt',phonetic:'/nt/',cls:'g-coda'},
+    {text:'pt',phonetic:'/pt/',cls:'g-coda'},{text:'st',phonetic:'/st/',cls:'g-coda'},
+    {text:'xt',phonetic:'/kst/',cls:'g-coda'},{text:'ld',phonetic:'/ld/',cls:'g-coda'},
+    {text:'lf',phonetic:'/lf/',cls:'g-coda'},{text:'lp',phonetic:'/lp/',cls:'g-coda'},
+    {text:'mp',phonetic:'/mp/',cls:'g-coda'},{text:'sp',phonetic:'/sp/',cls:'g-coda'},
+    {text:'sk',phonetic:'/sk/',cls:'g-coda'},{text:'nch',phonetic:'/ntʃ/',cls:'g-coda'},
+    {text:'nd',phonetic:'/nd/',cls:'g-coda'}
+  ]},
+  {name:'层级4·三合&特殊元音', onsets:[
+    {text:'shr',phonetic:'/ʃr/',cls:'g-onset'},{text:'thr',phonetic:'/θr/',cls:'g-onset'},
+    {text:'scr',phonetic:'/skr/',cls:'g-onset'},{text:'spl',phonetic:'/spl/',cls:'g-onset'},
+    {text:'spr',phonetic:'/spr/',cls:'g-onset'},{text:'squ',phonetic:'/skw/',cls:'g-onset'},
+    {text:'str',phonetic:'/str/',cls:'g-onset'}
+  ], vowels:[
+    {text:'au',phonetic:'/ɔ/',cls:'g-vowel'},{text:'aw',phonetic:'/ɔ/',cls:'g-vowel'},
+    {text:'ei',phonetic:'/eɪ/',cls:'g-vowel'},{text:'eu',phonetic:'/juː/',cls:'g-vowel'},
+    {text:'ew',phonetic:'/juː/,/u/',cls:'g-vowel'},{text:'ue',phonetic:'/u/,/juː/',cls:'g-vowel'},
+    {text:'ui',phonetic:'/u/',cls:'g-vowel'}
+  ], codas:[
+    {text:'ch',phonetic:'/tʃ/',cls:'g-coda'},{text:'ph',phonetic:'/f/',cls:'g-coda'},
+    {text:'sh',phonetic:'/ʃ/',cls:'g-coda'},{text:'th',phonetic:'/θ/,/ð/',cls:'g-coda'},
+    {text:'ck',phonetic:'/k/',cls:'g-coda'},{text:'ng',phonetic:'/ŋ/',cls:'g-coda'}
+  ]},
+  {name:'层级5·不发音&复杂元音', onsets:[
+    {text:'gn',phonetic:'/n/(g silent)',cls:'g-onset',silent:true},
+    {text:'kn',phonetic:'/n/(k silent)',cls:'g-onset',silent:true},
+    {text:'wr',phonetic:'/r/(w silent)',cls:'g-onset',silent:true},
+    {text:'qu',phonetic:'/kw/',cls:'g-onset'}
+  ], vowels:[
+    {text:'aigh',phonetic:'/eɪ/',cls:'g-vowel'},{text:'augh',phonetic:'/ɔ/',cls:'g-vowel'},
+    {text:'igh',phonetic:'/aɪ/',cls:'g-vowel'},{text:'eigh',phonetic:'/eɪ/',cls:'g-vowel'},
+    {text:'ough',phonetic:'/oʊ/,/ɔ/',cls:'g-vowel'},{text:'oe',phonetic:'/oʊ/',cls:'g-vowel'},
+    {text:'ay',phonetic:'/eɪ/',cls:'g-vowel'},{text:'ey',phonetic:'/i/,/eɪ/',cls:'g-vowel'},
+    {text:'oy',phonetic:'/ɔɪ/',cls:'g-vowel'}
+  ], codas:[
+    {text:'mb',phonetic:'/m/(b silent)',cls:'g-coda',silent:true},
+    {text:'nk',phonetic:'/ŋk/',cls:'g-coda'},
+    {text:'dge',phonetic:'/dʒ/',cls:'g-coda'},
+    {text:'tch',phonetic:'/tʃ/',cls:'g-coda'}
+  ]}
+];
+
+// 高级页面字素可见性状态
+let tierVisibility = {};
+function initTierVisibility(){
+  tiers.forEach((tier, idx) => {
+    ['onsets','vowels','codas','suffixes'].forEach(type => {
+      if(tier[type]){
+        tier[type].forEach(item => {
+          tierVisibility[idx + '_' + type + '_' + item.text] = true;
+        });
+      }
+    });
+  });
+}
+initTierVisibility();
+
+// 字素设置面板
+let tempVisibility = {};
+function openTierSettings(){
+  tempVisibility = JSON.parse(JSON.stringify(tierVisibility));
+  renderTierSettings();
+  document.getElementById('tierSettingsOverlay').style.display = 'flex';
+}
+function closeTierSettings(){
+  document.getElementById('tierSettingsOverlay').style.display = 'none';
+}
+function renderTierSettings(){
+  const body = document.getElementById('tierSettingsBody');
+  body.innerHTML = '';
+  const typeNames = {onsets:'首音', vowels:'元音', codas:'尾音', suffixes:'后缀'};
+  tiers.forEach((tier, idx) => {
+    const tierDiv = document.createElement('div');
+    tierDiv.className = 'tier-setting-tier';
+    tierDiv.innerHTML = '<div class="tier-setting-tier-title">'
+      + tier.name
+      + '<button onclick="setTierTempAll('+idx+',true)">全选</button>'
+      + '<button onclick="setTierTempAll('+idx+',false)">全不选</button>'
+      + '</div>';
+    ['onsets','vowels','codas','suffixes'].forEach(type => {
+      if(tier[type] && tier[type].length > 0){
+        const groupDiv = document.createElement('div');
+        groupDiv.style.display = 'flex';
+        groupDiv.style.alignItems = 'flex-start';
+        groupDiv.style.marginBottom = '6px';
+        groupDiv.innerHTML = '<div class="tier-setting-group-label">'+typeNames[type]+'</div>';
+        const itemsDiv = document.createElement('div');
+        itemsDiv.className = 'tier-setting-group';
+        tier[type].forEach(item => {
+          const key = idx + '_' + type + '_' + item.text;
+          const itemDiv = document.createElement('div');
+          itemDiv.className = 'tier-setting-item' + (tempVisibility[key] ? ' checked' : '') + (type === 'vowels' ? ' vowel' : '');
+          itemDiv.textContent = item.text;
+          itemDiv.onclick = function(){
+            tempVisibility[key] = !tempVisibility[key];
+            this.classList.toggle('checked');
+          };
+          itemsDiv.appendChild(itemDiv);
+        });
+        groupDiv.appendChild(itemsDiv);
+        tierDiv.appendChild(groupDiv);
+      }
+    });
+    body.appendChild(tierDiv);
+  });
+}
+function setTierTempAll(tierIdx, visible){
+  const tier = tiers[tierIdx];
+  ['onsets','vowels','codas','suffixes'].forEach(type => {
+    if(tier[type]){
+      tier[type].forEach(item => {
+        tempVisibility[tierIdx + '_' + type + '_' + item.text] = visible;
+      });
+    }
+  });
+  renderTierSettings();
+}
+function resetTierVisibility(){
+  tiers.forEach((tier, idx) => {
+    ['onsets','vowels','codas','suffixes'].forEach(type => {
+      if(tier[type]){
+        tier[type].forEach(item => {
+          tempVisibility[idx + '_' + type + '_' + item.text] = true;
+        });
+      }
+    });
+  });
+  renderTierSettings();
+}
+function applyTierSettings(){
+  tierVisibility = JSON.parse(JSON.stringify(tempVisibility));
+  closeTierSettings();
+  renderLibrary();
+}
+
+function createGrapheme(item, tierIdx){
+  const div = document.createElement('div');
+  let cls = 'grapheme ' + (item.cls || 'g-letter');
+  // 标记元音字母（仅单字母）
+  if(item.text && item.text.length === 1 && 'aeiou'.indexOf(item.text) >= 0 && item.cls === 'g-letter'){
+    cls += ' is-vowel';
+  }
+  div.className = cls;
+  div.dataset.text = item.text;
+  div.dataset.phonetic = item.phonetic || '';
+  if(tierIdx !== undefined) div.dataset.tier = tierIdx;
+  if(item.magicE) div.dataset.magicE = 'true';
+  if(item.silent) div.dataset.silent = 'true';
+  let html = '<span class="grapheme-text">'+item.text+'</span>';
+  if(item.phonetic) html += '<span class="grapheme-ipa">'+item.phonetic+'</span>';
+  if(item.phonetic) html += '<span class="mini-speaker" data-phonetic="'+item.phonetic+'">🔊</span>';
+  div.innerHTML = html;
+  div.addEventListener('click', function(){
+    handleGraphemeClick(this);
+  });
+  // 拖拽支持
+  div.draggable = true;
+  div.addEventListener('dragstart', function(e){
+    e.dataTransfer.setData('text/plain', JSON.stringify({
+      text: this.dataset.text,
+      phonetic: this.dataset.phonetic,
+      magicE: this.dataset.magicE || '',
+      silent: this.dataset.silent || ''
+    }));
+    this.style.opacity = '0.5';
+  });
+  div.addEventListener('dragend', function(){
+    this.style.opacity = '1';
+  });
+  // 小喇叭点击发声
+  const spk = div.querySelector('.mini-speaker');
+  if(spk){
+    spk.addEventListener('click', function(e){
+      e.stopPropagation();
+      playPhoneme(this.dataset.phonetic);
+      // 动态创建fixed定位tooltip，不被父容器裁剪
+      const rect = div.getBoundingClientRect();
+      const tip = document.createElement('div');
+      tip.className = 'floating-tooltip';
+      tip.textContent = this.dataset.phonetic;
+      // 判断显示在上方还是下方，避免超出视口
+      if(rect.top < 150){
+        tip.style.left = (rect.left + rect.width/2) + 'px';
+        tip.style.top = (rect.bottom + 8) + 'px';
+        tip.style.transform = 'translateX(-50%)';
+      } else {
+        tip.style.left = (rect.left + rect.width/2) + 'px';
+        tip.style.top = (rect.top - 8) + 'px';
+        tip.style.transform = 'translate(-50%,-100%)';
+      }
+      document.body.appendChild(tip);
+      setTimeout(function(){ tip.remove(); }, 2000);
+    });
+  }
+  return div;
+}
+
+let showIpa = false;
+function toggleIpa(){
+  showIpa = !showIpa;
+  const btn = document.getElementById('ipaToggle');
+  const lib = document.getElementById('library');
+  if(showIpa){
+    btn.classList.add('active');
+    btn.textContent = '隐藏音标';
+    document.querySelectorAll('.grapheme').forEach(g => {
+      g.classList.add('show-ipa');
+      g.classList.remove('large-letter');
+    });
+    // 显示音标时字素框整体上移
+    if(lib) lib.style.paddingTop = currentLevel === 2 ? '10px' : '8px';
+  } else {
+    btn.classList.remove('active');
+    btn.textContent = '显示音标';
+    document.querySelectorAll('.grapheme').forEach(g => {
+      g.classList.remove('show-ipa');
+      g.classList.add('large-letter');
+    });
+    // 隐藏音标时恢复
+    if(lib) lib.style.paddingTop = currentLevel === 2 ? '20px' : '30px';
+  }
+  // 重新渲染，应用显示/隐藏音标的样式
+  renderLibrary();
+}
+
+function handleGraphemeClick(el){
+  const text = el.dataset.text;
+  const isMagicE = el.dataset.magicE === 'true';
+  const isSilent = el.dataset.silent === 'true';
+
+  if(isMagicE){
+    saveHistory();
+    const parts = text.split('_');
+    const startBox = findNextEmptyBox();
+    if(!startBox) addBox(false);
+    const allBoxes = document.querySelectorAll('.display-box');
+    let startIdx = Array.from(allBoxes).indexOf(startBox);
+    if(startIdx < 0) startIdx = 0;
+    ensureBoxes(startIdx + 3);
+    const boxes = document.querySelectorAll('.display-box');
+    fillBoxLetter(boxes[startIdx], parts[0], false, el.dataset.phonetic);
+    fillBoxLetter(boxes[startIdx+2], parts[1], false);
+    boxes[startIdx+1].classList.add('waiting-fill');
+    boxes[startIdx+1].innerHTML = '<span style="color:#ffb300;font-size:20px">?</span>';
+    return;
+  }
+
+  if(isSilent){
+    saveHistory();
+    const silentMap = {
+      'mb':'<span class="box-letter">m</span><span class="box-letter silent">b</span>',
+      'gn':'<span class="box-letter silent">g</span><span class="box-letter">n</span>',
+      'kn':'<span class="box-letter silent">k</span><span class="box-letter">n</span>',
+      'wr':'<span class="box-letter silent">w</span><span class="box-letter">r</span>'
+    };
+    const target = findNextEmptyBox();
+    if(target){
+      target.innerHTML = (silentMap[text] || '<span class="box-letter silent">'+text+'</span>')
+        + '<span class="remove-x" onclick="event.stopPropagation();clearBox(this.parentElement)">×</span>';
+    }
+    return;
+  }
+
+  saveHistory();
+  // v12.0 点击字素只填格、不发音：先让孩子自己说出这个音，
+  // 想验证就点字素上的小喇叭（或拼完后点🔊听整词）
+  const waiting = document.querySelector('.display-box.waiting-fill');
+  if(waiting){
+    waiting.classList.remove('waiting-fill');
+    fillBoxLetter(waiting, text, false, el.dataset.phonetic);
+  } else {
+    const target = findNextEmptyBox();
+    if(target) fillBoxLetter(target, text, false, el.dataset.phonetic);
+    else {
+      addBox(false);
+      const boxes = document.querySelectorAll('.display-box');
+      fillBoxLetter(boxes[boxes.length-1], text, false, el.dataset.phonetic);
+    }
+  }
+}
+
+function fillBoxLetter(box, letter, silent, phonetic){
+  const cls = silent ? 'box-letter silent' : 'box-letter';
+  box.dataset.phonetic = phonetic || '';
+  box.innerHTML = '<span class="'+cls+'">'+letter+'</span>'
+    + '<span class="remove-x" onclick="event.stopPropagation();clearBox(this.parentElement)">×</span>';
+}
+
+function findNextEmptyBox(){
+  const boxes = document.querySelectorAll('.display-box');
+  for(let b of boxes){
+    if(!b.querySelector('.box-letter') && !b.classList.contains('waiting-fill')) return b;
+  }
+  return null;
+}
+function ensureBoxes(count){
+  const c = document.getElementById('displayBoxes');
+  while(c.querySelectorAll('.display-box').length < count){
+    const b = document.createElement('div');
+    b.className='display-box';b.setAttribute('onclick','clearBox(this)');
+    c.appendChild(b);
+  }
+}
+
+let history = [];
+function saveHistory(){
+  const boxes = document.querySelectorAll('.display-box');
+  history.push(Array.from(boxes).map(b => {
+    const letters = b.querySelectorAll('.box-letter');
+    if(letters.length) return Array.from(letters).map(l => l.textContent + (l.classList.contains('silent')?'__SIL__':'')).join('|');
+    return b.classList.contains('waiting-fill') ? '__WAIT__' : '';
+  }));
+  if(history.length > 50) history.shift();
+}
+function clearBox(box){
+  saveHistory();
+  box.innerHTML='';box.classList.remove('waiting-fill');
+}
+function undo(){
+  if(!history.length) return;
+  const prev = history.pop();
+  const boxes = document.querySelectorAll('.display-box');
+  boxes.forEach((b,i) => {
+    b.classList.remove('waiting-fill');
+    if(prev[i] === '__WAIT__'){
+      b.innerHTML='<span style="color:#ffb300;font-size:20px">?</span>';
+      b.classList.add('waiting-fill');
+    } else if(prev[i]){
+      const parts = prev[i].split('|');
+      let html = '';
+      parts.forEach(p => {
+        if(p.endsWith('__SIL__')) html += '<span class="box-letter silent">'+p.replace('__SIL__','')+'</span>';
+        else html += '<span class="box-letter">'+p+'</span>';
+      });
+      b.innerHTML = html + '<span class="remove-x" onclick="event.stopPropagation();clearBox(this.parentElement)">×</span>';
+    } else b.innerHTML='';
+  });
+}
+function clearAll(){
+  saveHistory();
+  document.querySelectorAll('.display-box').forEach(b => {
+    b.innerHTML='';b.classList.remove('waiting-fill');
+  });
+}
+function addBox(save){
+  if(save !== false) saveHistory();
+  const c = document.getElementById('displayBoxes');
+  const b = document.createElement('div');
+  b.className='display-box';b.setAttribute('onclick','clearBox(this)');
+  c.appendChild(b);
+}
+function removeBox(){
+  const boxes = document.querySelectorAll('.display-box');
+  if(boxes.length > 2){
+    saveHistory();
+    boxes[boxes.length-1].remove();
+  }
+}
+function getBuiltWord(){
+  let w = '';
+  document.querySelectorAll('.display-box .box-letter').forEach(l => w += l.textContent);
+  return w;
+}
+function playBuiltWord(){
+  const word = getBuiltWord();
+  if(!word){ alert('请先拼出单词'); return; }
+  const type = pronType === 'us' ? 0 : 1;
+  const a = document.getElementById('audioPlayer');
+  a.src = 'https://dict.youdao.com/dictvoice?type='+type+'&audio='+encodeURIComponent(word.toLowerCase());
+  a.play().catch(function(){
+    if('speechSynthesis' in window){
+      const u = new SpeechSynthesisUtterance(word.toLowerCase());
+      u.lang = pronType==='us'?'en-US':'en-GB';speechSynthesis.speak(u);
+    }
+  });
+}
+
+function setTierVisibility(tierIdx, show){
+  const tier = tiers[tierIdx];
+  ['onsets','vowels','codas','suffixes'].forEach(type => {
+    if(tier[type]){
+      tier[type].forEach(item => {
+        tierVisibility[tierIdx + '_' + type + '_' + item.text] = show;
+      });
+    }
+  });
+  renderLibrary();
+}
+
+function renderLibrary(){
+  const lib = document.getElementById('library');
+  lib.innerHTML = '';
+  // 恢复初级中级拼词框大小
+  if(currentLevel !== 3){
+    document.querySelectorAll('.display-box').forEach(box => {
+      box.style.width = '118px';
+      box.style.height = '96px';
+    });
+    const boxLetter = document.querySelector('.display-box .box-letter');
+    if(boxLetter) boxLetter.style.fontSize = '56px';
+    lib.style.marginTop = '';
+  }
+  // 中级页面去掉滚动，一屏显示
+  if(currentLevel === 2){
+    lib.style.overflow = 'hidden';
+    lib.style.paddingTop = showIpa ? '10px' : '20px';
+  } else if(currentLevel === 1){
+    lib.style.overflow = 'auto';
+    lib.style.paddingTop = '4px';
+  } else {
+    lib.style.overflow = 'auto';
+    lib.style.paddingTop = '30px';
+  }
+
+  if(currentLevel === 1){
+    // 初级：26字母网格
+    const grid = document.createElement('div');
+    grid.className = 'alphabet-grid';
+    alphabet.forEach(item => {
+      const g = createGrapheme(item);
+      if(showIpa) g.classList.add('show-ipa');
+      else g.classList.add('large-letter');
+      grid.appendChild(g);
+    });
+    lib.appendChild(grid);
+  }
+  else if(currentLevel === 2){
+    // 中级：左侧分类 + 右侧字母
+    const area = document.createElement('div');
+    area.className = 'level2-area';
+    const left = document.createElement('div');
+    left.className = 'level2-left';
+    level2Categories.forEach(cat => {
+      const row = document.createElement('div');
+      row.className = 'digraph-row';
+      row.innerHTML = '<div class="row-label '+cat.lblCls+'">'+cat.label+'</div>';
+      const wrap = document.createElement('div');
+      wrap.className = 'row-graphemes';
+      cat.items.forEach(item => {
+        const g = createGrapheme(item);
+        if(showIpa) g.classList.add('show-ipa');
+        else g.classList.add('large-letter');
+        wrap.appendChild(g);
+      });
+      row.appendChild(wrap);
+      left.appendChild(row);
+    });
+    const rightWrap = document.createElement('div');
+    rightWrap.className = 'level2-right-wrap';
+    // 竖向字母音标题
+    const vTitle = document.createElement('div');
+    vTitle.className = 'vertical-title';
+    vTitle.textContent = '字母音';
+    rightWrap.appendChild(vTitle);
+    const right = document.createElement('div');
+    right.className = 'level2-right';
+    // 手动6行排列，每行5个
+    const rowLayout = [
+      ['a','b','c','d','e'],
+      ['f','g','h','i','j'],
+      ['k','l','m','n','o'],
+      ['p','q','r','s','t'],
+      ['u','v','w','x','y'],
+      ['z']
+    ];
+    rowLayout.forEach(rowLetters => {
+      const rowDiv = document.createElement('div');
+      rowDiv.className = 'level2-row';
+      rowLetters.forEach(letter => {
+        const item = alphabet.find(a => a.text === letter);
+        if(item){
+          const g = createGrapheme(item);
+          if(showIpa) g.classList.add('show-ipa');
+          else g.classList.add('large-letter');
+          rowDiv.appendChild(g);
+        }
+      });
+      right.appendChild(rowDiv);
+    });
+    rightWrap.appendChild(right);
+    area.appendChild(left);
+    area.appendChild(rightWrap);
+    lib.appendChild(area);
+  }
+  else {
+    // 高级：5层级首中尾横向，恢复最初布局，只渲染可见字素
+    // 拼词框和撤销清空上移，给字素更多空间
+    const row2 = document.querySelector('.topbar-row2');
+    const row3 = document.querySelector('.topbar-row3');
+    if(row2) row2.style.marginTop = '-26px';
+    if(row3) row3.style.marginTop = '6px';
+    // 高级页面拼词框缩小，不影响初级中级
+    document.querySelectorAll('.display-box').forEach(box => {
+      box.style.width = '90px';
+      box.style.height = '70px';
+    });
+    const boxLetter = document.querySelector('.display-box .box-letter');
+    if(boxLetter) boxLetter.style.fontSize = '50px';
+    lib.style.overflow = 'hidden';
+    lib.style.paddingTop = '2px';
+    lib.style.marginTop = '20px';
+    // 计算总可见字素数
+    let totalVisible = 0;
+    tiers.forEach((tier, idx) => {
+      ['onsets','vowels','codas','suffixes'].forEach(type => {
+        if(tier[type]){
+          tier[type].forEach(item => {
+            if(tierVisibility[idx + '_' + type + '_' + item.text]) totalVisible++;
+          });
+        }
+      });
+    });
+    // 缩小字素框，确保5个层级全部一屏显示
+    let fontSize, ipaSize, spkSize, padding, gap, marginBottom, tierColWidth;
+    if(totalVisible <= 50){
+      fontSize = '20px'; ipaSize = '8px'; spkSize = '9px'; padding = '8px 4px'; gap = '6px'; marginBottom = '10px'; tierColWidth = '28px';
+    } else if(totalVisible <= 90){
+      fontSize = '18px'; ipaSize = '7px'; spkSize = '8px'; padding = '7px 3px'; gap = '5px'; marginBottom = '8px'; tierColWidth = '26px';
+    } else if(totalVisible <= 130){
+      fontSize = '16px'; ipaSize = '7px'; spkSize = '8px'; padding = '6px 3px'; gap = '5px'; marginBottom = '6px'; tierColWidth = '26px';
+    } else {
+      // 不显示音标时，字素框高度和显示音标时一样，字母更大，确保5个层级一屏
+      fontSize = '17px'; ipaSize = '7px'; spkSize = '8px'; padding = '6px 3px'; gap = '4px'; marginBottom = '6px'; tierColWidth = '26px';
+    }
+    // 显示音标时，字素框大小为基准，确保5个层级一屏并铺满页面
+    if(showIpa){
+      padding = '6px 3px';
+      fontSize = '16px';
+      ipaSize = '8px';
+      spkSize = '9px';
+      gap = '4px';
+      marginBottom = '6px';
+    }
+    tiers.forEach((tier, idx) => {
+      const row = document.createElement('div');
+      row.className = 'tier-row';
+      row.dataset.tierRow = idx;
+      row.style.marginBottom = marginBottom;
+      row.style.gap = '6px';
+      row.style.gridTemplateColumns = tierColWidth + ' 1fr';
+      row.innerHTML = '<div class="tier-name-label" style="font-size:16px;font-weight:700;color:#2B7FD8;padding-top:8px;line-height:1.2;font-family:Arial,sans-serif;text-align:center">'+(idx+1)+'</div>';
+      const content = document.createElement('div');
+      content.className = 'tier-content';
+      content.style.gap = '10px';
+      content.style.gridTemplateColumns = '3.2fr 2.8fr 3.2fr 0.8fr';
+      ['onsets','vowels','codas','suffixes'].forEach(type => {
+        if(tier[type]){
+          const visibleItems = tier[type].filter(item => tierVisibility[idx + '_' + type + '_' + item.text]);
+          if(visibleItems.length > 0){
+            const col = document.createElement('div');col.className='phoneme-col';
+            const g = document.createElement('div');g.className='phoneme-grid col-' + type.replace(/s$/,'');
+            g.style.gap = gap;
+            g.style.display = 'grid';
+            // 固定每行数量：首音8个、元音7个、尾音8个、后缀固定宽度
+            if(type === 'onsets') g.style.gridTemplateColumns = 'repeat(8, 1fr)';
+            else if(type === 'vowels') g.style.gridTemplateColumns = 'repeat(7, 1fr)';
+            else if(type === 'codas') g.style.gridTemplateColumns = 'repeat(8, 1fr)';
+            else g.style.gridTemplateColumns = 'repeat(1, 60px)';
+            visibleItems.forEach(item => {
+              const grapheme = createGrapheme(item, idx);
+              grapheme.style.padding = padding;
+              grapheme.style.fontSize = fontSize;
+              grapheme.style.borderRadius = '8px';
+              grapheme.style.width = '100%';
+              grapheme.style.minWidth = '0';
+              grapheme.style.flex = 'none';
+              grapheme.style.aspectRatio = 'auto';
+              grapheme.style.display = 'flex';
+              grapheme.style.flexDirection = 'column';
+              grapheme.style.alignItems = 'center';
+              grapheme.style.justifyContent = 'center';
+              grapheme.style.lineHeight = '1.2';
+              grapheme.style.boxSizing = 'border-box';
+              // 根据类型设置背景颜色
+              if(type === 'onsets'){
+                grapheme.style.background = '#2B7FD8';
+              } else if(type === 'vowels'){
+                grapheme.style.background = '#ff5c5c';
+              } else if(type === 'codas'){
+                grapheme.style.background = '#5cb85c';
+              } else {
+                grapheme.style.background = '#f0a8d0';
+              }
+              // 根据显示音标状态添加类
+              if(showIpa) grapheme.classList.add('show-ipa');
+              else grapheme.classList.add('large-letter');
+              const textEl = grapheme.querySelector('.grapheme-text');
+              if(textEl) textEl.style.fontSize = fontSize;
+              const ipaEl = grapheme.querySelector('.grapheme-ipa');
+              if(ipaEl) ipaEl.style.fontSize = ipaSize;
+              const spkEl = grapheme.querySelector('.mini-speaker');
+              if(spkEl){
+                spkEl.style.fontSize = spkSize;
+                spkEl.style.top = '1px';
+                spkEl.style.right = '2px';
+              }
+              g.appendChild(grapheme);
+            });
+            col.appendChild(g);content.appendChild(col);
+          }
+        }
+      });
+      row.appendChild(content);
+      lib.appendChild(row);
+    });
+  }
+}
+
+function setLevel(level, btn){
+  currentLevel = level;
+  document.querySelectorAll('.level-tabs button').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  // 根据级别调整顶部间距和撤销/清空按钮间距
+  const row3 = document.querySelector('.topbar-row3');
+  const topbar = document.querySelector('.topbar');
+  if(row3){
+    if(level === 1) row3.style.marginTop = '32px';
+    else if(level === 2) row3.style.marginTop = '10px';
+    else row3.style.marginTop = '18px';
+  }
+  if(topbar){
+    topbar.style.paddingTop = '16px';
+  }
+  // 高级页面显示字素设置按钮
+  const settingsBtn = document.getElementById('tierSettingsBtn');
+  if(settingsBtn){
+    settingsBtn.style.display = level === 3 ? 'inline-block' : 'none';
+  }
+  // 中级页面拼词框和撤销清空上移
+  const row2 = document.querySelector('.topbar-row2');
+  if(row2){
+    if(level === 2) row2.style.marginTop = '-22px';
+    else row2.style.marginTop = '0px';
+  }
+  renderLibrary();
+  if(typeof applySidebars === 'function') applySidebars();
+}
+
+renderLibrary();
+// 初始化撤销/清空按钮位置（初级）
+const initRow3 = document.querySelector('.topbar-row3');
+if(initRow3) initRow3.style.marginTop = '32px';
+// 拖拽放置支持
+const dropZone = document.getElementById('displayBoxes');
+dropZone.addEventListener('dragover', function(e){
+  e.preventDefault();
+  const box = e.target.closest('.display-box');
+  if(box) box.style.background = '#d0e8ff';
+  else this.style.background = '#e8f4ff';
+});
+dropZone.addEventListener('dragleave', function(e){
+  const box = e.target.closest('.display-box');
+  if(box) box.style.background = '';
+  if(!this.contains(e.relatedTarget)) this.style.background = '';
+});
+dropZone.addEventListener('drop', function(e){
+  e.preventDefault();
+  this.style.background = '';
+  document.querySelectorAll('.display-box').forEach(b => b.style.background = '');
+  try{
+    const data = JSON.parse(e.dataTransfer.getData('text/plain'));
+    const targetBox = e.target.closest('.display-box');
+    const fakeEl = document.createElement('div');
+    fakeEl.dataset.text = data.text;
+    fakeEl.dataset.phonetic = data.phonetic || '';
+    fakeEl.dataset.magicE = data.magicE;
+    fakeEl.dataset.silent = data.silent;
+    
+    // 魔法e和不发音字母用原逻辑
+    if(data.magicE || data.silent){
+      handleGraphemeClick(fakeEl);
+      return;
+    }
+    
+    // 普通字母：拖到哪个框就填哪个框
+    if(targetBox){
+      saveHistory();
+      // 如果目标框有等待填充标记，先清除
+      targetBox.classList.remove('waiting-fill');
+      fillBoxLetter(targetBox, data.text, false, data.phonetic || '');
+    } else {
+      handleGraphemeClick(fakeEl);
+    }
+  }catch(err){ console.log('drop error', err); }
+});
+
+// ================= v9.0 拼词增强（仅两侧栏） =================
+const wordFamilies = {
+  'at':['cat','bat','hat','sat','mat','rat'],
+  'an':['can','fan','man','pan','ran','van'],
+  'ad':['bad','dad','had','mad','pad','sad'],
+  'ag':['bag','rag','tag','wag'],
+  'ap':['cap','map','nap','tap'],
+  'am':['ham','jam','ram','yam'],
+  'et':['jet','net','pet','set','vet','wet'],
+  'en':['hen','men','pen','ten'],
+  'ed':['bed','red','fed','wed'],
+  'eg':['leg','peg'],
+  'ig':['big','dig','pig','wig'],
+  'in':['bin','fin','pin','tin','win'],
+  'ip':['dip','hip','lip','rip','sip','tip','zip'],
+  'it':['bit','fit','hit','kit','pit','sit'],
+  'og':['dog','fog','hog','jog','log'],
+  'op':['cop','hop','mop','top'],
+  'ot':['cot','dot','got','hot','lot','pot'],
+  'ob':['cob','job','rob'],
+  'ug':['bug','hug','jug','mug','rug'],
+  'un':['bun','fun','gun','run','sun'],
+  'ut':['but','cut','gut','hut','nut'],
+  'ub':['cub','hub','rub','tub'],
+  'um':['gum','hum','sum'],
+  'ock':['clock','dock','lock','rock','sock'],
+  'ack':['back','jack','pack','rack','sack'],
+  'ick':['kick','lick','pick','sick','tick'],
+  'ell':['bell','fell','sell','tell','well'],
+  'ill':['bill','fill','hill','pill','will'],
+  'all':['ball','call','fall','tall','wall'],
+  'ain':['rain','train','brain','chain'],
+  'eep':['sheep','sleep','jeep','deep'],
+  'eat':['meat','seat','beat','neat'],
+  'ame':['game','name','same','came'],
+  'ake':['cake','lake','make','take'],
+  'ine':['nine','pine','fine','line'],
+  'ite':['kite','bite','white'],
+  'ope':['hope','rope'],
+  'ose':['nose','rose'],
+  'one':['bone','stone','cone'],
+  'ole':['hole','pole','mole'],
+  'ook':['book','cook','look','took']
+};
+
+function getFamily(word){
+  const w = String(word||'').toLowerCase();
+  if(w.length < 3) return null;
+  const rimes = Object.keys(wordFamilies).sort((a,b)=>b.length-a.length);
+  for(const rime of rimes){
+    if(w.endsWith(rime)){
+      const words = wordFamilies[rime].filter(x=>x!==w);
+      if(words.length) return {rime:rime, words:words};
+    }
+  }
+  return null;
+}
+
+// ===== 左栏：单词家族 =====
+function renderFamily(){
+  const body = document.getElementById('familyRailBody');
+  if(!body) return;
+  const fam = getFamily(getBuiltWord());
+  if(!fam){
+    body.innerHTML = '<div class="rail-empty">拼出一个单词<br>这里会出现它的家族词</div>';
+    return;
+  }
+  body.innerHTML = '<div class="rail-sub">-' + fam.rime + ' 家族</div>';
+  fam.words.forEach(w => {
+    const pill = document.createElement('div');
+    pill.className = 'fam-pill-v';
+    pill.innerHTML = '<span>' + w + '</span><span class="fp-play">🔊</span>';
+    pill.addEventListener('click', function(){
+      saveHistory();
+      clearAll();
+      const letters = w.split('');
+      ensureBoxes(letters.length);
+      const bs = document.querySelectorAll('.display-box');
+      letters.forEach((l,i)=>{ fillBoxLetter(bs[i], l, false, alphabetData[l] || ''); });
+      playBuiltWord();
+      renderFamily();
+    });
+    body.appendChild(pill);
+  });
+}
+const famObs = new MutationObserver(function(){ renderFamily(); });
+(function(){
+  const db = document.getElementById('displayBoxes');
+  if(db) famObs.observe(db, {subtree:true, childList:true, characterData:true});
+})();
+
+// ===== 侧栏显示管理（高级或窄屏自动收起为圆钮） =====
+function railMini(){
+  // v15.0 词族/更多只保留在初级；中级/高级不再提供这两个功能
+  if(currentLevel !== 1) return true;
+  // 初级：26字母 7 列约 620px 居中，窄屏收起为圆钮
+  return window.innerWidth < 1100;
+}
+function applySidebars(){
+  const mini = railMini();
+  // 圆钮仅初级窄屏出现；中级/高级不出现任何入口
+  const showFab = mini && currentLevel === 1;
+  document.getElementById('familyRail').style.display = mini ? 'none' : 'flex';
+  document.getElementById('toolRail').style.display = mini ? 'none' : 'flex';
+  document.getElementById('fabFamily').style.display = showFab ? 'flex' : 'none';
+  document.getElementById('fabTool').style.display = showFab ? 'flex' : 'none';
+}
+function toggleFamilyRail(){
+  const rail = document.getElementById('familyRail');
+  rail.style.display = rail.style.display === 'none' ? 'flex' : 'none';
+}
+function toggleToolRail(){
+  const rail = document.getElementById('toolRail');
+  rail.style.display = rail.style.display === 'none' ? 'flex' : 'none';
+}
+function hideToolRail(){
+  if(railMini()) document.getElementById('toolRail').style.display = 'none';
+}
+window.addEventListener('resize', applySidebars);
+(function(){ setTimeout(applySidebars, 50); })();
+
+// ===== 慢速合成拼读 =====
+function slowBlend(){
+  const word = getBuiltWord();
+  if(!word){ alert('请先拼出单词'); return; }
+  const boxes = document.querySelectorAll('.display-box');
+  const parts = [];
+  boxes.forEach(b=>{
+    const l = b.querySelector('.box-letter');
+    if(l && !l.classList.contains('silent')) parts.push({ph: b.dataset.phonetic || '', letter: l.textContent});
+  });
+  if(!parts.length){ playBuiltWord(); return; }
+  // v13.0 兜底：填格没带音素时按字母查表（词族/部分字素可能缺音素）
+  parts.forEach(p=>{ if(!p.ph && alphabetData[p.letter[0]]) p.ph = alphabetData[p.letter[0]]; });
+  parts.forEach((p,i)=>{
+    setTimeout(()=>{
+      boxes.forEach(x=>x.classList.remove('blend-active'));
+      const t = boxes[i];
+      if(t) t.classList.add('blend-active');
+      playPhoneme(p.ph);
+    }, i*750);
+  });
+  setTimeout(()=>{
+    boxes.forEach(x=>x.classList.remove('blend-active'));
+    playBuiltWord();
+  }, parts.length*750 + 350);
+}
+
+// ===== 音效（WebAudio） =====
+let v9ctx = null;
+function v9Audio(){
+  try{
+    if(!v9ctx) v9ctx = new (window.AudioContext||window.webkitAudioContext)();
+    if(v9ctx.state==='suspended') v9ctx.resume();
+    return v9ctx;
+  }catch(e){ return null; }
+}
+function v9tone(freq,dur,when,type,vol){
+  const ctx=v9Audio(); if(!ctx) return;
+  try{
+    const o=ctx.createOscillator(),g=ctx.createGain();
+    o.type=type||'sine'; o.frequency.value=freq;
+    const t0=ctx.currentTime+(when||0);
+    g.gain.setValueAtTime(0.0001,t0);
+    g.gain.exponentialRampToValueAtTime(vol||0.2,t0+0.02);
+    g.gain.exponentialRampToValueAtTime(0.0001,t0+dur);
+    o.connect(g); g.connect(ctx.destination);
+    o.start(t0); o.stop(t0+dur+0.05);
+  }catch(e){}
+}
+function v9Right(){ v9tone(660,.12,0,'sine',.18); v9tone(880,.16,.1,'sine',.18); }
+function v9Combo(){ v9tone(660,.1,0,'sine',.16); v9tone(880,.1,.09,'sine',.16); v9tone(1100,.18,.18,'sine',.16); }
+function v9Wrong(){ v9tone(220,.22,0,'sawtooth',.12); }
+function v9Win(){ [523,659,784,1047].forEach((f,i)=>v9tone(f,.18,i*.12,'sine',.18)); }
+
+// ===== 拼读挑战 =====
+const CHALLENGE_WORDS = [
+  {w:'cat',e:'🐱',c:'猫'},{w:'dog',e:'🐶',c:'小狗'},{w:'pig',e:'🐷',c:'小猪'},
+  {w:'sun',e:'☀️',c:'太阳'},{w:'hat',e:'🎩',c:'帽子'},{w:'bed',e:'🛏️',c:'床'},
+  {w:'bus',e:'🚌',c:'公交车'},{w:'cup',e:'☕',c:'杯子'},{w:'ten',e:'🔟',c:'十'},
+  {w:'map',e:'🗺️',c:'地图'},{w:'hen',e:'🐔',c:'母鸡'},{w:'pen',e:'✒️',c:'钢笔'},
+  {w:'box',e:'📦',c:'盒子'},{w:'fish',e:'🐟',c:'鱼'},{w:'ball',e:'⚽',c:'球'},
+  {w:'book',e:'📖',c:'书'},{w:'moon',e:'🌙',c:'月亮'},{w:'tree',e:'🌳',c:'树'},
+  {w:'duck',e:'🦆',c:'鸭子'},{w:'frog',e:'🐸',c:'青蛙'},{w:'milk',e:'🥛',c:'牛奶'},
+  {w:'star',e:'⭐',c:'星星'},{w:'ship',e:'🚢',c:'轮船'},{w:'cake',e:'🍰',c:'蛋糕'},
+  {w:'rain',e:'🌧️',c:'下雨'},{w:'goat',e:'🐐',c:'山羊'},{w:'hand',e:'✋',c:'手'},
+  {w:'lamp',e:'💡',c:'台灯'},{w:'nest',e:'🪺',c:'鸟窝'},{w:'king',e:'🤴',c:'国王'},
+  {w:'ring',e:'💍',c:'戒指'},{w:'bell',e:'🔔',c:'铃铛'},{w:'egg',e:'🥚',c:'鸡蛋'},
+  {w:'apple',e:'🍎',c:'苹果'},{w:'monkey',e:'🐵',c:'猴子'},{w:'tiger',e:'🐯',c:'老虎'},
+  {w:'rabbit',e:'🐰',c:'兔子'},{w:'lion',e:'🦁',c:'狮子'},{w:'bear',e:'🐻',c:'熊'},
+  {w:'sheep',e:'🐑',c:'绵羊'},{w:'horse',e:'🐴',c:'马'},{w:'mouse',e:'🐭',c:'老鼠'},
+  {w:'bird',e:'🐦',c:'小鸟'},{w:'flower',e:'🌸',c:'花'},{w:'house',e:'🏠',c:'房子'},
+  {w:'door',e:'🚪',c:'门'},{w:'chair',e:'🪑',c:'椅子'},{w:'window',e:'🪟',c:'窗户'},
+  {w:'cloud',e:'☁️',c:'云'},{w:'snow',e:'❄️',c:'雪'},{w:'wind',e:'🌬️',c:'风'},
+  {w:'beach',e:'🏖️',c:'海滩'},{w:'peach',e:'🍑',c:'桃子'},{w:'bread',e:'🍞',c:'面包'},
+  {w:'train',e:'🚂',c:'火车'},{w:'plane',e:'✈️',c:'飞机'},{w:'boat',e:'⛵',c:'小船'}
+];
+const CH_PER = 8;
+let chL = [], chI = 0, chSc = 0, chCo = 0, chBest = 0, chWr = 0, chOn = false;
+const CH_KEY = 'alex_phonics_progress_v1';
+let chProg = {score:0, bestCombo:0, wins:0};
+try{
+  const s = JSON.parse(localStorage.getItem(CH_KEY)||'null');
+  if(s) chProg = s;
+  if(typeof chProg.score!=='number') chProg.score=0;
+  if(typeof chProg.bestCombo!=='number') chProg.bestCombo=0;
+  if(typeof chProg.wins!=='number') chProg.wins=0;
+}catch(e){}
+function chSave(){ try{ localStorage.setItem(CH_KEY, JSON.stringify(chProg)); }catch(e){} }
+function chSh(arr){
+  const a=arr.slice();
+  for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); const t=a[i];a[i]=a[j];a[j]=t; }
+  return a;
+}
+function playWordText(word){
+  if(!word) return;
+  const a = document.getElementById('audioPlayer');
+  a.src = 'https://dict.youdao.com/dictvoice?type='+(pronType==='us'?0:1)+'&audio='+encodeURIComponent(word);
+  a.play().catch(function(){
+    if('speechSynthesis' in window){
+      const u=new SpeechSynthesisUtterance(word);
+      u.lang=pronType==='us'?'en-US':'en-GB';
+      speechSynthesis.speak(u);
+    }
+  });
+}
+function openChallenge(){
+  if(currentLevel !== 1) return;  // v15.0 拼读挑战仅初级提供
+  chOn = true;
+  chL = chSh(CHALLENGE_WORDS).slice(0, CH_PER);
+  chI = 0; chSc = 0; chCo = 0; chBest = 0; chWr = 0;
+  clearAll();
+  document.getElementById('toolRail').style.display = 'flex';
+  document.getElementById('chCard').classList.add('on');
+  renderCh();
+  playChallengeWord();
+}
+function closeChallenge(){
+  chOn = false;
+  document.getElementById('chCard').classList.remove('on');
+  if(railMini()) document.getElementById('toolRail').style.display = 'none';
+}
+function renderCh(){
+  const total = chL.length;
+  const cur = chL[chI];
+  document.getElementById('chNum').textContent = '第 '+(chI+1)+'/'+total;
+  document.getElementById('chFill').style.width = ((chI/total)*100)+'%';
+  document.getElementById('chEmoji').textContent = cur.e;
+  document.getElementById('chCn').textContent = cur.c;
+  document.getElementById('chSpell').textContent = '';
+  document.getElementById('chWordCard').classList.remove('reveal');
+  const fb = document.getElementById('chFb');
+  fb.className = 'ch-fb'; fb.textContent = '';
+  document.getElementById('chScore').textContent = '⭐ '+chSc+' · 🔥 '+chCo;
+}
+function playChallengeWord(){
+  if(!chOn || chI >= chL.length) return;
+  const w = chL[chI].w;
+  playWordText(w);
+  setTimeout(function(){ playWordText(w); }, 1300);
+}
+function confirmChallenge(){
+  if(!chOn || chI >= chL.length) return;
+  const target = chL[chI];
+  const built = getBuiltWord().toLowerCase();
+  const fb = document.getElementById('chFb');
+  if(!built){
+    fb.className = 'ch-fb no'; fb.textContent = '拼词框还是空的，先点字母拼一拼～';
+    return;
+  }
+  if(built === target.w){
+    chSc++; chCo++;
+    if(chCo>chBest) chBest=chCo;
+    if(chCo>=3){ v9Combo(); fb.textContent = '🔥 连对 '+chCo+' 个！'; }
+    else { v9Right(); fb.textContent = '🎉 答对啦！'; }
+    fb.className = 'ch-fb ok';
+    document.getElementById('chScore').textContent = '⭐ '+chSc+' · 🔥 '+chCo;
+    clearAll();
+    chI++;
+    if(chI >= chL.length){ finishCh(); return; }
+    setTimeout(function(){ renderCh(); playChallengeWord(); }, 1100);
+  } else {
+    chCo = 0; chWr++;
+    v9Wrong();
+    fb.className = 'ch-fb no';
+    fb.textContent = '🤔 再听听看（点喇叭重听）';
+    document.getElementById('chScore').textContent = '⭐ '+chSc+' · 🔥 0';
+    if(chWr >= 2) revealChallenge();
+  }
+}
+function revealChallenge(){
+  if(!chOn || chI >= chL.length) return;
+  document.getElementById('chSpell').textContent = chL[chI].w;
+  document.getElementById('chWordCard').classList.add('reveal');
+  const fb = document.getElementById('chFb');
+  fb.className = 'ch-fb no';
+  fb.textContent = '这个单词是「'+chL[chI].w+'」，跟着拼一遍吧～';
+}
+function finishCh(){
+  const stars = chSc >= CH_PER ? 3 : chSc >= Math.ceil(CH_PER*0.6) ? 2 : 1;
+  chProg.score += chSc;
+  if(chBest > chProg.bestCombo) chProg.bestCombo = chBest;
+  if(chSc >= Math.ceil(CH_PER*0.6)) chProg.wins++;
+  chSave();
+  v9Win();
+  document.getElementById('chWordCard').classList.add('reveal');
+  document.getElementById('chEmoji').textContent = stars===3?'🏆':stars===2?'🎉':'💪';
+  document.getElementById('chCn').textContent = stars===3?'太厉害了，三颗星！':stars===2?'很棒！':'继续加油！';
+  document.getElementById('chSpell').textContent = '';
+  document.getElementById('chNum').textContent = '挑战完成';
+  document.getElementById('chFill').style.width = '100%';
+  const fb = document.getElementById('chFb');
+  fb.className = 'ch-fb ok';
+  fb.textContent = '拼对 '+chSc+'/'+CH_PER+' 词 · 最高连对 '+chBest+' · 累计 '+chProg.score+' 分';
+  document.getElementById('chScore').textContent = '⭐ '+stars+' · 累计 '+chProg.score+' 分';
+  document.querySelectorAll('.ch-card .ch-ok, .ch-card .ch-hint').forEach(function(b){ b.style.display='none'; });
+  try{
+    const rain=document.createElement('div');
+    rain.style.cssText='position:fixed;inset:0;pointer-events:none;z-index:999;overflow:hidden;';
+    for(let i=0;i<20;i++){
+      const s=document.createElement('span');
+      s.textContent=['⭐','🌟','✨','🎉'][Math.floor(Math.random()*4)];
+      s.style.cssText='position:absolute;top:-30px;left:'+(Math.random()*94)+'%;font-size:'+(18+Math.random()*20)+'px;animation:rainF '+(1.4+Math.random()*1.6)+'s linear forwards;';
+      rain.appendChild(s);
+    }
+    document.body.appendChild(rain);
+    setTimeout(function(){rain.remove();},3400);
+  }catch(e){}
+  chOn = false;
+}
+(function(){
+  if(!document.getElementById('v9rain')){
+    const st=document.createElement('style');
+    st.id='v9rain';
+    st.textContent='@keyframes rainF{0%{transform:translateY(0) rotate(0);opacity:1}100%{transform:translateY(110vh) rotate(360deg);opacity:.6}}';
+    document.head.appendChild(st);
+  }
+})();
+
+</script>
+<div class="side-rail" id="familyRail">
+  <div class="rail-title">📚 词族</div>
+  <div class="rail-body" id="familyRailBody">
+    <div class="rail-empty">拼出一个单词<br>这里会出现它的家族词</div>
+  </div>
+</div>
+
+<div class="side-rail right" id="toolRail">
+  <div class="rail-title">🧰 更多 <button class="rail-close" onclick="hideToolRail()">×</button></div>
+  <div class="rail-body">
+    <button class="rail-btn" onclick="slowBlend()">🐢 慢速拼读<span>逐字素发声 → 整词连读</span></button>
+    <button class="rail-btn pink" onclick="openChallenge()">🎮 拼读挑战<span>听发音拼出单词，8 词一轮</span></button>
+    <div class="ch-card" id="chCard">
+      <div class="ch-head">🎮 拼读挑战 <span class="ch-num" id="chNum"></span></div>
+      <div class="ch-progress"><i id="chFill"></i></div>
+      <div class="ch-word" id="chWordCard">
+        <span class="ch-emoji" id="chEmoji"></span>
+        <span class="ch-cn" id="chCn"></span>
+        <span class="ch-spell" id="chSpell"></span>
+      </div>
+      <button class="ch-play" onclick="playChallengeWord()">🔊 再听一次</button>
+      <div class="ch-fb" id="chFb"></div>
+      <div class="ch-actions">
+        <button class="ch-ok" onclick="confirmChallenge()">✅ 确认</button>
+        <button class="ch-hint" onclick="revealChallenge()">💡 提示</button>
+        <button class="ch-out" onclick="closeChallenge()">退出</button>
+      </div>
+      <div class="ch-score" id="chScore"></div>
+      <div class="ch-hint-txt">在下方字素库里点字母拼出这个词</div>
+    </div>
+  </div>
+</div>
+
+<button class="rail-fab" id="fabFamily" onclick="toggleFamilyRail()">📚</button>
+<button class="rail-fab fab-right" id="fabTool" onclick="toggleToolRail()">🎮</button>
+
+</body>
+</html>

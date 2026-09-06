@@ -641,6 +641,23 @@ main{padding:2px 12px!important}
 .wm-root-meaning{font-size:11px!important}
 .wm-root-origin{font-size:9px!important}
 .wm-selected-info{font-size:10px!important;padding:2px 6px!important}
+
+/* v4.8 例词分析卡片 */
+.primary-examples-title{font-size:11px!important;font-weight:700!important;color:#2B7FD8!important;margin:6px 0 3px 0!important;padding:3px 6px!important;background:#eff6ff!important;border-radius:4px!important}
+.primary-examples-grid{display:grid!important;grid-template-columns:repeat(3,1fr)!important;gap:4px!important;padding:2px 0!important}
+.example-card{background:#fff!important;border:1px solid #e5e7eb!important;border-radius:5px!important;padding:5px 7px!important}
+.example-card .ex-word{font-size:12px!important;font-weight:700!important;color:#1e40af!important}
+.example-card .ex-ipa{font-size:9px!important;color:#6b7280!important;margin-left:4px!important}
+.example-card .ex-pos{font-size:9px!important;color:#059669!important;margin-left:4px!important}
+.example-card .ex-meaning{font-size:10px!important;color:#374151!important;margin:1px 0!important}
+.example-card .ex-parts{display:flex!important;align-items:center!important;gap:2px!important;margin:2px 0!important;font-size:9px!important}
+.example-card .ex-part{background:#f0f9ff!important;border:1px solid #bae6fd!important;border-radius:3px!important;padding:1px 4px!important;text-align:center!important;min-width:30px!important}
+.example-card .ex-part .pt{font-weight:600!important;color:#0369a1!important;display:block!important;font-size:10px!important}
+.example-card .ex-part .pc{color:#64748b!important;font-size:8px!important;display:block!important}
+.example-card .ex-eq{color:#94a3b8!important;font-weight:700!important;font-size:11px!important}
+.example-card .ex-result{background:#fef3c7!important;border:1px solid #fcd34d!important;border-radius:3px!important;padding:1px 5px!important;font-size:10px!important;color:#92400e!important;font-weight:600!important}
+.example-card .ex-note{font-size:8px!important;color:#dc2626!important;background:#fef2f2!important;padding:1px 4px!important;border-radius:2px!important;margin-left:4px!important}
+.example-card .ex-tip{font-size:8px!important;color:#6b7280!important;margin-top:1px!important;font-style:italic!important}
 </style>
 </head>
 <body>
@@ -847,6 +864,8 @@ international"></textarea>
             <div class="primary-morph-list" id="pri-prefix-together"></div>
           </div>
         </div>
+        <div class="primary-examples-title">📝 例词分析</div>
+        <div class="primary-examples-grid" id="pri-prefix-examples"></div>
       </div>
 
       <!-- 后缀分类 -->
@@ -877,11 +896,15 @@ international"></textarea>
             <div class="primary-morph-list" id="pri-suffix-other"></div>
           </div>
         </div>
+        <div class="primary-examples-title">📝 例词分析</div>
+        <div class="primary-examples-grid" id="pri-suffix-examples"></div>
       </div>
 
       <!-- 词根列表 -->
       <div class="primary-content" id="primary-roots" hidden>
         <div class="primary-root-grid" id="primaryRootGrid"></div>
+        <div class="primary-examples-title">📝 词根例词分析</div>
+        <div class="primary-examples-grid" id="pri-root-examples"></div>
       </div>
 
       <!-- 合成词 -->
@@ -904,6 +927,8 @@ international"></textarea>
             <div class="primary-morph-list" id="pri-compound-other"></div>
           </div>
         </div>
+        <div class="primary-examples-title">📝 合成词分析</div>
+        <div class="primary-examples-grid" id="pri-compound-examples"></div>
       </div>
     </div>
   </div>
@@ -4500,6 +4525,186 @@ const primaryCompounds = {
   ],
 };
 
+
+// ==================== v4.8 小学词缀详细例词 ====================
+const primaryExamples = {
+  // 前缀：表否定
+  neg: [
+    {w:'unhappy', ipa:"/ʌnˈhæpi/", pos:'adj.', m:'不高兴的', parts:[{t:'un-', c:'不'}, {t:'happy', c:'高兴的'}], result:'不高兴的', note:'', tip:'不+高兴=不高兴'},
+    {w:'unable', ipa:"/ʌnˈeɪbl/", pos:'adj.', m:'不能的', parts:[{t:'un-', c:'不'}, {t:'able', c:'能够的'}], result:'不能的', note:'', tip:'不+能够=不能够'},
+    {w:'disagree', ipa:"/ˌdɪsəˈɡriː/", pos:'v.', m:'不同意', parts:[{t:'dis-', c:'不'}, {t:'agree', c:'同意'}], result:'不同意', note:'', tip:'不+同意=不同意'},
+    {w:'impossible', ipa:"/ɪmˈpɒsəbl/", pos:'adj.', m:'不可能的', parts:[{t:'im-', c:'不'}, {t:'possible', c:'可能的'}], result:'不可能的', note:'p前用im', tip:'不+可能=不可能'},
+    {w:'nonsense', ipa:"/ˈnɒnsns/", pos:'n.', m:'胡说，废话', parts:[{t:'non-', c:'非，不'}, {t:'sense', c:'意义'}], result:'无意义的话', note:'', tip:'非+意义=无意义'},
+  ],
+  // 前缀：表动作/方向
+  action: [
+    {w:'return', ipa:"/rɪˈtɜːn/", pos:'v./n.', m:'返回，归还', parts:[{t:'re-', c:'回，再'}, {t:'turn', c:'转'}], result:'转回来=返回', note:'', tip:'回+转=转回来'},
+    {w:'preview', ipa:"/ˈpriːvjuː/", pos:'n./v.', m:'预览，预习', parts:[{t:'pre-', c:'在前'}, {t:'view', c:'看'}], result:'提前看=预览', note:'', tip:'在前+看=提前看'},
+    {w:'export', ipa:"/ɪkˈspɔːt/", pos:'v./n.', m:'出口，输出', parts:[{t:'ex-', c:'出'}, {t:'port', c:'运送'}], result:'运出去=出口', note:'', tip:'出+运送=运出去'},
+    {w:'transport', ipa:"/trænˈspɔːt/", pos:'v./n.', m:'运输，交通', parts:[{t:'trans-', c:'跨越'}, {t:'port', c:'运送'}], result:'跨越运送=运输', note:'', tip:'跨越+运送=运输'},
+    {w:'subway', ipa:"/ˈsʌbweɪ/", pos:'n.', m:'地铁', parts:[{t:'sub-', c:'在下'}, {t:'way', c:'路'}], result:'在下面的路=地铁', note:'', tip:'在下+路=地下的路'},
+    {w:'international', ipa:"/ˌɪntəˈnæʃnəl/", pos:'adj.', m:'国际的', parts:[{t:'inter-', c:'在…之间'}, {t:'national', c:'国家的'}], result:'国家之间的=国际的', note:'', tip:'之间+国家的=国际的'},
+  ],
+  // 前缀：表数量
+  number: [
+    {w:'uniform', ipa:"/ˈjuːnɪfɔːm/", pos:'n./adj.', m:'制服；统一的', parts:[{t:'uni-', c:'单一'}, {t:'form', c:'形式'}], result:'一种形式=统一', note:'', tip:'单一+形式=统一'},
+    {w:'bicycle', ipa:"/ˈbaɪsɪkl/", pos:'n.', m:'自行车', parts:[{t:'bi-', c:'二'}, {t:'cycle', c:'轮，圈'}], result:'两个轮子=自行车', note:'', tip:'二+轮=两轮车'},
+    {w:'triangle', ipa:"/ˈtraɪæŋɡl/", pos:'n.', m:'三角形', parts:[{t:'tri-', c:'三'}, {t:'angle', c:'角'}], result:'三个角=三角形', note:'', tip:'三+角=三角形'},
+    {w:'multiply', ipa:"/ˈmʌltɪplaɪ/", pos:'v.', m:'乘，繁殖', parts:[{t:'multi-', c:'多'}, {t:'ply', c:'折叠'}], result:'多折叠=倍增', note:'', tip:'多+折叠=增多'},
+    {w:'semicircle', ipa:"/ˈsemisɜːkl/", pos:'n.', m:'半圆', parts:[{t:'semi-', c:'半'}, {t:'circle', c:'圆'}], result:'半个圆=半圆', note:'', tip:'半+圆=半圆'},
+    {w:'monologue', ipa:"/ˈmɒnəlɒɡ/", pos:'n.', m:'独白', parts:[{t:'mono-', c:'单一'}, {t:'logue', c:'说话'}], result:'一个人说话=独白', note:'', tip:'单一+说话=独白'},
+  ],
+  // 前缀：表加强
+  intense: [
+    {w:'superman', ipa:"/ˈsuːpəmæn/", pos:'n.', m:'超人', parts:[{t:'super-', c:'超级'}, {t:'man', c:'人'}], result:'超级的人=超人', note:'', tip:'超级+人=超人'},
+    {w:'overcome', ipa:"/ˌəʊvəˈkʌm/", pos:'v.', m:'克服，战胜', parts:[{t:'over-', c:'过度，在上'}, {t:'come', c:'来'}], result:'从上面来=压倒', note:'', tip:'在上+来=压过来'},
+    {w:'outdoor', ipa:"/ˈaʊtdɔː/", pos:'adj.', m:'户外的', parts:[{t:'out-', c:'外'}, {t:'door', c:'门'}], result:'门外的=户外', note:'', tip:'外+门=门外'},
+    {w:'extraordinary', ipa:"/ɪkˈstrɔːdnri/", pos:'adj.', m:'非凡的，特别的', parts:[{t:'extra-', c:'超出'}, {t:'ordinary', c:'普通的'}], result:'超出普通=非凡', note:'', tip:'超出+普通=不普通'},
+  ],
+  // 前缀：表时间/位置
+  time: [
+    {w:'forecast', ipa:"/ˈfɔːkɑːst/", pos:'n./v.', m:'预报，预测', parts:[{t:'fore-', c:'在前，预先'}, {t:'cast', c:'投掷'}], result:'预先投出=预报', note:'', tip:'预先+投=预先说'},
+    {w:'postwar', ipa:"/ˌpəʊstˈwɔː/", pos:'adj.', m:'战后的', parts:[{t:'post-', c:'后'}, {t:'war', c:'战争'}], result:'战争之后=战后', note:'', tip:'后+战争=战后'},
+    {w:'midnight', ipa:"/ˈmɪdnaɪt/", pos:'n.', m:'午夜，半夜', parts:[{t:'mid-', c:'中'}, {t:'night', c:'夜晚'}], result:'夜晚中间=午夜', note:'', tip:'中+夜晚=半夜'},
+    {w:'prewar', ipa:"/ˌpriːˈwɔː/", pos:'adj.', m:'战前的', parts:[{t:'pre-', c:'在前'}, {t:'war', c:'战争'}], result:'战争之前=战前', note:'', tip:'在前+战争=战前'},
+  ],
+  // 前缀：表共同
+  together: [
+    {w:'connect', ipa:"/kəˈnekt/", pos:'v.', m:'连接，联系', parts:[{t:'con-', c:'共同'}, {t:'nect', c:'绑'}], result:'绑在一起=连接', note:'', tip:'共同+绑=连起来'},
+    {w:'combine', ipa:"/kəmˈbaɪn/", pos:'v.', m:'结合，联合', parts:[{t:'com-', c:'共同'}, {t:'bine', c:'两个'}], result:'两个在一起=结合', note:'', tip:'共同+二=合二为一'},
+    {w:'cooperate', ipa:"/kəʊˈɒpəreɪt/", pos:'v.', m:'合作，协作', parts:[{t:'co-', c:'共同'}, {t:'operate', c:'操作'}], result:'共同操作=合作', note:'', tip:'共同+操作=一起做'},
+    {w:'sympathy', ipa:"/ˈsɪmpəθi/", pos:'n.', m:'同情，同感', parts:[{t:'sym-', c:'共同'}, {t:'pathy', c:'感情'}], result:'共同的感情=同情', note:'', tip:'共同+感情=同感'},
+  ],
+  // 后缀：构成名词（人/物）
+  'noun-person': [
+    {w:'teacher', ipa:"/ˈtiːtʃə(r)/", pos:'n.', m:'教师', parts:[{t:'teach', c:'教'}, {t:'-er', c:'人'}], result:'教的人=教师', note:'', tip:'教+人=老师'},
+    {w:'actor', ipa:"/ˈæktə(r)/", pos:'n.', m:'演员', parts:[{t:'act', c:'表演'}, {t:'-or', c:'人'}], result:'表演的人=演员', note:'', tip:'表演+人=演员'},
+    {w:'manager', ipa:"/ˈmænɪdʒə(r)/", pos:'n.', m:'经理', parts:[{t:'manage', c:'管理'}, {t:'-er', c:'人'}], result:'管理的人=经理', note:'ee合并', tip:'管理+人=管理者'},
+    {w:'winner', ipa:"/ˈwɪnə(r)/", pos:'n.', m:'获胜者', parts:[{t:'win', c:'胜利'}, {t:'-er', c:'人'}], result:'赢的人=获胜者', note:'双写n', tip:'胜利+人=赢家'},
+    {w:'engineer', ipa:"/ˌendʒɪˈnɪə(r)/", pos:'n.', m:'工程师', parts:[{t:'engine', c:'发动机'}, {t:'-er', c:'人'}], result:'造发动机的人=工程师', note:'', tip:'发动机+人=技师'},
+    {w:'artist', ipa:"/ˈɑːtɪst/", pos:'n.', m:'艺术家', parts:[{t:'art', c:'艺术'}, {t:'-ist', c:'人'}], result:'搞艺术的人=艺术家', note:'', tip:'艺术+人=艺术家'},
+  ],
+  // 后缀：构成名词（状态/行为）
+  'noun-state': [
+    {w:'action', ipa:"/ˈækʃn/", pos:'n.', m:'行动，行为', parts:[{t:'act', c:'做'}, {t:'-ion', c:'行为'}], result:'做的行为=行动', note:'', tip:'做+行为=行动'},
+    {w:'development', ipa:"/dɪˈveləpmənt/", pos:'n.', m:'发展，开发', parts:[{t:'develop', c:'发展'}, {t:'-ment', c:'结果'}], result:'发展的结果=发展', note:'', tip:'发展+结果=发展'},
+    {w:'happiness', ipa:"/ˈhæpinəs/", pos:'n.', m:'幸福，快乐', parts:[{t:'happy', c:'高兴的'}, {t:'-ness', c:'状态'}], result:'高兴的状态=幸福', note:'y变i', tip:'高兴+状态=幸福'},
+    {w:'ability', ipa:"/əˈbɪləti/", pos:'n.', m:'能力，才能', parts:[{t:'able', c:'能够的'}, {t:'-ity', c:'性质'}], result:'能够的性质=能力', note:'', tip:'能够+性质=能力'},
+    {w:'importance', ipa:"/ɪmˈpɔːtns/", pos:'n.', m:'重要性', parts:[{t:'important', c:'重要的'}, {t:'-ance', c:'状态'}], result:'重要的状态=重要性', note:'', tip:'重要+状态=重要性'},
+    {w:'freedom', ipa:"/ˈfriːdəm/", pos:'n.', m:'自由', parts:[{t:'free', c:'自由的'}, {t:'-dom', c:'领域，状态'}], result:'自由的状态=自由', note:'', tip:'自由+状态=自由'},
+  ],
+  // 后缀：构成形容词
+  adj: [
+    {w:'readable', ipa:"/ˈriːdəbl/", pos:'adj.', m:'可读的', parts:[{t:'read', c:'读'}, {t:'-able', c:'能够'}], result:'能够读的=可读的', note:'', tip:'读+能够=能读的'},
+    {w:'beautiful', ipa:"/ˈbjuːtɪfl/", pos:'adj.', m:'美丽的', parts:[{t:'beauty', c:'美'}, {t:'-ful', c:'充满'}], result:'充满美的=美丽的', note:'y变i', tip:'美+充满=美丽的'},
+    {w:'careless', ipa:"/ˈkeələs/", pos:'adj.', m:'粗心的', parts:[{t:'care', c:'关心'}, {t:'-less', c:'没有'}], result:'没有关心的=粗心的', note:'', tip:'关心+没有=不关心'},
+    {w:'famous', ipa:"/ˈfeɪməs/", pos:'adj.', m:'著名的', parts:[{t:'fame', c:'名声'}, {t:'-ous', c:'具有'}], result:'具有名声的=著名的', note:'', tip:'名声+具有=有名的'},
+    {w:'national', ipa:"/ˈnæʃnəl/", pos:'adj.', m:'国家的，民族的', parts:[{t:'nation', c:'国家'}, {t:'-al', c:'…的'}], result:'国家的=国家的', note:'', tip:'国家+的=国家的'},
+    {w:'active', ipa:"/ˈæktɪv/", pos:'adj.', m:'积极的，活跃的', parts:[{t:'act', c:'行动'}, {t:'-ive', c:'有倾向'}], result:'有行动倾向的=积极的', note:'', tip:'行动+倾向=爱动的'},
+  ],
+  // 后缀：构成动词
+  verb: [
+    {w:'realize', ipa:"/ˈriːəlaɪz/", pos:'v.', m:'实现，意识到', parts:[{t:'real', c:'真实的'}, {t:'-ize', c:'使…化'}], result:'使真实化=实现', note:'', tip:'真实+使化=实现'},
+    {w:'beautify', ipa:"/ˈbjuːtɪfaɪ/", pos:'v.', m:'美化', parts:[{t:'beauty', c:'美'}, {t:'-fy', c:'使…化'}], result:'使变美=美化', note:'y变i', tip:'美+使化=美化'},
+    {w:'widen', ipa:"/ˈwaɪdn/", pos:'v.', m:'加宽，变宽', parts:[{t:'wide', c:'宽的'}, {t:'-en', c:'使…'}], result:'使变宽=加宽', note:'', tip:'宽+使=变宽'},
+    {w:'simplify', ipa:"/ˈsɪmplɪfaɪ/", pos:'v.', m:'简化', parts:[{t:'simple', c:'简单的'}, {t:'-fy', c:'使…化'}], result:'使简单化=简化', note:'', tip:'简单+使化=简化'},
+  ],
+  // 后缀：构成副词
+  adv: [
+    {w:'quickly', ipa:"/ˈkwɪkli/", pos:'adv.', m:'快速地', parts:[{t:'quick', c:'快的'}, {t:'-ly', c:'…地'}], result:'快地=快速地', note:'', tip:'快+地=快速地'},
+    {w:'happily', ipa:"/ˈhæpɪli/", pos:'adv.', m:'高兴地', parts:[{t:'happy', c:'高兴的'}, {t:'-ly', c:'…地'}], result:'高兴地=高兴地', note:'y变i', tip:'高兴+地=高兴地'},
+    {w:'forward', ipa:"/ˈfɔːwəd/", pos:'adv.', m:'向前', parts:[{t:'fore', c:'前'}, {t:'-ward', c:'向…方向'}], result:'向前方=向前', note:'', tip:'前+方向=向前'},
+    {w:'otherwise', ipa:"/ˈʌðəwaɪz/", pos:'adv.', m:'否则，另外', parts:[{t:'other', c:'其他的'}, {t:'-wise', c:'在…方面'}], result:'在其他方面=否则', note:'', tip:'其他+方面=不然'},
+  ],
+  // 后缀：其他
+  other: [
+    {w:'thirteen', ipa:"/ˌθɜːˈtiːn/", pos:'num.', m:'十三', parts:[{t:'three', c:'三'}, {t:'-teen', c:'十几'}], result:'三+十几=十三', note:'', tip:'三+十几=十三'},
+    {w:'twenty', ipa:"/ˈtwenti/", pos:'num.', m:'二十', parts:[{t:'twen', c:'二'}, {t:'-ty', c:'几十'}], result:'二+几十=二十', note:'', tip:'二+几十=二十'},
+    {w:'biology', ipa:"/baɪˈɒlədʒi/", pos:'n.', m:'生物学', parts:[{t:'bio', c:'生命'}, {t:'-logy', c:'…学'}], result:'生命的学问=生物学', note:'', tip:'生命+学=生物学'},
+    {w:'photograph', ipa:"/ˈfəʊtəɡrɑːf/", pos:'n./v.', m:'照片；拍照', parts:[{t:'photo', c:'光'}, {t:'-graph', c:'写，画'}], result:'用光写=照片', note:'', tip:'光+写=拍照'},
+    {w:'telephone', ipa:"/ˈtelɪfəʊn/", pos:'n.', m:'电话', parts:[{t:'tele', c:'远'}, {t:'-phone', c:'声音'}], result:'远处的声音=电话', note:'', tip:'远+声音=电话'},
+    {w:'thermometer', ipa:"/θəˈmɒmɪtə(r)/", pos:'n.', m:'温度计', parts:[{t:'thermo', c:'热'}, {t:'-meter', c:'测量仪'}], result:'测量热的仪器=温度计', note:'', tip:'热+测量仪=温度计'},
+  ],
+  // 词根示例（精选12个）
+  roots: [
+    {r:'act', m:'做，动作', words:[
+      {w:'action', ipa:"/ˈækʃn/", m:'行动', parts:'act(做)+ion(行为)'},
+      {w:'active', ipa:"/ˈæktɪv/", m:'积极的', parts:'act(行动)+ive(有倾向)'},
+      {w:'actor', ipa:"/ˈæktə(r)/", m:'演员', parts:'act(表演)+or(人)'},
+    ]},
+    {r:'audi', m:'听', words:[
+      {w:'audio', ipa:"/ˈɔːdiəʊ/", m:'音频', parts:'audi(听)+o(名词)'},
+      {w:'audience', ipa:"/ˈɔːdiəns/", m:'听众', parts:'audi(听)+ence(人)'},
+      {w:'audible', ipa:"/ˈɔːdəbl/", m:'听得见的', parts:'audi(听)+ible(能够)'},
+    ]},
+    {r:'port', m:'携带，运送', words:[
+      {w:'export', ipa:"/ɪkˈspɔːt/", m:'出口', parts:'ex(出)+port(运送)'},
+      {w:'import', ipa:"/ɪmˈpɔːt/", m:'进口', parts:'im(进)+port(运送)'},
+      {w:'transport', ipa:"/trænˈspɔːt/", m:'运输', parts:'trans(跨越)+port(运送)'},
+    ]},
+    {r:'dict', m:'说', words:[
+      {w:'dictionary', ipa:"/ˈdɪkʃənri/", m:'字典', parts:'dict(说)+ion+ary(物)'},
+      {w:'predict', ipa:"/prɪˈdɪkt/", m:'预测', parts:'pre(在前)+dict(说)'},
+      {w:'contradict', ipa:"/ˌkɒntrəˈdɪkt/", m:'反驳', parts:'contra(相反)+dict(说)'},
+    ]},
+    {r:'spect', m:'看', words:[
+      {w:'inspect', ipa:"/ɪnˈspekt/", m:'检查', parts:'in(向内)+spect(看)'},
+      {w:'respect', ipa:"/rɪˈspekt/", m:'尊敬', parts:'re(再)+spect(看)'},
+      {w:'spectator', ipa:"/spekˈteɪtə(r)/", m:'观众', parts:'spect(看)+ator(人)'},
+    ]},
+    {r:'struct', m:'建造', words:[
+      {w:'structure', ipa:"/ˈstrʌktʃə(r)/", m:'结构', parts:'struct(建造)+ure(物)'},
+      {w:'construct', ipa:"/kənˈstrʌkt/", m:'建造', parts:'con(共同)+struct(建造)'},
+      {w:'instruct', ipa:"/ɪnˈstrʌkt/", m:'指导', parts:'in(向内)+struct(建造)'},
+    ]},
+    {r:'ject', m:'投掷', words:[
+      {w:'project', ipa:"/ˈprɒdʒekt/", m:'项目，投射', parts:'pro(向前)+ject(投掷)'},
+      {w:'reject', ipa:"/rɪˈdʒekt/", m:'拒绝', parts:'re(回)+ject(投掷)'},
+      {w:'inject', ipa:"/ɪnˈdʒekt/", m:'注射', parts:'in(向内)+ject(投掷)'},
+    ]},
+    {r:'form', m:'形状，形式', words:[
+      {w:'transform', ipa:"/trænsˈfɔːm/", m:'转变', parts:'trans(跨越)+form(形式)'},
+      {w:'inform', ipa:"/ɪnˈfɔːm/", m:'通知', parts:'in(进入)+form(形式)'},
+      {w:'uniform', ipa:"/ˈjuːnɪfɔːm/", m:'制服，统一的', parts:'uni(单一)+form(形式)'},
+    ]},
+    {r:'vis/vid', m:'看', words:[
+      {w:'visible', ipa:"/ˈvɪzəbl/", m:'可见的', parts:'vis(看)+ible(能够)'},
+      {w:'vision', ipa:"/ˈvɪʒn/", m:'视力，愿景', parts:'vis(看)+ion(行为)'},
+      {w:'video', ipa:"/ˈvɪdiəʊ/", m:'视频', parts:'vid(看)+eo(名词)'},
+    ]},
+    {r:'graph', m:'写，画', words:[
+      {w:'photograph', ipa:"/ˈfəʊtəɡrɑːf/", m:'照片', parts:'photo(光)+graph(写)'},
+      {w:'biography', ipa:"/baɪˈɒɡrəfi/", m:'传记', parts:'bio(生命)+graph(写)+y'},
+      {w:'autograph', ipa:"/ˈɔːtəɡrɑːf/", m:'亲笔签名', parts:'auto(自己)+graph(写)'},
+    ]},
+    {r:'phon', m:'声音', words:[
+      {w:'telephone', ipa:"/ˈtelɪfəʊn/", m:'电话', parts:'tele(远)+phon(声音)'},
+      {w:'microphone', ipa:"/ˈmaɪkrəfəʊn/", m:'麦克风', parts:'micro(小)+phon(声音)'},
+      {w:'phonetic', ipa:"/fəˈnetɪk/", m:'语音的', parts:'phon(声音)+etic(…的)'},
+    ]},
+    {r:'bio', m:'生命', words:[
+      {w:'biology', ipa:"/baɪˈɒlədʒi/", m:'生物学', parts:'bio(生命)+logy(…学)'},
+      {w:'biography', ipa:"/baɪˈɒɡrəfi/", m:'传记', parts:'bio(生命)+graph(写)+y'},
+      {w:'antibiotic', ipa:"/ˌæntibaɪˈɒtɪk/", m:'抗生素', parts:'anti(反对)+bio(生命)+tic'},
+    ]},
+  ],
+  // 合成词示例
+  compounds: [
+    {w:'bookstore', ipa:"/ˈbʊkstɔː(r)/", m:'书店', parts:'book(书)+store(商店)', tip:'卖书的商店'},
+    {w:'classroom', ipa:"/ˈklɑːsruːm/", m:'教室', parts:'class(班级)+room(房间)', tip:'上课的房间'},
+    {w:'football', ipa:"/ˈfʊtbɔːl/", m:'足球', parts:'foot(脚)+ball(球)', tip:'用脚踢的球'},
+    {w:'blackboard', ipa:"/ˈblækbɔːd/", m:'黑板', parts:'black(黑色的)+board(板)', tip:'黑色的板'},
+    {w:'playground', ipa:"/ˈpleɪɡraʊnd/", m:'操场', parts:'play(玩)+ground(场地)', tip:'玩耍的场地'},
+    {w:'breakfast', ipa:"/ˈbrekfəst/", m:'早餐', parts:'break(打破)+fast(禁食)', tip:'打破一夜禁食'},
+    {w:'sunshine', ipa:"/ˈsʌnʃaɪn/", m:'阳光', parts:'sun(太阳)+shine(照耀)', tip:'太阳的照耀'},
+    {w:'yourself', ipa:"/jɔːˈself/", m:'你自己', parts:'your(你的)+self(自己)', tip:'你自己'},
+    {w:'everybody', ipa:"/ˈevribɒdi/", m:'每个人', parts:'every(每个)+body(人)', tip:'每一个人'},
+    {w:'outside', ipa:"/ˌaʊtˈsaɪd/", m:'在外面', parts:'out(外)+side(边)', tip:'在外边'},
+    {w:'without', ipa:"/wɪˈðaʊt/", m:'没有', parts:'with(带有)+out(出去)', tip:'带出去了=没有'},
+    {w:'upstairs', ipa:"/ˌʌpˈsteəz/", m:'在楼上', parts:'up(上)+stairs(楼梯)', tip:'在楼梯上面'},
+  ],
+};
+
 // v4.6 小学词根词缀函数
 let currentPrimarySub = 'prefixes';
 function switchPrimary(sub) {
@@ -4556,6 +4761,65 @@ function renderPrimary() {
       ).join('');
     }
   });
+
+  // v4.8 渲染例词分析卡片
+  renderExampleCards('pri-prefix-examples', [...primaryExamples.neg, ...primaryExamples.action, ...primaryExamples.number].slice(0, 9));
+  renderExampleCards('pri-suffix-examples', [...primaryExamples['noun-person'], ...primaryExamples['noun-state'], ...primaryExamples.adj].slice(0, 9));
+  renderRootExampleCards('pri-root-examples', primaryExamples.roots.slice(0, 6));
+  renderCompoundExampleCards('pri-compound-examples', primaryExamples.compounds.slice(0, 9));
+}
+
+// v4.8 渲染例词卡片
+function renderExampleCards(containerId, examples) {
+  const el = document.getElementById(containerId);
+  if (!el) return;
+  el.innerHTML = examples.map(ex => {
+    const partsHtml = ex.parts.map((p, i) => {
+      const eq = i < ex.parts.length - 1 ? '<span class="ex-eq">+</span>' : '<span class="ex-eq">=</span>';
+      return '<div class="ex-part"><span class="pt">' + p.t + '</span><span class="pc">' + p.c + '</span></div>' + eq;
+    }).join('');
+    const noteHtml = ex.note ? '<span class="ex-note">注：' + ex.note + '</span>' : '';
+    return '<div class="example-card">' +
+      '<div><span class="ex-word">' + ex.w + '</span><span class="ex-ipa">' + ex.ipa + '</span><span class="ex-pos">' + ex.pos + '</span>' + noteHtml + '</div>' +
+      '<div class="ex-meaning">' + ex.m + '</div>' +
+      '<div class="ex-parts">' + partsHtml + '<span class="ex-result">' + ex.result + '</span></div>' +
+      '<div class="ex-tip">💡 ' + ex.tip + '</div>' +
+    '</div>';
+  }).join('');
+}
+
+// v4.8 渲染词根例词卡片
+function renderRootExampleCards(containerId, roots) {
+  const el = document.getElementById(containerId);
+  if (!el) return;
+  el.innerHTML = roots.map(r => {
+    const wordsHtml = r.words.map(w =>
+      '<div class="example-card" style="margin-bottom:3px">' +
+        '<div><span class="ex-word">' + w.w + '</span><span class="ex-ipa">' + w.ipa + '</span></div>' +
+        '<div class="ex-meaning">' + w.m + '</div>' +
+        '<div class="ex-tip">📐 ' + w.parts + '</div>' +
+      '</div>'
+    ).join('');
+    return '<div class="example-card" style="background:#f0f9ff">' +
+      '<div class="ex-word" style="color:#7c3aed">' + r.r + '</div>' +
+      '<div class="ex-meaning">词根：' + r.m + '</div>' +
+      wordsHtml +
+    '</div>';
+  }).join('');
+}
+
+// v4.8 渲染合成词例词卡片
+function renderCompoundExampleCards(containerId, compounds) {
+  const el = document.getElementById(containerId);
+  if (!el) return;
+  el.innerHTML = compounds.map(c =>
+    '<div class="example-card">' +
+      '<div><span class="ex-word">' + c.w + '</span><span class="ex-ipa">' + c.ipa + '</span></div>' +
+      '<div class="ex-meaning">' + c.m + '</div>' +
+      '<div class="ex-parts"><span class="ex-result">' + c.parts + '</span></div>' +
+      '<div class="ex-tip">💡 ' + c.tip + '</div>' +
+    '</div>'
+  ).join('');
 }
 
 // 在页面加载时渲染小学词根词缀

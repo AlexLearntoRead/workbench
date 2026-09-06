@@ -66,17 +66,17 @@ body{
   padding:16px;
 }
 .word-card{
-  background:#fff;border-radius:20px;
-  box-shadow:0 8px 32px rgba(0,0,0,.08);
-  width:100%;max-width:1000px;
-  height:100%;max-height:640px;
+  background:#fff;border-radius:26px;
+  box-shadow:0 12px 40px rgba(26,58,138,.10);
+  width:100%;max-width:1040px;
+  height:100%;max-height:660px;
   display:flex;overflow:hidden;
   position:relative;
 }
 
 /* 左侧 */
 .card-left{
-  width:36%;background:linear-gradient(160deg,#eff6ff,#dbeafe);
+  width:36%;background:linear-gradient(165deg,#f0f7ff 0%,#dbeafe 100%);
   padding:24px 20px;
   display:flex;flex-direction:column;
   align-items:center;justify-content:center;
@@ -121,11 +121,15 @@ body{
 }
 .info-label{
   width:60px;flex-shrink:0;
-  font-size:13px;font-weight:700;color:#94a3b8;
-  padding-top:2px;
+  font-size:13px;font-weight:800;color:#64748b;
+  padding-top:3px;
 }
 .info-value{
   flex:1;font-size:15px;font-weight:600;color:#1f2937;line-height:1.5;
+}
+.sc-block{
+  background:#f8fafc;border:1px solid #eef2f7;
+  border-radius:14px;padding:12px 14px;width:100%;
 }
 .info-value.pos{color:#2B7FD8}
 .info-value.meaning{color:#1e293b;font-size:16px}
@@ -139,9 +143,10 @@ body{
   display:flex;flex-direction:column;align-items:center;gap:2px;
 }
 .syl-text{
-  padding:8px 14px;background:#f1f5f9;border-radius:10px;
-  font-size:20px;font-weight:800;color:#1e40af;
+  padding:10px 20px;background:#fff;border-radius:14px;
+  font-size:28px;font-weight:900;color:#1e3a8a;
   cursor:pointer;transition:all .15s;border:2px solid #cbd5e1;
+  box-shadow:0 2px 8px rgba(30,58,138,.08);
 }
 .syl-text:hover{background:#dbeafe;border-color:#60a5fa}
 .syl-text.stressed{
@@ -162,9 +167,9 @@ body{
   min-width:44px;
 }
 .g-letter{
-  font-size:26px;font-weight:800;line-height:1.2;
-  padding:8px 14px;border-radius:10px;cursor:pointer;transition:all .15s;
-  border:1.5px solid transparent;min-width:40px;text-align:center;
+  font-size:28px;font-weight:800;line-height:1.2;
+  padding:9px 15px;border-radius:12px;cursor:pointer;transition:all .15s;
+  border:1.5px solid transparent;min-width:42px;text-align:center;
 }
 .g-letter:hover{transform:translateY(-2px);border-color:#93c5fd}
 .g-letter.silent{opacity:0.4;text-decoration:line-through}
@@ -1361,15 +1366,15 @@ function buildCardHTML(data) {
         </div>
         <div class="info-row">
           <div class="info-label">音节</div>
-          <div class="info-value">${sylHTML}</div>
+          <div class="info-value"><div class="sc-block">${sylHTML}</div></div>
         </div>
         <div class="info-row">
           <div class="info-label">音形</div>
-          <div class="info-value">${gHTML}</div>
+          <div class="info-value"><div class="sc-block">${gHTML}</div></div>
         </div>
         <div class="info-row">
           <div class="info-label">构词</div>
-          <div class="info-value">${morphHTML}</div>
+          <div class="info-value"><div class="sc-block">${morphHTML}</div></div>
         </div>
         ${data.etym && data.etym.desc ? `<div class="info-row">
           <div class="info-label">词源</div>
@@ -1377,7 +1382,7 @@ function buildCardHTML(data) {
         </div>` : ''}
         ${exampleHTML ? `<div class="info-row" style="margin-top:4px">
           <div class="info-label">例句</div>
-          <div class="info-value" style="width:100%">${exampleHTML}</div>
+          <div class="info-value" style="width:100%"><div class="sc-block">${exampleHTML}</div></div>
         </div>` : ''}
       </div>
       ${wordList.length > 1 ? `

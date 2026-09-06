@@ -245,7 +245,7 @@ body{
 
 /* 空状态 */
 .empty-state{
-  text-align:center;color:#94a3b8;padding:60px 20px;
+  text-align:center;color:#94a3b8;padding:20px 20px;
 }
 .empty-state .icon{font-size:64px;margin-bottom:16px}
 .empty-state h2{font-size:20px;font-weight:700;margin-bottom:8px;color:#64748b}
@@ -285,7 +285,7 @@ body{
   .card-left{width:100%;padding:24px}
   .card-word{font-size:40px}
   .card-icon{font-size:60px}
-  .card-container{height:auto;min-height:calc(100vh - 56px);align-items:flex-start}
+  .card-container{height:auto;min-height:auto;align-items:flex-start}
   html,body{overflow:auto}
 }
 </style>
@@ -304,6 +304,13 @@ body{background:#fefcf6!important;}
 .back-to-workbench,.back-btn{display:none!important;}
 @media(max-width:560px){.wb-title b{font-size:.92rem;}.wb-title i{display:none;}.wb-topbar{gap:10px;padding:8px 10px;}}
 
+
+/* 一屏显示紧凑模式 */
+body{overflow-y:auto}
+header{padding:8px 16px!important}
+header h1{font-size:18px!important;margin:0!important}
+header p{font-size:11px!important;margin:2px 0 0 0!important}
+.card-container{padding:12px 16px!important;gap:8px!important}
 </style>
 </head>
 <body>

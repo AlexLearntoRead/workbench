@@ -475,7 +475,7 @@ header h1{font-size:18px!important;margin:0!important;line-height:1.2!important}
 header p{font-size:11px!important;margin:2px 0 0 0!important;line-height:1.2!important}
 .nav-tabs{padding:4px 16px!important;gap:4px!important;margin:0!important}
 .nav-tab{padding:4px 12px!important;font-size:12px!important;border-radius:6px!important}
-main{padding:6px 16px!important}
+main{padding:2px 12px!important}
 .wm-container{padding:4px 0!important}
 .wm-toolbar{margin-bottom:4px!important;gap:6px!important}
 .wm-level-tabs{margin-bottom:3px!important;gap:3px!important}
@@ -568,6 +568,59 @@ main{padding:6px 16px!important}
 .wm-result-sum{font-size:9px!important}
 .wm-result-meaning{font-size:10px!important}
 .wm-result-empty{padding:3px!important;font-size:9px!important;margin-top:1px!important}
+
+/* v4.6 小学词根词缀页面 */
+.primary-container{padding:6px 16px!important;height:calc(100vh - 120px)!important;display:flex!important;flex-direction:column!important;gap:4px!important;overflow:hidden!important}
+.primary-subtabs{display:flex!important;gap:4px!important;flex-shrink:0!important}
+.primary-subtab{padding:4px 14px!important;font-size:12px!important;border:1px solid #d1d5db!important;border-radius:6px!important;background:#fff!important;cursor:pointer!important;color:#374151!important}
+.primary-subtab.active{background:#2B7FD8!important;color:#fff!important;border-color:#2B7FD8!important}
+.primary-content{flex:1!important;overflow-y:auto!important;min-height:0!important;max-height:100%!important}
+.primary-cat-grid{display:grid!important;grid-template-columns:repeat(3,1fr)!important;gap:6px!important;padding:2px 0!important}
+.primary-cat{background:#fff!important;border:1px solid #e5e7eb!important;border-radius:6px!important;padding:6px 8px!important}
+.primary-cat h4{font-size:11px!important;color:#2B7FD8!important;margin:0 0 4px 0!important;padding-bottom:3px!important;border-bottom:1px solid #e5e7eb!important}
+.primary-morph-list{display:flex!important;flex-direction:column!important;gap:2px!important}
+.primary-morph-item{display:flex!important;justify-content:space-between!important;align-items:center!important;padding:2px 4px!important;font-size:10px!important;border-radius:3px!important;background:#f8fafc!important}
+.primary-morph-item .morph{font-weight:600!important;color:#1e40af!important;min-width:50px!important}
+.primary-morph-item .meaning{color:#4b5563!important;flex:1!important;text-align:center!important;font-size:9px!important}
+.primary-morph-item .example{color:#6b7280!important;font-size:8px!important;text-align:right!important;max-width:80px!important;overflow:hidden!important;text-overflow:ellipsis!important;white-space:nowrap!important}
+.primary-root-grid{display:grid!important;grid-template-columns:repeat(4,1fr)!important;gap:4px!important;padding:2px 0!important}
+.primary-root-card{background:#fff!important;border:1px solid #e5e7eb!important;border-radius:5px!important;padding:4px 6px!important}
+.primary-root-card .root-text{font-size:13px!important;font-weight:700!important;color:#2B7FD8!important}
+.primary-root-card .root-meaning{font-size:9px!important;color:#4b5563!important;margin:1px 0!important}
+.primary-root-card .root-example{font-size:8px!important;color:#6b7280!important;line-height:1.2!important}
+
+/* v4.6 结果卡移到上方的样式 */
+.wm-result-top{background:linear-gradient(135deg,#fef3c7,#fde68a)!important;border:1px solid #f59e0b!important;border-radius:8px!important;padding:6px 12px!important;margin:4px 0!important;display:flex!important;align-items:center!important;gap:12px!important;min-height:44px!important}
+.wm-result-top .wm-result-word-row{display:flex!important;align-items:center!important;gap:6px!important}
+.wm-result-top .wm-result-word{font-size:18px!important;font-weight:700!important;color:#92400e!important}
+.wm-result-top .wm-result-sum{font-size:10px!important;color:#78350f!important;flex:1!important}
+.wm-result-top .wm-result-meaning{font-size:11px!important;color:#78350f!important;font-weight:600!important}
+.wm-result-empty-top{text-align:center!important;padding:4px!important;font-size:10px!important;color:#9ca3af!important;margin:2px 0!important}
+.wm-matrix{margin-top:2px!important}
+
+/* v4.6.1 小学页面一屏压缩 */
+.primary-container{padding:3px 12px!important;height:calc(100vh - 185px)!important;max-height:calc(100vh - 185px)!important;gap:2px!important;overflow:hidden!important;display:flex!important;flex-direction:column!important}
+.primary-subtabs{gap:3px!important}
+.primary-subtab{padding:3px 12px!important;font-size:11px!important;border-radius:5px!important}
+.primary-cat-grid{gap:4px!important;padding:1px 0!important}
+.primary-cat{padding:4px 6px!important;border-radius:5px!important}
+.primary-cat h4{font-size:10px!important;margin:0 0 3px 0!important;padding-bottom:2px!important}
+.primary-morph-item{padding:1px 3px!important;font-size:9px!important;gap:2px!important}
+.primary-morph-item .morph{font-size:10px!important;min-width:45px!important}
+.primary-morph-item .meaning{font-size:8px!important}
+.primary-morph-item .example{font-size:7px!important;max-width:70px!important}
+.primary-root-grid{gap:3px!important;padding:1px 0!important;grid-template-columns:repeat(6,1fr)!important}
+.primary-root-card{padding:3px 5px!important;border-radius:4px!important}
+.primary-root-card .root-text{font-size:11px!important}
+.primary-root-card .root-meaning{font-size:8px!important;margin:0!important}
+.primary-root-card .root-example{font-size:7px!important;line-height:1.1!important}
+
+/* v4.6.2 词素库页面一屏 */
+#page-library{height:calc(100vh - 185px)!important;max-height:calc(100vh - 185px)!important;overflow-y:auto!important;padding:4px 12px!important}
+#page-library .library-section{margin:4px 0!important;padding:4px 8px!important}
+#page-library .library-section h3{font-size:12px!important;margin:2px 0!important}
+#page-library .library-grid{gap:3px!important;grid-template-columns:repeat(4,1fr)!important}
+#page-library .library-item{padding:3px 6px!important;font-size:10px!important;border-radius:4px!important}
 </style>
 </head>
 <body>
@@ -587,6 +640,7 @@ main{padding:6px 16px!important}
   <button class="nav-tab" data-page="library">词素库</button>
   <button class="nav-tab" data-page="upload">单词上传解析</button>
   <button class="nav-tab" data-page="quiz">构词练习</button>
+  <button class="nav-tab" data-page="primary">小学词根词缀</button>
 </div>
 
 <main>
@@ -637,6 +691,19 @@ main{padding:6px 16px!important}
         <div class="wm-hint">点击左侧前缀 + 右侧后缀，组合出单词</div>
       </div>
 
+      <!-- 组合结果（移到最上方） -->
+      <div class="wm-result-top" id="wmResult" hidden>
+        <div class="wm-result-word-row">
+          <span class="wm-result-word" id="resultWord">project</span>
+          <button class="wm-result-speak" onclick="speakResultWord()" title="发音">🔊</button>
+        </div>
+        <div class="wm-result-sum" id="resultSum">pro- + ject = project</div>
+        <div class="wm-result-meaning" id="resultMeaning">项目，投射（向前扔）</div>
+      </div>
+      <div class="wm-result-empty-top" id="wmResultEmpty">
+        选择前缀和后缀来组合单词，或只选一个看词族
+      </div>
+
       <div class="wm-matrix">
         <!-- 左栏：前缀 -->
         <div class="wm-col wm-prefix-col">
@@ -669,18 +736,7 @@ main{padding:6px 16px!important}
         </div>
       </div>
 
-      <!-- 组合结果 -->
-      <div class="wm-result" id="wmResult" hidden>
-        <div class="wm-result-word-row">
-          <span class="wm-result-word" id="resultWord">project</span>
-          <button class="wm-result-speak" onclick="speakResultWord()" title="发音">🔊</button>
-        </div>
-        <div class="wm-result-sum" id="resultSum">pro- + ject = project</div>
-        <div class="wm-result-meaning" id="resultMeaning">项目，投射（向前扔）</div>
-      </div>
-      <div class="wm-result-empty" id="wmResultEmpty">
-        选择前缀和后缀来组合单词，或只选一个看词族
-      </div>
+
     </div>
   </div>
 
@@ -732,6 +788,106 @@ international"></textarea>
       <button class="quiz-next" id="quizNext" hidden onclick="nextQuiz()">下一题 →</button>
     </div>
   </div>
+
+  <!-- 小学词根词缀学习（参考《图解词根词缀速记小学生英语单词》分类） -->
+  <div id="page-primary" hidden>
+    <div class="primary-container">
+      <div class="primary-subtabs">
+        <button class="primary-subtab active" data-sub="prefixes" onclick="switchPrimary('prefixes')">前缀</button>
+        <button class="primary-subtab" data-sub="suffixes" onclick="switchPrimary('suffixes')">后缀</button>
+        <button class="primary-subtab" data-sub="roots" onclick="switchPrimary('roots')">词根</button>
+        <button class="primary-subtab" data-sub="compounds" onclick="switchPrimary('compounds')">合成词</button>
+      </div>
+
+      <!-- 前缀分类 -->
+      <div class="primary-content" id="primary-prefixes">
+        <div class="primary-cat-grid">
+          <div class="primary-cat">
+            <h4>表加强/程度</h4>
+            <div class="primary-morph-list" id="pri-prefix-intense"></div>
+          </div>
+          <div class="primary-cat">
+            <h4>表动作/方向</h4>
+            <div class="primary-morph-list" id="pri-prefix-action"></div>
+          </div>
+          <div class="primary-cat">
+            <h4>表数量/顺序</h4>
+            <div class="primary-morph-list" id="pri-prefix-number"></div>
+          </div>
+          <div class="primary-cat">
+            <h4>表否定/相反</h4>
+            <div class="primary-morph-list" id="pri-prefix-neg"></div>
+          </div>
+          <div class="primary-cat">
+            <h4>表时间/位置</h4>
+            <div class="primary-morph-list" id="pri-prefix-time"></div>
+          </div>
+          <div class="primary-cat">
+            <h4>表共同/相互</h4>
+            <div class="primary-morph-list" id="pri-prefix-together"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 后缀分类 -->
+      <div class="primary-content" id="primary-suffixes" hidden>
+        <div class="primary-cat-grid">
+          <div class="primary-cat">
+            <h4>构成名词（人/物）</h4>
+            <div class="primary-morph-list" id="pri-suffix-noun-person"></div>
+          </div>
+          <div class="primary-cat">
+            <h4>构成名词（状态/行为）</h4>
+            <div class="primary-morph-list" id="pri-suffix-noun-state"></div>
+          </div>
+          <div class="primary-cat">
+            <h4>构成形容词</h4>
+            <div class="primary-morph-list" id="pri-suffix-adj"></div>
+          </div>
+          <div class="primary-cat">
+            <h4>构成动词</h4>
+            <div class="primary-morph-list" id="pri-suffix-verb"></div>
+          </div>
+          <div class="primary-cat">
+            <h4>构成副词</h4>
+            <div class="primary-morph-list" id="pri-suffix-adv"></div>
+          </div>
+          <div class="primary-cat">
+            <h4>构成数词/其他</h4>
+            <div class="primary-morph-list" id="pri-suffix-other"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 词根列表 -->
+      <div class="primary-content" id="primary-roots" hidden>
+        <div class="primary-root-grid" id="primaryRootGrid"></div>
+      </div>
+
+      <!-- 合成词 -->
+      <div class="primary-content" id="primary-compounds" hidden>
+        <div class="primary-cat-grid">
+          <div class="primary-cat">
+            <h4>名词+名词</h4>
+            <div class="primary-morph-list" id="pri-compound-nn"></div>
+          </div>
+          <div class="primary-cat">
+            <h4>形容词+名词</h4>
+            <div class="primary-morph-list" id="pri-compound-an"></div>
+          </div>
+          <div class="primary-cat">
+            <h4>动词+名词/副词</h4>
+            <div class="primary-morph-list" id="pri-compound-vn"></div>
+          </div>
+          <div class="primary-cat">
+            <h4>其他常用合成词</h4>
+            <div class="primary-morph-list" id="pri-compound-other"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
 </main>
 
 <script>
@@ -4074,6 +4230,323 @@ function playYoudaoSound(word) {
     }
   });
 }
+
+// ==================== v4.6 小学词根词缀数据 ====================
+const primaryPrefixes = {
+  intense: [
+    {m:'super-', meaning:'超级，在上', ex:'superman'},
+    {m:'over-', meaning:'过度，在上', ex:'overcome'},
+    {m:'ultra-', meaning:'超出，极端', ex:'ultraviolet'},
+    {m:'out-', meaning:'超过，外', ex:'outdoor'},
+    {m:'extra-', meaning:'超出，额外', ex:'extraordinary'},
+  ],
+  action: [
+    {m:'re-', meaning:'再，重新，回', ex:'return'},
+    {m:'pre-', meaning:'在前，预先', ex:'preview'},
+    {m:'post-', meaning:'后', ex:'postwar'},
+    {m:'ex-', meaning:'出，外', ex:'export'},
+    {m:'trans-', meaning:'跨越，转移', ex:'transport'},
+    {m:'sub-', meaning:'在下，低于', ex:'subway'},
+    {m:'inter-', meaning:'在…之间', ex:'international'},
+    {m:'pro-', meaning:'向前，支持', ex:'progress'},
+    {m:'retro-', meaning:'向后', ex:'retrograde'},
+  ],
+  number: [
+    {m:'uni-', meaning:'单一', ex:'uniform'},
+    {m:'bi-', meaning:'二，双', ex:'bicycle'},
+    {m:'tri-', meaning:'三', ex:'triangle'},
+    {m:'multi-', meaning:'多', ex:'multiply'},
+    {m:'semi-', meaning:'半', ex:'semicircle'},
+    {m:'mono-', meaning:'单一', ex:'monologue'},
+    {m:'centi-', meaning:'百，百分之一', ex:'centimeter'},
+    {m:'milli-', meaning:'千，千分之一', ex:'millimeter'},
+  ],
+  neg: [
+    {m:'un-', meaning:'不，否定', ex:'unhappy'},
+    {m:'dis-', meaning:'不，分离', ex:'disagree'},
+    {m:'in-/im-', meaning:'不，进入', ex:'impossible'},
+    {m:'non-', meaning:'非，不', ex:'nonsense'},
+    {m:'mis-', meaning:'错误', ex:'mistake'},
+    {m:'anti-', meaning:'反对', ex:'antiwar'},
+    {m:'contra-', meaning:'相反，对抗', ex:'contradict'},
+    {m:'counter-', meaning:'相反，对抗', ex:'counteract'},
+    {m:'de-', meaning:'去除，向下，否定', ex:'decrease'},
+  ],
+  time: [
+    {m:'fore-', meaning:'前，预先', ex:'forecast'},
+    {m:'ante-', meaning:'在前', ex:'anteroom'},
+    {m:'pre-', meaning:'在前，预先', ex:'prewar'},
+    {m:'post-', meaning:'后', ex:'postpone'},
+    {m:'mid-', meaning:'中', ex:'midnight'},
+    {m:'neo-', meaning:'新', ex:'neoclassical'},
+    {m:'paleo-', meaning:'古，旧', ex:'paleontology'},
+  ],
+  together: [
+    {m:'co-/con-', meaning:'共同', ex:'connect'},
+    {m:'com-', meaning:'共同', ex:'combine'},
+    {m:'col-', meaning:'共同', ex:'collaborate'},
+    {m:'cor-', meaning:'共同', ex:'correspond'},
+    {m:'sym-/syn-', meaning:'共同，一起', ex:'sympathy'},
+    {m:'inter-', meaning:'在…之间，相互', ex:'interact'},
+  ],
+};
+
+const primarySuffixes = {
+  'noun-person': [
+    {m:'-er/-or', meaning:'做…的人/物', ex:'teacher'},
+    {m:'-ist', meaning:'…主义者，专家', ex:'artist'},
+    {m:'-ian', meaning:'…的人', ex:'musician'},
+    {m:'-ant/-ent', meaning:'…的人/物', ex:'assistant'},
+    {m:'-ee', meaning:'被…的人', ex:'employee'},
+    {m:'-eer', meaning:'…的人', ex:'engineer'},
+    {m:'-ess', meaning:'女性', ex:'actress'},
+  ],
+  'noun-state': [
+    {m:'-tion/-sion', meaning:'行为，状态', ex:'action'},
+    {m:'-ment', meaning:'行为，结果', ex:'development'},
+    {m:'-ness', meaning:'状态，性质', ex:'happiness'},
+    {m:'-ity/-ty', meaning:'性质，状态', ex:'ability'},
+    {m:'-ance/-ence', meaning:'状态，性质', ex:'importance'},
+    {m:'-age', meaning:'集合，状态，费用', ex:'storage'},
+    {m:'-dom', meaning:'领域，状态', ex:'freedom'},
+    {m:'-hood', meaning:'状态，身份', ex:'childhood'},
+    {m:'-ship', meaning:'状态，关系', ex:'friendship'},
+    {m:'-ism', meaning:'主义，学说', ex:'capitalism'},
+    {m:'-ure', meaning:'行为，状态', ex:'pressure'},
+    {m:'-cy', meaning:'状态，性质', ex:'privacy'},
+  ],
+  adj: [
+    {m:'-able/-ible', meaning:'能够…的', ex:'readable'},
+    {m:'-ful', meaning:'充满…的', ex:'beautiful'},
+    {m:'-less', meaning:'没有…的', ex:'careless'},
+    {m:'-ous/-ious', meaning:'具有…性质的', ex:'famous'},
+    {m:'-al', meaning:'…的', ex:'national'},
+    {m:'-ive', meaning:'有…倾向的', ex:'active'},
+    {m:'-ic/-ical', meaning:'…的', ex:'historic'},
+    {m:'-ary/-ory', meaning:'与…有关的', ex:'library'},
+    {m:'-y', meaning:'充满…的', ex:'sunny'},
+    {m:'-ish', meaning:'像…的，稍微', ex:'childish'},
+    {m:'-ly', meaning:'…的（形容词）', ex:'friendly'},
+    {m:'-en', meaning:'…的（材料）', ex:'wooden'},
+    {m:'-esque', meaning:'…风格的', ex:'picturesque'},
+    {m:'-most', meaning:'最…的', ex:'foremost'},
+  ],
+  verb: [
+    {m:'-ize/-ise', meaning:'使…化', ex:'realize'},
+    {m:'-fy', meaning:'使…化', ex:'beautify'},
+    {m:'-en', meaning:'使…', ex:'widen'},
+    {m:'-ate', meaning:'使…，做', ex:'activate'},
+    {m:'-ish', meaning:'使…', ex:'finish'},
+  ],
+  adv: [
+    {m:'-ly', meaning:'…地', ex:'quickly'},
+    {m:'-ward/-wards', meaning:'向…方向', ex:'forward'},
+    {m:'-wise', meaning:'在…方面', ex:'otherwise'},
+    {m:'-fold', meaning:'倍', ex:'twofold'},
+  ],
+  other: [
+    {m:'-teen', meaning:'十几', ex:'thirteen'},
+    {m:'-ty', meaning:'几十', ex:'twenty'},
+    {m:'-th', meaning:'第…', ex:'fifth'},
+    {m:'-logy', meaning:'…学', ex:'biology'},
+    {m:'-graph', meaning:'写，画，记录器', ex:'photograph'},
+    {m:'-phone', meaning:'声音', ex:'telephone'},
+    {m:'-scope', meaning:'观察仪器', ex:'telescope'},
+    {m:'-meter', meaning:'测量仪器', ex:'thermometer'},
+  ],
+};
+
+// 小学67词根（来自《图解词根词缀速记小学生英语单词》）
+const primaryRoots = [
+  {r:'act', m:'做，动作', e:'action, active, actor'},
+  {r:'annu', m:'年', e:'annual, anniversary'},
+  {r:'audi', m:'听', e:'audio, audience, audible'},
+  {r:'auto', m:'自己', e:'automatic, automobile'},
+  {r:'bas', m:'低，基础', e:'base, basic, basement'},
+  {r:'bio', m:'生命', e:'biology, biography'},
+  {r:'ceed', m:'走，进行', e:'proceed, succeed'},
+  {r:'centr', m:'中心', e:'central, center'},
+  {r:'cert', m:'确定，确信', e:'certain, certificate'},
+  {r:'circ', m:'圆，环', e:'circle, circular, circus'},
+  {r:'clos', m:'关闭', e:'close, closet, enclose'},
+  {r:'cord', m:'心', e:'core, cordial, record'},
+  {r:'cover', m:'覆盖', e:'cover, discover, recover'},
+  {r:'electr', m:'电', e:'electric, electricity, electron'},
+  {r:'fact', m:'做，制造', e:'factory, fact, manufacture'},
+  {r:'fend', m:'打击，防御', e:'defend, offend, fence'},
+  {r:'firm', m:'坚定，牢固', e:'firm, confirm, affirm'},
+  {r:'form', m:'形状，形式', e:'form, reform, uniform'},
+  {r:'found', m:'基础，建立', e:'found, foundation, founder'},
+  {r:'gen', m:'产生，种类', e:'gene, generate, general'},
+  {r:'grad', m:'步，级', e:'grade, graduate, gradual'},
+  {r:'gress', m:'走，步', e:'progress, congress, aggressive'},
+  {r:'ject', m:'投掷', e:'project, reject, inject'},
+  {r:'join', m:'连接，加入', e:'join, joint, adjoin'},
+  {r:'lect', m:'选择，收集，读', e:'select, collect, lecture'},
+  {r:'log', m:'话语，学科', e:'logic, dialogue, biology'},
+  {r:'mount', m:'山，登上', e:'mountain, mount, amount'},
+  {r:'mit', m:'发送', e:'transmit, submit, permit'},
+  {r:'mus', m:'音乐', e:'music, musical, musician'},
+  {r:'memor', m:'记忆', e:'memory, memorize, memorial'},
+  {r:'nounc', m:'说，宣布', e:'pronounce, announce, denounce'},
+  {r:'nov', m:'新', e:'novel, novelty, innovate'},
+  {r:'oper', m:'工作，操作', e:'operate, operation, cooperative'},
+  {r:'pass', m:'感情，忍受，通过', e:'passion, passive, passport'},
+  {r:'part', m:'部分，分开', e:'part, partial, depart'},
+  {r:'pear', m:'出现，看见', e:'appear, disappear, apparent'},
+  {r:'pend', m:'悬挂，支付', e:'depend, suspend, pendant'},
+  {r:'phon', m:'声音', e:'phone, phonetic, microphone'},
+  {r:'place', m:'放置，地方', e:'place, replace, displace'},
+  {r:'plant', m:'种植，植物', e:'plant, plantation, transplant'},
+  {r:'plen', m:'满，全', e:'plenty, plentiful, complete'},
+  {r:'port', m:'携带，运送', e:'transport, export, import'},
+  {r:'pos', m:'放置', e:'position, compose, deposit'},
+  {r:'press', m:'压', e:'press, pressure, express'},
+  {r:'prim', m:'第一，首要', e:'prime, primary, primitive'},
+  {r:'quir', m:'询问，寻求', e:'question, require, acquire'},
+  {r:'range', m:'排列，范围', e:'range, arrange, derange'},
+  {r:'rest', m:'休息，剩余', e:'rest, arrest, restaurant'},
+  {r:'sens', m:'感觉', e:'sense, sensitive, sensible'},
+  {r:'serv', m:'服务，保持', e:'serve, service, preserve'},
+  {r:'set', m:'放置，确定', e:'set, settle, reset'},
+  {r:'sign', m:'标记，信号', e:'sign, signal, design'},
+  {r:'sist', m:'站立', e:'resist, consist, insist'},
+  {r:'spec', m:'看', e:'inspect, respect, spectator'},
+  {r:'sta', m:'站立，状态', e:'stand, state, station'},
+  {r:'struct', m:'建造', e:'structure, construct, instruct'},
+  {r:'sur', m:'确定，安全', e:'sure, ensure, insure'},
+  {r:'tain', m:'保持，握住', e:'contain, maintain, obtain'},
+  {r:'techn', m:'技术，艺术', e:'technology, technical, technique'},
+  {r:'tect', m:'覆盖，保护', e:'protect, detective, architect'},
+  {r:'test', m:'测试，证明', e:'test, contest, protest'},
+  {r:'tend', m:'伸展，趋向', e:'tend, extend, intend'},
+  {r:'treat', m:'处理，对待', e:'treat, treatment, retreat'},
+  {r:'urb', m:'城市', e:'urban, suburb, urbanize'},
+  {r:'valu', m:'价值', e:'value, valuable, evaluate'},
+  {r:'vert', m:'转', e:'convert, reverse, divert'},
+  {r:'viv', m:'活，生命', e:'vivid, survive, revival'},
+];
+
+const primaryCompounds = {
+  nn: [
+    {m:'bookstore', meaning:'书店', e:'book+store'},
+    {m:'classroom', meaning:'教室', e:'class+room'},
+    {m:'bedroom', meaning:'卧室', e:'bed+room'},
+    {m:'bathroom', meaning:'浴室', e:'bath+room'},
+    {m:'football', meaning:'足球', e:'foot+ball'},
+    {m:'basketball', meaning:'篮球', e:'basket+ball'},
+    {m:'baseball', meaning:'棒球', e:'base+ball'},
+    {m:'sunshine', meaning:'阳光', e:'sun+shine'},
+    {m:'moonlight', meaning:'月光', e:'moon+light'},
+    {m:'railway', meaning:'铁路', e:'rail+way'},
+    {m:'highway', meaning:'公路', e:'high+way'},
+    {m:'waterfall', meaning:'瀑布', e:'water+fall'},
+  ],
+  an: [
+    {m:'blackboard', meaning:'黑板', e:'black+board'},
+    {m:'whiteboard', meaning:'白板', e:'white+board'},
+    {m:'greenhouse', meaning:'温室', e:'green+house'},
+    {m:'bluebird', meaning:'蓝鸟', e:'blue+bird'},
+    {m:'redhead', meaning:'红头发的人', e:'red+head'},
+    {m:'loudspeaker', meaning:'扬声器', e:'loud+speaker'},
+    {m:'shortcut', meaning:'捷径', e:'short+cut'},
+    {m:'longhand', meaning:'普通书写', e:'long+hand'},
+  ],
+  vn: [
+    {m:'breakfast', meaning:'早餐', e:'break+fast'},
+    {m:'playground', meaning:'操场', e:'play+ground'},
+    {m:'playhouse', meaning:'玩具房', e:'play+house'},
+    {m:'pickpocket', meaning:'扒手', e:'pick+pocket'},
+    {m:'cutthroat', meaning:'残酷的', e:'cut+throat'},
+    {m:'runaway', meaning:'逃跑者', e:'run+away'},
+    {m:'takeoff', meaning:'起飞', e:'take+off'},
+    {m:'checkout', meaning:'结账', e:'check+out'},
+  ],
+  other: [
+    {m:'yourself', meaning:'你自己', e:'your+self'},
+    {m:'himself', meaning:'他自己', e:'him+self'},
+    {m:'herself', meaning:'她自己', e:'her+self'},
+    {m:'themselves', meaning:'他们自己', e:'them+selves'},
+    {m:'everybody', meaning:'每个人', e:'every+body'},
+    {m:'someone', meaning:'某人', e:'some+one'},
+    {m:'anything', meaning:'任何事', e:'any+thing'},
+    {m:'nowhere', meaning:'无处', e:'no+where'},
+    {m:'upstairs', meaning:'在楼上', e:'up+stairs'},
+    {m:'downstairs', meaning:'在楼下', e:'down+stairs'},
+    {m:'outside', meaning:'在外面', e:'out+side'},
+    {m:'inside', meaning:'在里面', e:'in+side'},
+    {m:'without', meaning:'没有', e:'with+out'},
+    {m:'within', meaning:'在…之内', e:'with+in'},
+  ],
+};
+
+// v4.6 小学词根词缀函数
+let currentPrimarySub = 'prefixes';
+function switchPrimary(sub) {
+  currentPrimarySub = sub;
+  document.querySelectorAll('.primary-subtab').forEach(t => t.classList.remove('active'));
+  document.querySelector(`.primary-subtab[data-sub="${sub}"]`)?.classList.add('active');
+  document.querySelectorAll('.primary-content').forEach(c => c.hidden = true);
+  document.getElementById(`primary-${sub}`).hidden = false;
+}
+
+function renderPrimary() {
+  // 前缀
+  const prefixCats = ['intense', 'action', 'number', 'neg', 'time', 'together'];
+  prefixCats.forEach(cat => {
+    const el = document.getElementById(`pri-prefix-${cat}`);
+    if (el) {
+      el.innerHTML = primaryPrefixes[cat].map(p =>
+        `<div class="primary-morph-item"><span class="morph">${p.m}</span><span class="meaning">${p.meaning}</span><span class="example">${p.ex}</span></div>`
+      ).join('');
+    }
+  });
+  // 后缀
+  const suffixCats = ['noun-person', 'noun-state', 'adj', 'verb', 'adv', 'other'];
+  suffixCats.forEach(cat => {
+    const el = document.getElementById(`pri-suffix-${cat.replace('-', '')}`);
+    if (!el) {
+      // 尝试带连字符的id
+      const el2 = document.getElementById(`pri-suffix-${cat}`);
+      if (el2) {
+        el2.innerHTML = primarySuffixes[cat].map(s =>
+          `<div class="primary-morph-item"><span class="morph">${s.m}</span><span class="meaning">${s.meaning}</span><span class="example">${s.ex}</span></div>`
+        ).join('');
+      }
+    } else {
+      el.innerHTML = primarySuffixes[cat].map(s =>
+        `<div class="primary-morph-item"><span class="morph">${s.m}</span><span class="meaning">${s.meaning}</span><span class="example">${s.ex}</span></div>`
+      ).join('');
+    }
+  });
+  // 词根
+  const rootGrid = document.getElementById('primaryRootGrid');
+  if (rootGrid) {
+    rootGrid.innerHTML = primaryRoots.map(r =>
+      `<div class="primary-root-card"><div class="root-text">${r.r}</div><div class="root-meaning">${r.m}</div><div class="root-example">${r.e}</div></div>`
+    ).join('');
+  }
+  // 合成词
+  const compoundCats = ['nn', 'an', 'vn', 'other'];
+  compoundCats.forEach(cat => {
+    const el = document.getElementById(`pri-compound-${cat}`);
+    if (el) {
+      el.innerHTML = primaryCompounds[cat].map(c =>
+        `<div class="primary-morph-item"><span class="morph">${c.m}</span><span class="meaning">${c.meaning}</span><span class="example">${c.e}</span></div>`
+      ).join('');
+    }
+  });
+}
+
+// 在页面加载时渲染小学词根词缀
+document.addEventListener('DOMContentLoaded', function() {
+  setTimeout(renderPrimary, 100);
+});
+// 立即执行一次（防止DOMContentLoaded已触发）
+if (document.readyState !== 'loading') {
+  setTimeout(renderPrimary, 200);
+}
+
 </script>
 
 </body>

@@ -857,58 +857,66 @@ international"></textarea>
       <div class="primary-content" id="primary-prefixes">
         <div class="primary-cat-grid">
           <div class="primary-cat">
-            <h4>表加强/程度</h4>
+            <h4>表加强</h4>
             <div class="primary-morph-list" id="pri-prefix-intense"></div>
           </div>
           <div class="primary-cat">
-            <h4>表动作/方向</h4>
+            <h4>表动作</h4>
             <div class="primary-morph-list" id="pri-prefix-action"></div>
           </div>
           <div class="primary-cat">
-            <h4>表数量/顺序</h4>
+            <h4>表数量</h4>
             <div class="primary-morph-list" id="pri-prefix-number"></div>
           </div>
           <div class="primary-cat">
-            <h4>表否定/相反</h4>
+            <h4>表否定</h4>
             <div class="primary-morph-list" id="pri-prefix-neg"></div>
           </div>
           <div class="primary-cat">
-            <h4>表时间/位置</h4>
-            <div class="primary-morph-list" id="pri-prefix-time"></div>
+            <h4>表方向</h4>
+            <div class="primary-morph-list" id="pri-prefix-direction"></div>
           </div>
           <div class="primary-cat">
-            <h4>表共同/相互</h4>
-            <div class="primary-morph-list" id="pri-prefix-together"></div>
+            <h4>表去除</h4>
+            <div class="primary-morph-list" id="pri-prefix-remove"></div>
           </div>
         </div>
       </div>
 
-      <!-- 后缀分类 -->
+      <!-- 后缀分类（v5.0 完整8分类） -->
       <div class="primary-content" id="primary-suffixes" hidden>
         <div class="primary-cat-grid">
           <div class="primary-cat">
-            <h4>构成名词（人/物）</h4>
+            <h4>构成名词（表人）</h4>
             <div class="primary-morph-list" id="pri-suffix-noun-person"></div>
+          </div>
+          <div class="primary-cat">
+            <h4>构成名词（表人/物）</h4>
+            <div class="primary-morph-list" id="pri-suffix-noun-thing"></div>
           </div>
           <div class="primary-cat">
             <h4>构成名词（状态/行为）</h4>
             <div class="primary-morph-list" id="pri-suffix-noun-state"></div>
           </div>
           <div class="primary-cat">
-            <h4>构成形容词</h4>
-            <div class="primary-morph-list" id="pri-suffix-adj"></div>
+            <h4>构成名词（表地点）</h4>
+            <div class="primary-morph-list" id="pri-suffix-noun-place"></div>
           </div>
           <div class="primary-cat">
             <h4>构成动词</h4>
             <div class="primary-morph-list" id="pri-suffix-verb"></div>
           </div>
           <div class="primary-cat">
+            <h4>构成形容词</h4>
+            <div class="primary-morph-list" id="pri-suffix-adj"></div>
+          </div>
+          <div class="primary-cat">
             <h4>构成副词</h4>
             <div class="primary-morph-list" id="pri-suffix-adv"></div>
           </div>
           <div class="primary-cat">
-            <h4>构成数词/其他</h4>
-            <div class="primary-morph-list" id="pri-suffix-other"></div>
+            <h4>构成数词</h4>
+            <div class="primary-morph-list" id="pri-suffix-num"></div>
           </div>
         </div>
       </div>
@@ -4545,49 +4553,42 @@ function switchPrimary(sub) {
 }
 
 function renderPrimary() {
-  // 前缀
-  const prefixCats = ['intense', 'action', 'number', 'neg', 'time', 'together'];
-  prefixCats.forEach(cat => {
-    const el = document.getElementById(`pri-prefix-${cat}`);
-    if (el) {
-      el.innerHTML = primaryPrefixes[cat].map(p =>
-        `<div class="primary-morph-item"><span class="morph">${p.m}</span><span class="meaning">${p.meaning}</span><span class="example">${p.ex}</span></div>`
-      ).join('');
+  // v5.0 使用完整数据
+  // 前缀（6分类）
+  var prefixCats = ['intense', 'action', 'direction', 'number', 'neg', 'remove'];
+  prefixCats.forEach(function(cat) {
+    var el = document.getElementById('pri-prefix-' + cat);
+    if (el && primaryPrefixesV5[cat]) {
+      el.innerHTML = primaryPrefixesV5[cat].map(function(p) {
+        return '<div class="primary-morph-item"><span class="morph">' + p.m + '</span><span class="meaning">' + p.meaning + '</span><span class="example">' + p.ex + '</span></div>';
+      }).join('');
     }
   });
-  // 后缀
-  const suffixCats = ['noun-person', 'noun-state', 'adj', 'verb', 'adv', 'other'];
-  suffixCats.forEach(cat => {
-    const el = document.getElementById(`pri-suffix-${cat.replace('-', '')}`);
-    if (!el) {
-      // 尝试带连字符的id
-      const el2 = document.getElementById(`pri-suffix-${cat}`);
-      if (el2) {
-        el2.innerHTML = primarySuffixes[cat].map(s =>
-          `<div class="primary-morph-item"><span class="morph">${s.m}</span><span class="meaning">${s.meaning}</span><span class="example">${s.ex}</span></div>`
-        ).join('');
-      }
-    } else {
-      el.innerHTML = primarySuffixes[cat].map(s =>
-        `<div class="primary-morph-item"><span class="morph">${s.m}</span><span class="meaning">${s.meaning}</span><span class="example">${s.ex}</span></div>`
-      ).join('');
+  // 后缀（8分类）
+  var suffixCats = ['noun-person', 'noun-thing', 'noun-state', 'noun-place', 'verb', 'adj', 'adv', 'num'];
+  suffixCats.forEach(function(cat) {
+    var el = document.getElementById('pri-suffix-' + cat);
+    if (el && primarySuffixesV5[cat]) {
+      el.innerHTML = primarySuffixesV5[cat].map(function(s) {
+        return '<div class="primary-morph-item"><span class="morph">' + s.m + '</span><span class="meaning">' + s.meaning + '</span><span class="example">' + s.ex + '</span></div>';
+      }).join('');
     }
   });
-  // 词根
-  const rootGrid = document.getElementById('primaryRootGrid');
+  // 词根（67个）
+  var rootGrid = document.getElementById('primaryRootGrid');
   if (rootGrid) {
-    rootGrid.innerHTML = primaryRoots.map(r =>
-      `<div class="primary-root-card"><div class="root-text">${r.r}</div><div class="root-meaning">${r.m}</div><div class="root-example">${r.e}</div></div>`
-    ).join('');
+    rootGrid.innerHTML = primaryRootsV5.map(function(r) {
+      return '<div class="primary-root-card"><div class="root-text">' + r.r + '</div><div class="root-meaning">' + r.m + '</div><div class="root-example">' + r.e + '</div></div>';
+    }).join('');
   }
-  // 合成词
-  const compoundCats = ['nn', 'an', 'vn', 'other'];
-  compoundCats.forEach(cat => {
-    const el = document.getElementById(`pri-compound-${cat}`);
-    if (el) {
-      el.innerHTML = primaryCompounds[cat].map(c =>
-        `<div class="primary-morph-item"><span class="morph">${c.m}</span><span class="meaning">${c.meaning}</span><span class="example">${c.e}</span></div>`
-      ).join('');
+  // 合成词（4分类）
+  var compoundCats = ['nn', 'an', 'vn', 'other'];
+  compoundCats.forEach(function(cat) {
+    var el = document.getElementById('pri-compound-' + cat);
+    if (el && primaryCompoundsV5[cat]) {
+      el.innerHTML = primaryCompoundsV5[cat].map(function(c) {
+        return '<div class="primary-morph-item"><span class="morph">' + c.m + '</span><span class="meaning">' + c.meaning + '</span><span class="example">' + c.e + '</span></div>';
+      }).join('');
     }
   });
 }
@@ -4735,6 +4736,13 @@ function speakResultV49() {
     speechSynthesis.speak(u);
   }
 }
+
+
+// ==================== v5.0 小学词缀完整数据（来自《图解词根词缀速记小学生英语单词》） ====================
+var primaryPrefixesV5 = JSON.parse('{"intense": [{"m": "a-", "meaning": "表加强；在", "ex": "ahead, aloud"}, {"m": "ad-", "meaning": "表加强", "ex": "advance, adapt"}, {"m": "an-/ap-/ar-/as-/at-", "meaning": "表加强", "ex": "announce, appear, arrest, assist, attend"}, {"m": "com-/con-/cor-", "meaning": "表加强；共同", "ex": "compile, connect, correct"}, {"m": "de-", "meaning": "表加强；去掉", "ex": "describe, decide"}, {"m": "ob-/op-", "meaning": "表加强；反", "ex": "observe, oppose"}], "action": [{"m": "be-", "meaning": "使", "ex": "become, beside"}, {"m": "en-", "meaning": "使；进入", "ex": "enable, enjoy"}, {"m": "im-/in-", "meaning": "使；进入", "ex": "impress, include"}, {"m": "co-/col-", "meaning": "共同", "ex": "cooperate, collect"}, {"m": "eco-", "meaning": "生态；经济", "ex": "ecology, economy"}, {"m": "per-", "meaning": "完全的", "ex": "perfect, perhaps"}, {"m": "over-", "meaning": "过度；在上", "ex": "overcome, overcoat"}, {"m": "re-", "meaning": "再，重新", "ex": "return, review"}, {"m": "tele-", "meaning": "远的；电", "ex": "telephone, television"}, {"m": "trans-", "meaning": "变换；横穿", "ex": "transport, translate"}, {"m": "un-", "meaning": "打开；不", "ex": "unlock, unhappy"}, {"m": "under-", "meaning": "不够；在下", "ex": "understand, underground"}], "direction": [{"m": "de-", "meaning": "向下", "ex": "decline, decrease"}, {"m": "e-/ex-", "meaning": "出，外", "ex": "emit, export"}, {"m": "em-/en-", "meaning": "进入", "ex": "embrace, enter"}, {"m": "im-/in-", "meaning": "进入，向内", "ex": "import, inside"}, {"m": "intro-", "meaning": "向内", "ex": "introduce, introvert"}, {"m": "pro-", "meaning": "向前", "ex": "progress, project"}, {"m": "re-", "meaning": "回，向后", "ex": "return, reflect"}, {"m": "with-", "meaning": "向后", "ex": "withdraw, withhold"}, {"m": "up-", "meaning": "向上", "ex": "upstairs, upward"}, {"m": "circum-", "meaning": "环绕", "ex": "circle, circumstance"}, {"m": "fore-", "meaning": "前面", "ex": "forecast, forehead"}, {"m": "inter-", "meaning": "在…之间；相互", "ex": "international, internet"}, {"m": "pre-", "meaning": "前", "ex": "preview, prepare"}, {"m": "post-", "meaning": "后", "ex": "postwar, postcard"}, {"m": "sub-", "meaning": "下", "ex": "subway, submarine"}, {"m": "suc-/suf-/sup-/sug-", "meaning": "下", "ex": "success, suffer, supply, suggest"}, {"m": "super-", "meaning": "超级；过多；上", "ex": "superman, supermarket"}, {"m": "extra-", "meaning": "超过", "ex": "extraordinary, extra"}, {"m": "sur-", "meaning": "上，超", "ex": "surface, surprise"}, {"m": "sus-", "meaning": "下", "ex": "suspect, sustain"}, {"m": "trans-", "meaning": "横穿", "ex": "transport, transform"}, {"m": "under-", "meaning": "在…下", "ex": "underground, understand"}, {"m": "be-", "meaning": "在（构成介词）", "ex": "before, behind"}, {"m": "by-", "meaning": "在旁边", "ex": "bypass, byproduct"}], "number": [{"m": "bi-", "meaning": "二", "ex": "bicycle, bilingual"}, {"m": "kilo-", "meaning": "千", "ex": "kilometer, kilogram"}, {"m": "magni-", "meaning": "大", "ex": "magnificent, magnify"}, {"m": "macro-", "meaning": "大", "ex": "macroeconomics, macro"}, {"m": "micro-", "meaning": "小", "ex": "microscope, microphone"}, {"m": "multi-", "meaning": "多", "ex": "multiply, multimedia"}, {"m": "tri-", "meaning": "三", "ex": "triangle, tricycle"}, {"m": "uni-", "meaning": "单一", "ex": "uniform, universe"}, {"m": "twi-", "meaning": "二", "ex": "twilight, twins"}, {"m": "cent-/centi-", "meaning": "百", "ex": "century, centimeter"}], "neg": [{"m": "ab-/abs-", "meaning": "相反；离开", "ex": "abnormal, absent"}, {"m": "an-", "meaning": "无", "ex": "anonymous, anemia"}, {"m": "ant-/anti-", "meaning": "相反；对抗", "ex": "antonym, antibody"}, {"m": "contra-", "meaning": "相反", "ex": "contrary, contradict"}, {"m": "counter-", "meaning": "相反", "ex": "counter, counteract"}, {"m": "dif-/dis-", "meaning": "不；去除", "ex": "differ, disagree"}, {"m": "il-/ir-", "meaning": "不", "ex": "illogical, irregular"}, {"m": "im-/in-", "meaning": "不", "ex": "impossible, incorrect"}, {"m": "mis-", "meaning": "错", "ex": "mistake, misunderstand"}, {"m": "non-", "meaning": "不", "ex": "nonsense, nonstop"}, {"m": "ob-/op-", "meaning": "反", "ex": "object, oppose"}, {"m": "un-", "meaning": "不", "ex": "unhappy, unable"}], "remove": [{"m": "ab-/abs-", "meaning": "离开", "ex": "absent, absorb"}, {"m": "de-", "meaning": "去掉", "ex": "decrease, decode"}, {"m": "di-/dif-", "meaning": "使分开；分开", "ex": "divide, differ"}, {"m": "dis-", "meaning": "去除，分开", "ex": "disappear, disconnect"}, {"m": "se-", "meaning": "分开", "ex": "separate, secret"}]}');
+var primarySuffixesV5 = JSON.parse('{"noun-person": [{"m": "-er/-or/-eer", "meaning": "人", "ex": "teacher, actor, engineer"}, {"m": "-ian", "meaning": "人", "ex": "musician, librarian"}, {"m": "-ist", "meaning": "人", "ex": "artist, scientist"}, {"m": "-ess", "meaning": "人，特指女性", "ex": "actress, waitress"}, {"m": "-ese", "meaning": "人；语言", "ex": "Chinese, Japanese"}, {"m": "-an/-ian", "meaning": "人；…的", "ex": "American, Australian"}, {"m": "-y", "meaning": "人", "ex": "daddy, mommy"}], "noun-thing": [{"m": "-ar", "meaning": "物", "ex": "calendar, grammar"}, {"m": "-ary", "meaning": "人；物", "ex": "secretary, dictionary"}, {"m": "-ain", "meaning": "人；物", "ex": "captain, mountain"}, {"m": "-al", "meaning": "物", "ex": "hospital, capital"}, {"m": "-age", "meaning": "物；状态", "ex": "package, storage"}, {"m": "-ant/-ent", "meaning": "人", "ex": "assistant, student"}, {"m": "-er/-or", "meaning": "物", "ex": "computer, tractor"}, {"m": "-en", "meaning": "小的人或物", "ex": "chicken, kitten"}, {"m": "-et", "meaning": "小物", "ex": "pocket, ticket"}], "noun-state": [{"m": "-ty/-ity/-ety", "meaning": "性质；状态", "ex": "beauty, ability, variety"}, {"m": "-ality", "meaning": "性质；状态", "ex": "nationality, personality"}, {"m": "-ance/-ence/-ency", "meaning": "性质；状态", "ex": "importance, difference, emergency"}, {"m": "-ry", "meaning": "性质；状态", "ex": "history, chemistry"}, {"m": "-y", "meaning": "状态；行为", "ex": "memory, discovery"}, {"m": "-logy", "meaning": "学科", "ex": "biology, technology"}, {"m": "-ic/-ics", "meaning": "学科；艺术", "ex": "music, physics"}, {"m": "-ice", "meaning": "性质；行为", "ex": "justice, service"}, {"m": "-ness", "meaning": "性质；状态", "ex": "happiness, kindness"}, {"m": "-ure/-ature", "meaning": "状态；行为", "ex": "nature, temperature"}, {"m": "-tion/-ation", "meaning": "状态；行为", "ex": "action, education"}, {"m": "-sion", "meaning": "状态；行为", "ex": "decision, television"}, {"m": "-ment", "meaning": "行为；具体事物", "ex": "development, government"}, {"m": "-th", "meaning": "行为", "ex": "growth, death"}, {"m": "-ing", "meaning": "行为；具体事物", "ex": "building, meeting"}], "noun-place": [{"m": "-ory/-ary/-ry", "meaning": "场地", "ex": "factory, library, bakery"}, {"m": "-age", "meaning": "地点", "ex": "village, cottage"}], "verb": [{"m": "-ate", "meaning": "动作", "ex": "create, operate"}, {"m": "-en", "meaning": "做，使", "ex": "widen, strengthen"}, {"m": "-fy/-ify", "meaning": "使，…化", "ex": "beautify, simplify"}, {"m": "-ise/-ize", "meaning": "使，…化", "ex": "realize, organize"}, {"m": "-ish", "meaning": "使", "ex": "finish, publish"}], "adj": [{"m": "-y", "meaning": "…的", "ex": "happy, sunny"}, {"m": "-ly", "meaning": "…的", "ex": "friendly, lovely"}, {"m": "-ful", "meaning": "充满…的", "ex": "beautiful, helpful"}, {"m": "-able/-ible", "meaning": "可…的", "ex": "readable, possible"}, {"m": "-al/-ial", "meaning": "…的", "ex": "national, special"}, {"m": "-ar/-ary", "meaning": "…的", "ex": "popular, necessary"}, {"m": "-ant/-ent", "meaning": "…的", "ex": "important, different"}, {"m": "-ic", "meaning": "…的", "ex": "music, magic"}, {"m": "-ive/-alive", "meaning": "…的；…的人（物）", "ex": "active, alive"}, {"m": "-ous/-ious", "meaning": "…的", "ex": "famous, serious"}, {"m": "-ing", "meaning": "令人…的（物）", "ex": "interesting, exciting"}, {"m": "-ed", "meaning": "…的（人）；被…的", "ex": "interested, excited"}, {"m": "-ern", "meaning": "…方向的", "ex": "eastern, western"}, {"m": "-en", "meaning": "…做的", "ex": "wooden, golden"}], "adv": [{"m": "-ly", "meaning": "…地", "ex": "quickly, happily"}], "num": [{"m": "-ty", "meaning": "…十（基数词）", "ex": "twenty, thirty"}, {"m": "-teen", "meaning": "十…（基数词）", "ex": "thirteen, fifteen"}, {"m": "-th", "meaning": "第…（序数词）", "ex": "first, fifth"}]}');
+var primaryRootsV5 = JSON.parse('[{"r": "act", "m": "做；动作", "e": "action, active, actor"}, {"r": "annu/anni", "m": "年", "e": "annual, anniversary"}, {"r": "audi", "m": "听", "e": "audio, audience, audible"}, {"r": "auto", "m": "自己", "e": "automatic, automobile"}, {"r": "bas", "m": "低下，基础", "e": "base, basic, basement"}, {"r": "bio", "m": "生物", "e": "biology, biography"}, {"r": "ceed/cess", "m": "走", "e": "proceed, success, process"}, {"r": "centr", "m": "中心", "e": "central, center, concentrate"}, {"r": "cert/cern", "m": "肯定，确认", "e": "certain, certificate, concern"}, {"r": "circ/cycl", "m": "圆，环", "e": "circle, cycle, bicycle"}, {"r": "clos/clud", "m": "关闭", "e": "close, closet, include"}, {"r": "cord", "m": "心", "e": "core, cordial, record"}, {"r": "cover", "m": "盖，盖子", "e": "cover, discover, recover"}, {"r": "electr", "m": "电", "e": "electric, electricity, electron"}, {"r": "fac/fec/fic", "m": "做", "e": "factory, fact, effect, office"}, {"r": "fend/fens", "m": "打击", "e": "defend, offend, fence"}, {"r": "firm", "m": "坚定", "e": "firm, confirm, affirm"}, {"r": "form", "m": "形成，形状", "e": "form, reform, uniform"}, {"r": "found/fund", "m": "基础", "e": "found, foundation, fund"}, {"r": "gen/gener", "m": "生产", "e": "gene, generate, general"}, {"r": "grad", "m": "级，度", "e": "grade, graduate, gradual"}, {"r": "gress", "m": "走", "e": "progress, congress, aggressive"}, {"r": "ject", "m": "扔", "e": "project, reject, inject"}, {"r": "join/junct", "m": "连接，结合", "e": "join, joint, junction"}, {"r": "lect", "m": "选择", "e": "select, collect, lecture"}, {"r": "log/logu", "m": "说话", "e": "logic, dialogue, biology"}, {"r": "mount", "m": "登上", "e": "mountain, mount, amount"}, {"r": "mis/mit", "m": "送", "e": "transmit, submit, permit"}, {"r": "mus", "m": "娱乐", "e": "music, musical, musician"}, {"r": "memor/member", "m": "记忆", "e": "memory, memorize, remember"}, {"r": "nounc", "m": "说", "e": "pronounce, announce, denounce"}, {"r": "nov", "m": "新", "e": "novel, novelty, innovate"}, {"r": "oper", "m": "工作", "e": "operate, operation, cooperative"}, {"r": "pass", "m": "走，通过", "e": "pass, passion, passport"}, {"r": "part", "m": "部分，分开", "e": "part, partial, depart"}, {"r": "pear", "m": "看见", "e": "appear, disappear, apparent"}, {"r": "pend", "m": "悬挂", "e": "depend, suspend, pendant"}, {"r": "phon", "m": "声音", "e": "phone, phonetic, microphone"}, {"r": "place", "m": "地方", "e": "place, replace, displace"}, {"r": "plant", "m": "种植", "e": "plant, plantation, transplant"}, {"r": "plen/plet", "m": "满", "e": "plenty, plentiful, complete"}, {"r": "port", "m": "拿，运", "e": "transport, export, import"}, {"r": "pos/posit", "m": "放", "e": "position, compose, deposit"}, {"r": "press", "m": "压", "e": "press, pressure, express"}, {"r": "prim/prin/prem", "m": "第一", "e": "prime, primary, prince"}, {"r": "quir/quest", "m": "寻求", "e": "question, require, acquire"}, {"r": "range", "m": "行，列", "e": "range, arrange, derange"}, {"r": "rest", "m": "停留", "e": "rest, arrest, restaurant"}, {"r": "sens/sent", "m": "感觉；感情", "e": "sense, sensitive, sentence"}, {"r": "serv", "m": "服务，保持", "e": "serve, service, preserve"}, {"r": "set", "m": "放", "e": "set, settle, reset"}, {"r": "sign", "m": "记号", "e": "sign, signal, design"}, {"r": "sist", "m": "站立", "e": "resist, consist, insist"}, {"r": "spec", "m": "种类", "e": "special, species, specific"}, {"r": "st/sta", "m": "站立", "e": "stand, state, station"}, {"r": "struct", "m": "建立", "e": "structure, construct, instruct"}, {"r": "sur", "m": "肯定，安全", "e": "sure, ensure, insure"}, {"r": "tain/tin", "m": "拿住", "e": "contain, maintain, obtain"}, {"r": "techn", "m": "技术", "e": "technology, technical, technique"}, {"r": "tect", "m": "盖", "e": "protect, detective, architect"}, {"r": "test", "m": "测试，验证", "e": "test, contest, protest"}, {"r": "tend/tent", "m": "伸展", "e": "tend, extend, intend"}, {"r": "treat", "m": "处理", "e": "treat, treatment, retreat"}, {"r": "urb", "m": "城市", "e": "urban, suburb, urbanize"}, {"r": "valu", "m": "价值", "e": "value, valuable, evaluate"}, {"r": "vers/vert", "m": "转", "e": "convert, reverse, divert"}, {"r": "viv/vit/vig", "m": "生命", "e": "vivid, survive, vital, vigor"}]');
+var primaryCompoundsV5 = JSON.parse('{"nn": [{"m": "bookstore", "meaning": "书店", "e": "book+store"}, {"m": "classroom", "meaning": "教室", "e": "class+room"}, {"m": "bedroom", "meaning": "卧室", "e": "bed+room"}, {"m": "bathroom", "meaning": "浴室", "e": "bath+room"}, {"m": "football", "meaning": "足球", "e": "foot+ball"}, {"m": "basketball", "meaning": "篮球", "e": "basket+ball"}, {"m": "baseball", "meaning": "棒球", "e": "base+ball"}, {"m": "sunshine", "meaning": "阳光", "e": "sun+shine"}, {"m": "moonlight", "meaning": "月光", "e": "moon+light"}, {"m": "railway", "meaning": "铁路", "e": "rail+way"}, {"m": "highway", "meaning": "公路", "e": "high+way"}, {"m": "waterfall", "meaning": "瀑布", "e": "water+fall"}], "an": [{"m": "blackboard", "meaning": "黑板", "e": "black+board"}, {"m": "whiteboard", "meaning": "白板", "e": "white+board"}, {"m": "greenhouse", "meaning": "温室", "e": "green+house"}, {"m": "bluebird", "meaning": "蓝鸟", "e": "blue+bird"}, {"m": "redhead", "meaning": "红头发的人", "e": "red+head"}, {"m": "loudspeaker", "meaning": "扬声器", "e": "loud+speaker"}, {"m": "shortcut", "meaning": "捷径", "e": "short+cut"}, {"m": "longhand", "meaning": "普通书写", "e": "long+hand"}], "vn": [{"m": "breakfast", "meaning": "早餐", "e": "break+fast"}, {"m": "playground", "meaning": "操场", "e": "play+ground"}, {"m": "playhouse", "meaning": "玩具房", "e": "play+house"}, {"m": "pickpocket", "meaning": "扒手", "e": "pick+pocket"}, {"m": "runaway", "meaning": "逃跑者", "e": "run+away"}, {"m": "takeoff", "meaning": "起飞", "e": "take+off"}, {"m": "checkout", "meaning": "结账", "e": "check+out"}, {"m": "cutthroat", "meaning": "残酷的", "e": "cut+throat"}], "other": [{"m": "yourself", "meaning": "你自己", "e": "your+self"}, {"m": "himself", "meaning": "他自己", "e": "him+self"}, {"m": "herself", "meaning": "她自己", "e": "her+self"}, {"m": "themselves", "meaning": "他们自己", "e": "them+selves"}, {"m": "everybody", "meaning": "每个人", "e": "every+body"}, {"m": "someone", "meaning": "某人", "e": "some+one"}, {"m": "anything", "meaning": "任何事", "e": "any+thing"}, {"m": "nowhere", "meaning": "无处", "e": "no+where"}, {"m": "upstairs", "meaning": "在楼上", "e": "up+stairs"}, {"m": "downstairs", "meaning": "在楼下", "e": "down+stairs"}, {"m": "outside", "meaning": "在外面", "e": "out+side"}, {"m": "inside", "meaning": "在里面", "e": "in+side"}, {"m": "without", "meaning": "没有", "e": "with+out"}, {"m": "within", "meaning": "在…之内", "e": "with+in"}]}');
 
 </script>
 

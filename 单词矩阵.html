@@ -276,6 +276,42 @@ main{max-width:1400px;margin:0 auto;padding:0 20px 40px}
   .matrix-suffix{align-items:center}
   .quiz-options{grid-template-columns:repeat(2,1fr)}
 }
+
+/* ===== v3.0 Word Matrix 正宗矩阵表格 ===== */
+.matrix-container.v3{padding:18px 20px 30px}
+.matrix-header{display:flex;gap:20px;align-items:flex-start;flex-wrap:wrap;margin-bottom:18px}
+.matrix-selector{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.matrix-selector label{font-size:14px;font-weight:700;color:#475569}
+.matrix-selector select{padding:9px 14px;border:2px solid #2B7FD8;border-radius:10px;font-size:15px;font-weight:700;color:#1f2937;background:#fff;font-family:inherit;cursor:pointer;min-width:200px}
+.root-hero{flex:1;min-width:280px;background:linear-gradient(135deg,#f0f7fc,#e8f0fe);border:2px solid #c7dcf5;border-radius:16px;padding:16px 22px}
+.root-hero-main{display:flex;align-items:center;gap:12px}
+.root-hero-text{font-size:38px;font-weight:900;color:#1e40af;letter-spacing:.02em}
+.root-speak-btn{background:#fff;border:2px solid #2B7FD8;color:#2B7FD8;border-radius:50%;width:40px;height:40px;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.root-speak-btn:hover{background:#2B7FD8;color:#fff}
+.root-hero-meaning{font-size:17px;font-weight:700;color:#334155;margin-top:4px}
+.root-hero-origin{font-size:12px;color:#64748b;margin-top:2px;font-style:italic}
+
+.matrix-table-wrap{overflow-x:auto;margin-bottom:18px;border-radius:12px;border:1px solid #e2e8f0}
+.matrix-table{border-collapse:collapse;width:100%;min-width:600px;background:#fff}
+.matrix-table th,.matrix-table td{border:1px solid #e2e8f0;padding:0;text-align:center;vertical-align:middle}
+.matrix-table thead th{background:#f1f5f9;font-size:13px;font-weight:800;color:#475569;padding:10px 8px;position:sticky;top:0}
+.matrix-table thead th.corner{background:#e2e8f0;color:#64748b;font-size:11px}
+.matrix-table tbody th{background:#f8fafc;font-size:14px;font-weight:800;color:#1e40af;padding:10px 12px;min-width:80px;text-align:right}
+.matrix-table .word-cell{padding:8px 6px;min-height:44px}
+.matrix-table .word-cell .word-btn{background:transparent;border:none;font-size:15px;font-weight:700;color:#2B7FD8;cursor:pointer;padding:6px 10px;border-radius:8px;width:100%;transition:all .12s;font-family:inherit}
+.matrix-table .word-cell .word-btn:hover{background:#dbeafe;color:#1e40af;transform:scale(1.05)}
+.matrix-table .word-cell .word-btn.selected{background:#2B7FD8;color:#fff}
+.matrix-table .empty-cell{background:#fafbfc;color:#cbd5e1;font-size:11px}
+
+.matrix-detail{background:linear-gradient(135deg,#fffbeb,#fef3c7);border:2px solid #fcd34d;border-radius:14px;padding:16px 22px;max-width:700px;margin:0 auto}
+.detail-word-row{display:flex;align-items:center;gap:12px}
+.detail-word{font-size:30px;font-weight:900;color:#92400e}
+.detail-speak{background:#fff;border:2px solid #d97706;color:#d97706;border-radius:50%;width:36px;height:36px;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.detail-speak:hover{background:#d97706;color:#fff}
+.detail-sum{font-size:16px;font-weight:700;color:#78350f;margin-top:6px}
+.detail-meaning{font-size:15px;color:#92400e;margin-top:4px;line-height:1.6}
+.detail-tip{font-size:11px;color:#b45309;margin-top:8px;font-style:italic}
+
 </style>
 
 
@@ -340,37 +376,40 @@ body{background:#fefcf6!important;}
     </div>
   </div>
 
-  <!-- Word Matrix -->
+
+  <!-- Word Matrix v3.0 -->
   <div id="page-matrix" hidden>
-    <div class="matrix-container">
-      <div class="matrix-selector">
-        <label style="font-size:14px;font-weight:600;color:#64748b;align-self:center">选择词根：</label>
-        <select id="rootSelect"></select>
+    <div class="matrix-container v3">
+      <div class="matrix-header">
+        <div class="matrix-selector">
+          <label>选择词根：</label>
+          <select id="rootSelect"></select>
+        </div>
+        <div class="root-hero" id="rootHero">
+          <div class="root-hero-main">
+            <span class="root-hero-text" id="rootText">port</span>
+            <button class="root-speak-btn" onclick="speakRoot()" title="发音">🔊</button>
+          </div>
+          <div class="root-hero-meaning" id="rootMeaning">搬运，携带</div>
+          <div class="root-hero-origin" id="rootOrigin">拉丁语 portare</div>
+        </div>
       </div>
-      <div class="matrix-layout">
-        <div class="matrix-col matrix-prefix">
-          <div class="matrix-col-title">前缀 Prefixes</div>
-          <div id="prefixList"></div>
+
+      <div class="matrix-table-wrap">
+        <table class="matrix-table" id="matrixTable">
+          <thead id="matrixHead"></thead>
+          <tbody id="matrixBody"></tbody>
+        </table>
+      </div>
+
+      <div class="matrix-detail" id="matrixDetail" hidden>
+        <div class="detail-word-row">
+          <span class="detail-word" id="detailWord">export</span>
+          <button class="detail-speak" onclick="speakDetailWord()" title="发音">🔊</button>
         </div>
-        <div class="matrix-center">
-          <div class="matrix-arrow">←</div>
-          <div class="matrix-col-title">词根 Base</div>
-          <div class="morpheme-card root-card" id="rootCard">
-            <span id="rootText">port</span>
-            <span class="meaning" id="rootMeaning">携带</span>
-          </div>
-          <div class="matrix-arrow">→</div>
-          <div class="matrix-result">
-            <div class="word" id="matrixWord">port</div>
-            <div class="word-sum" id="matrixSum">port</div>
-            <div class="word-derive" id="matrixDerive"></div>
-            <button class="play-btn" onclick="playMatrixWord()">🔊 发音</button>
-          </div>
-        </div>
-        <div class="matrix-col matrix-suffix">
-          <div class="matrix-col-title">后缀 Suffixes</div>
-          <div id="suffixList"></div>
-        </div>
+        <div class="detail-sum" id="detailSum">ex- + port = export</div>
+        <div class="detail-meaning" id="detailMeaning">出口，输出（向外搬运）</div>
+        <div class="detail-tip">点击矩阵中的单词查看词义推导</div>
       </div>
     </div>
   </div>
@@ -496,69 +535,480 @@ const suffixes = [
   {morph:'-ary/-ory', meaning:'与...有关的', examples:['library','dictionary','laboratory','memory']},
 ];
 
-// Word Matrix 数据（词根 -> 可搭配的前缀和后缀）
+// Word Matrix 数据 v3.0：15 个核心词根，每个含真实衍生词（前缀+后缀+释义）
 const matrixData = {
   'port': {
-    meaning: '携带，运送',
-    prefixes: ['ex-','im-','trans-','re-','de-','sup-'],
-    suffixes: ['-able','-er','-ation','-folio','-age']
+    meaning: '搬运，携带', origin: '拉丁语 portare（to carry）',
+    words: [
+      {w:'export', p:'ex-', s:'', m:'出口，输出（向外搬运）'},
+      {w:'exporter', p:'ex-', s:'-er', m:'出口商'},
+      {w:'exportation', p:'ex-', s:'-ation', m:'出口（名词）'},
+      {w:'exportable', p:'ex-', s:'-able', m:'可出口的'},
+      {w:'import', p:'im-', s:'', m:'进口，输入（向内搬运）'},
+      {w:'importer', p:'im-', s:'-er', m:'进口商'},
+      {w:'importation', p:'im-', s:'-ation', m:'进口（名词）'},
+      {w:'important', p:'im-', s:'-ant', m:'重要的（带入意义的）'},
+      {w:'importance', p:'im-', s:'-ance', m:'重要性'},
+      {w:'transport', p:'trans-', s:'', m:'运输（跨越搬运）'},
+      {w:'transporter', p:'trans-', s:'-er', m:'运输工具/人'},
+      {w:'transportation', p:'trans-', s:'-ation', m:'运输（名词）'},
+      {w:'transportable', p:'trans-', s:'-able', m:'可运输的'},
+      {w:'deport', p:'de-', s:'', m:'驱逐出境（带走）'},
+      {w:'deportation', p:'de-', s:'-ation', m:'驱逐（名词）'},
+      {w:'report', p:'re-', s:'', m:'报告（带回消息）'},
+      {w:'reporter', p:'re-', s:'-er', m:'记者'},
+      {w:'support', p:'sup-', s:'', m:'支持（从下面托起）'},
+      {w:'supporter', p:'sup-', s:'-er', m:'支持者'},
+      {w:'supportive', p:'sup-', s:'-ive', m:'支持的'},
+      {w:'portable', p:'', s:'-able', m:'便携的（可搬运的）'},
+      {w:'porter', p:'', s:'-er', m:'搬运工'},
+      {w:'portage', p:'', s:'-age', m:'搬运费，水陆联运'},
+      {w:'portfolio', p:'', s:'-folio', m:'文件夹，作品集（携带纸张）'},
+      {w:'portly', p:'', s:'-ly', m:'肥胖的，端庄的'},
+      {w:'comport', p:'com-', s:'', m:'举止，行为（共同携带→表现）'},
+      {w:'comportment', p:'com-', s:'-ment', m:'举止（名词）'},
+      {w:'purport', p:'pur-', s:'', m:'声称，意味着（全部携带）'},
+      {w:'disport', p:'dis-', s:'', m:'娱乐，嬉戏（分散注意力）'},
+    ]
   },
   'dict': {
-    meaning: '说',
-    prefixes: ['pre-','con-','contra-','bene-','maledict-'],
-    suffixes: ['-ion','-ator','-ary','-um','-ive']
+    meaning: '说，言', origin: '拉丁语 dicere（to say/speak）',
+    words: [
+      {w:'dictate', p:'', s:'-ate', m:'口述，命令（说出来）'},
+      {w:'dictation', p:'', s:'-ation', m:'听写，口述'},
+      {w:'dictator', p:'', s:'-or', m:'独裁者（发号施令者）'},
+      {w:'dictionary', p:'', s:'-ary', m:'词典（词语的集合）'},
+      {w:'dictum', p:'', s:'-um', m:'格言，正式声明'},
+      {w:'predict', p:'pre-', s:'', m:'预测（提前说）'},
+      {w:'prediction', p:'pre-', s:'-ion', m:'预测（名词）'},
+      {w:'predictable', p:'pre-', s:'-able', m:'可预测的'},
+      {w:'contradict', p:'contra-', s:'', m:'反驳（反着说）'},
+      {w:'contradiction', p:'contra-', s:'-ion', m:'矛盾，反驳'},
+      {w:'contradictory', p:'contra-', s:'-ory', m:'矛盾的'},
+      {w:'addict', p:'ad-', s:'', m:'使上瘾（被话语宣判）'},
+      {w:'addiction', p:'ad-', s:'-ion', m:'上瘾，沉迷'},
+      {w:'addictive', p:'ad-', s:'-ive', m:'使人上瘾的'},
+      {w:'edict', p:'e-', s:'', m:'法令，布告（说出的命令）'},
+      {w:'indict', p:'in-', s:'', m:'控告，起诉（公开宣布）'},
+      {w:'indictment', p:'in-', s:'-ment', m:'起诉书'},
+      {w:'interdict', p:'inter-', s:'', m:'禁止，阻断（在中间说）'},
+      {w:'interdiction', p:'inter-', s:'-ion', m:'禁止（名词）'},
+      {w:'verdict', p:'ver-', s:'', m:'裁决，判决（真实地说）'},
+      {w:'benediction', p:'bene-', s:'-ion', m:'祝福（说好话）'},
+      {w:'malediction', p:'male-', s:'-ion', m:'诅咒（说坏话）'},
+      {w:'valediction', p:'vale-', s:'-ion', m:'告别辞（说再见）'},
+      {w:'jurisdiction', p:'juris-', s:'-ion', m:'管辖权（法律上说）'},
+      {w:'dictaphone', p:'', s:'-aphone', m:'录音机（记录说话的）'},
+    ]
   },
   'spect': {
-    meaning: '看',
-    prefixes: ['in-','re-','pro-','retro-','per-','sus-'],
-    suffixes: ['-ator','-acle','-ion','-ive','-rum']
+    meaning: '看，观察', origin: '拉丁语 spectare（to look/watch）',
+    words: [
+      {w:'inspect', p:'in-', s:'', m:'检查（向内看）'},
+      {w:'inspection', p:'in-', s:'-ion', m:'检查（名词）'},
+      {w:'inspector', p:'in-', s:'-or', m:'检查员'},
+      {w:'respect', p:'re-', s:'', m:'尊重（反复看→看重）'},
+      {w:'respective', p:'re-', s:'-ive', m:'各自的，分别的'},
+      {w:'prospect', p:'pro-', s:'', m:'前景，展望（向前看）'},
+      {w:'prospective', p:'pro-', s:'-ive', m:'未来的，预期的'},
+      {w:'retrospect', p:'retro-', s:'', m:'回顾，追溯（向后看）'},
+      {w:'retrospective', p:'retro-', s:'-ive', m:'回顾的'},
+      {w:'suspect', p:'sus-', s:'', m:'怀疑（在下面看→暗中观察）'},
+      {w:'suspicion', p:'sus-', s:'-ion', m:'怀疑（名词）'},
+      {w:'suspicious', p:'sus-', s:'-ious', m:'可疑的'},
+      {w:'aspect', p:'a-', s:'', m:'方面，外观（看的角度）'},
+      {w:'expect', p:'ex-', s:'', m:'期待（向外看→盼望）'},
+      {w:'expectation', p:'ex-', s:'-ation', m:'期待（名词）'},
+      {w:'spectacle', p:'', s:'-acle', m:'景象，奇观（值得看的）'},
+      {w:'spectacles', p:'', s:'-acles', m:'眼镜（帮助看的）'},
+      {w:'spectator', p:'', s:'-or', m:'观众（看的人）'},
+      {w:'spectrum', p:'', s:'-um', m:'光谱，范围（可见的范围）'},
+      {w:'speculate', p:'', s:'-ate', m:'推测，投机（观察后思考）'},
+      {w:'speculation', p:'', s:'-ion', m:'推测（名词）'},
+      {w:'circumspect', p:'circum-', s:'', m:'谨慎的（环顾四周）'},
+      {w:'introspect', p:'intro-', s:'', m:'内省（向内看自己）'},
+      {w:'introspection', p:'intro-', s:'-ion', m:'内省（名词）'},
+      {w:'perspective', p:'per-', s:'-ive', m:'视角，透视（透彻地看）'},
+    ]
   },
   'duct': {
-    meaning: '引导，带领',
-    prefixes: ['con-','pro-','re-','in-','se-','ab-'],
-    suffixes: ['-ion','-or','-ile','-ive','-ility']
+    meaning: '引导，带领', origin: '拉丁语 ducere（to lead）',
+    words: [
+      {w:'conduct', p:'con-', s:'', m:'引导，指挥，行为（一起引导）'},
+      {w:'conductor', p:'con-', s:'-or', m:'指挥家，导体'},
+      {w:'conductive', p:'con-', s:'-ive', m:'传导的'},
+      {w:'produce', p:'pro-', s:'', m:'生产，产生（向前引出）'},
+      {w:'producer', p:'pro-', s:'-er', m:'生产者，制片人'},
+      {w:'production', p:'pro-', s:'-ion', m:'生产（名词）'},
+      {w:'productive', p:'pro-', s:'-ive', m:'多产的，高效的'},
+      {w:'productivity', p:'pro-', s:'-ivity', m:'生产力'},
+      {w:'reduce', p:'re-', s:'', m:'减少，降低（引回→缩小）'},
+      {w:'reduction', p:'re-', s:'-ion', m:'减少（名词）'},
+      {w:'introduce', p:'intro-', s:'', m:'介绍，引入（引到里面）'},
+      {w:'introduction', p:'intro-', s:'-ion', m:'介绍（名词）'},
+      {w:'educate', p:'e-', s:'-ate', m:'教育（引导出来→启发）'},
+      {w:'education', p:'e-', s:'-ation', m:'教育（名词）'},
+      {w:'educator', p:'e-', s:'-or', m:'教育者'},
+      {w:'deduce', p:'de-', s:'', m:'推断，演绎（向下引导→推导）'},
+      {w:'deduction', p:'de-', s:'-ion', m:'演绎，扣除'},
+      {w:'induce', p:'in-', s:'', m:'诱导，引起（引导进入）'},
+      {w:'induction', p:'in-', s:'-ion', m:'归纳，感应'},
+      {w:'seduce', p:'se-', s:'', m:'诱惑，引诱（引到旁边→带偏）'},
+      {w:'seduction', p:'se-', s:'-ion', m:'诱惑（名词）'},
+      {w:'abduct', p:'ab-', s:'', m:'绑架，诱拐（引走）'},
+      {w:'abduction', p:'ab-', s:'-ion', m:'绑架（名词）'},
+      {w:'traduce', p:'tra-', s:'', m:'诽谤，中伤（引到别处→歪曲）'},
+      {w:'viaduct', p:'via-', s:'', m:'高架桥（引导道路通过）'},
+      {w:'aqueduct', p:'aqua-', s:'', m:'渡槽，水渠（引导水流）'},
+    ]
   },
   'ject': {
-    meaning: '投掷',
-    prefixes: ['pro-','re-','in-','sub-','ob-','de-'],
-    suffixes: ['-ion','-or','-ile','-ure','-ment']
+    meaning: '投掷，扔', origin: '拉丁语 jacere（to throw）',
+    words: [
+      {w:'project', p:'pro-', s:'', m:'项目，投射（向前扔）'},
+      {w:'projection', p:'pro-', s:'-ion', m:'投射，预测'},
+      {w:'projector', p:'pro-', s:'-or', m:'投影仪'},
+      {w:'reject', p:'re-', s:'', m:'拒绝（扔回）'},
+      {w:'rejection', p:'re-', s:'-ion', m:'拒绝（名词）'},
+      {w:'inject', p:'in-', s:'', m:'注射（扔进去）'},
+      {w:'injection', p:'in-', s:'-ion', m:'注射（名词）'},
+      {w:'subject', p:'sub-', s:'', m:'主题，臣民（扔在下面→受制于）'},
+      {w:'subjection', p:'sub-', s:'-ion', m:'征服，隶属'},
+      {w:'subjective', p:'sub-', s:'-ive', m:'主观的'},
+      {w:'object', p:'ob-', s:'', m:'物体，目标（扔在前面→对着的）'},
+      {w:'objection', p:'ob-', s:'-ion', m:'反对，异议'},
+      {w:'objective', p:'ob-', s:'-ive', m:'客观的，目标'},
+      {w:'deject', p:'de-', s:'', m:'使沮丧（向下扔→情绪低落）'},
+      {w:'dejected', p:'de-', s:'-ed', m:'沮丧的'},
+      {w:'eject', p:'e-', s:'', m:'弹出，驱逐（扔出去）'},
+      {w:'ejection', p:'e-', s:'-ion', m:'弹出（名词）'},
+      {w:'interject', p:'inter-', s:'', m:'插话（扔在中间）'},
+      {w:'interjection', p:'inter-', s:'-ion', m:'感叹词，插话'},
+      {w:'conjecture', p:'con-', s:'-ure', m:'推测，猜想（一起扔→拼凑）'},
+      {w:'trajectory', p:'tra-', s:'-ory', m:'轨迹，弹道（扔过的路径）'},
+      {w:'jet', p:'', s:'', m:'喷气，喷射（ject 的简化）'},
+      {w:'jettison', p:'', s:'-ison', m:'抛弃（投弃货物）'},
+      {w:'abject', p:'ab-', s:'', m:'卑微的，可怜的（被扔开的）'},
+      {w:'adjacent', p:'ad-', s:'-ent', m:'邻近的（扔到旁边）'},
+    ]
   },
   'struct': {
-    meaning: '建造',
-    prefixes: ['con-','de-','in-','ob-','re-'],
-    suffixes: ['-ure','-ion','-ive','-or','-ural']
+    meaning: '建造，建立', origin: '拉丁语 struere（to build）',
+    words: [
+      {w:'construct', p:'con-', s:'', m:'建造，构建（一起建造）'},
+      {w:'construction', p:'con-', s:'-ion', m:'建设，建筑物'},
+      {w:'constructive', p:'con-', s:'-ive', m:'建设性的'},
+      {w:'constructor', p:'con-', s:'-or', m:'建造者，构造函数'},
+      {w:'destruct', p:'de-', s:'', m:'破坏，毁坏（拆除建造）'},
+      {w:'destruction', p:'de-', s:'-ion', m:'破坏（名词）'},
+      {w:'destructive', p:'de-', s:'-ive', m:'破坏性的'},
+      {w:'instruct', p:'in-', s:'', m:'指导，教导（在心里建造→教诲）'},
+      {w:'instruction', p:'in-', s:'-ion', m:'指导，说明书'},
+      {w:'instructor', p:'in-', s:'-or', m:'教练，讲师'},
+      {w:'instructive', p:'in-', s:'-ive', m:'有教育意义的'},
+      {w:'obstruct', p:'ob-', s:'', m:'阻碍，妨碍（建在前面→挡路）'},
+      {w:'obstruction', p:'ob-', s:'-ion', m:'阻碍（名词）'},
+      {w:'structure', p:'', s:'-ure', m:'结构，构造（建造的结果）'},
+      {w:'structural', p:'', s:'-ural', m:'结构的'},
+      {w:'restructure', p:'re-', s:'-ure', m:'重组，重构（重新建造）'},
+      {w:'infrastructure', p:'infra-', s:'-ure', m:'基础设施（在下面建造）'},
+      {w:'superstructure', p:'super-', s:'-ure', m:'上层建筑（在上面建造）'},
+      {w:'construe', p:'con-', s:'', m:'解释，理解（拼凑在一起→理解）'},
+      {w:'misconstrue', p:'mis-', s:'', m:'误解（错误地解释）'},
+      {w:'deconstruct', p:'de-', s:'', m:'解构（拆开建造→分析）'},
+      {w:'reconstruction', p:'re-', s:'-ion', m:'重建，复兴'},
+      {w:'constructivism', p:'con-', s:'-ism', m:'建构主义'},
+      {w:'structuralism', p:'', s:'-ism', m:'结构主义'},
+      {w:'unstructured', p:'un-', s:'-ed', m:'无结构的，松散的'},
+    ]
   },
   'form': {
-    meaning: '形状',
-    prefixes: ['trans-','in-','re-','con-','de-','uni-'],
-    suffixes: ['-ation','-er','-al','-ity','-less','-ful']
+    meaning: '形状，形式', origin: '拉丁语 forma（shape/form）',
+    words: [
+      {w:'form', p:'', s:'', m:'形式，形状，表格'},
+      {w:'formal', p:'', s:'-al', m:'正式的，形式的'},
+      {w:'formality', p:'', s:'-ity', m:'礼节，拘谨'},
+      {w:'format', p:'', s:'-at', m:'格式，版式'},
+      {w:'formation', p:'', s:'-ion', m:'形成，编队'},
+      {w:'formula', p:'', s:'-ula', m:'公式，配方'},
+      {w:'formulate', p:'', s:'-ate', m:'制定，规划（形成公式）'},
+      {w:'transform', p:'trans-', s:'', m:'转变，改造（改变形状）'},
+      {w:'transformation', p:'trans-', s:'-ion', m:'转变（名词）'},
+      {w:'transformer', p:'trans-', s:'-er', m:'变压器，变形金刚'},
+      {w:'inform', p:'in-', s:'', m:'通知，告知（在心里形成→告知）'},
+      {w:'information', p:'in-', s:'-ation', m:'信息，资料'},
+      {w:'informative', p:'in-', s:'-ive', m:'信息丰富的'},
+      {w:'reform', p:'re-', s:'', m:'改革，改良（重新形成）'},
+      {w:'reformation', p:'re-', s:'-ion', m:'改革（名词）'},
+      {w:'conform', p:'con-', s:'', m:'遵从，符合（形状一致）'},
+      {w:'conformity', p:'con-', s:'-ity', m:'一致性，遵从'},
+      {w:'deform', p:'de-', s:'', m:'使变形（破坏形状）'},
+      {w:'deformation', p:'de-', s:'-ion', m:'变形（名词）'},
+      {w:'uniform', p:'uni-', s:'', m:'制服，统一的（一种形状）'},
+      {w:'uniformity', p:'uni-', s:'-ity', m:'一致性，均匀'},
+      {w:'multiform', p:'multi-', s:'', m:'多种形式的'},
+      {w:'perform', p:'per-', s:'', m:'表演，执行（完全展现形式）'},
+      {w:'performance', p:'per-', s:'-ance', m:'表演，表现，性能'},
+      {w:'preform', p:'pre-', s:'', m:'预先形成'},
+      {w:'misinform', p:'mis-', s:'', m:'误传，提供错误信息'},
+      {w:'formless', p:'', s:'-less', m:'无形状的，混乱的'},
+    ]
   },
   'tract': {
-    meaning: '拉，拖',
-    prefixes: ['at-','ex-','con-','de-','sub-','pro-'],
-    suffixes: ['-ion','-or','-ile','-ive','-ability']
+    meaning: '拉，拖，拽', origin: '拉丁语 trahere（to pull/draw）',
+    words: [
+      {w:'attract', p:'at-', s:'', m:'吸引（拉向自己）'},
+      {w:'attraction', p:'at-', s:'-ion', m:'吸引力（名词）'},
+      {w:'attractive', p:'at-', s:'-ive', m:'有吸引力的'},
+      {w:'extract', p:'ex-', s:'', m:'提取，拔出（拉出来）'},
+      {w:'extraction', p:'ex-', s:'-ion', m:'提取（名词）'},
+      {w:'contract', p:'con-', s:'', m:'合同，收缩（拉到一起）'},
+      {w:'contraction', p:'con-', s:'-ion', m:'收缩，缩写'},
+      {w:'contractor', p:'con-', s:'-or', m:'承包商'},
+      {w:'detract', p:'de-', s:'', m:'贬低，减损（拉走→降低）'},
+      {w:'detraction', p:'de-', s:'-ion', m:'贬低（名词）'},
+      {w:'subtract', p:'sub-', s:'', m:'减去，扣除（从下面拉走）'},
+      {w:'subtraction', p:'sub-', s:'-ion', m:'减法（名词）'},
+      {w:'protract', p:'pro-', s:'', m:'延长，拖延（向前拉→拉长）'},
+      {w:'distract', p:'dis-', s:'', m:'分散注意力，使分心（拉开→分散）'},
+      {w:'distraction', p:'dis-', s:'-ion', m:'分心，娱乐'},
+      {w:'retract', p:'re-', s:'', m:'缩回，撤回（拉回来）'},
+      {w:'retraction', p:'re-', s:'-ion', m:'撤回（名词）'},
+      {w:'intractable', p:'in-', s:'-able', m:'难处理的，倔强的（拉不动的）'},
+      {w:'tract', p:'', s:'', m:'大片土地，道（拉出来的范围）'},
+      {w:'tractor', p:'', s:'-or', m:'拖拉机（拉东西的机器）'},
+      {w:'traction', p:'', s:'-ion', m:'牵引力，附着'},
+      {w:'abstract', p:'abs-', s:'', m:'抽象的，摘要（拉离→脱离具体）'},
+      {w:'abstraction', p:'abs-', s:'-ion', m:'抽象（名词）'},
+      {w:'extract', p:'ex-', s:'', m:'摘录，榨取'},
+      {w:'portrait', p:'por-', s:'-ait', m:'肖像（拉出来描绘）'},
+      {w:'trace', p:'', s:'', m:'痕迹，追踪（tract 的变体）'},
+      {w:'trait', p:'', s:'', m:'特征，品质（拉出的特点）'},
+    ]
   },
   'vis': {
-    meaning: '看',
-    prefixes: ['in-','re-','pro-','tele-','super-'],
-    suffixes: ['-ible','-ion','-ual','-it','-age']
+    meaning: '看，看见', origin: '拉丁语 videre（to see）/ visus',
+    words: [
+      {w:'visible', p:'', s:'-ible', m:'可见的（能被看见的）'},
+      {w:'visibility', p:'', s:'-ibility', m:'可见度，能见度'},
+      {w:'invisible', p:'in-', s:'-ible', m:'看不见的'},
+      {w:'vision', p:'', s:'-ion', m:'视力，视野，愿景'},
+      {w:'visual', p:'', s:'-ual', m:'视觉的，可视的'},
+      {w:'visualize', p:'', s:'-ize', m:'想象，使可视化'},
+      {w:'visit', p:'', s:'-it', m:'参观，访问（去看）'},
+      {w:'visitor', p:'', s:'-or', m:'访客，游客'},
+      {w:'revise', p:'re-', s:'', m:'修订，修改（再看一遍）'},
+      {w:'revision', p:'re-', s:'-ion', m:'修订（名词）'},
+      {w:'supervise', p:'super-', s:'', m:'监督，管理（在上面看）'},
+      {w:'supervision', p:'super-', s:'-ion', m:'监督（名词）'},
+      {w:'supervisor', p:'super-', s:'-or', m:'主管，导师'},
+      {w:'televise', p:'tele-', s:'', m:'电视播放（远距离看）'},
+      {w:'television', p:'tele-', s:'-ion', m:'电视'},
+      {w:'provide', p:'pro-', s:'', m:'提供，供给（提前看到→预备）'},
+      {w:'provision', p:'pro-', s:'-ion', m:'供应，规定'},
+      {w:'provider', p:'pro-', s:'-er', m:'提供者'},
+      {w:'evident', p:'e-', s:'-ent', m:'明显的（看得出来的）'},
+      {w:'evidence', p:'e-', s:'-ence', m:'证据，迹象'},
+      {w:'advise', p:'ad-', s:'', m:'建议，劝告（看清楚后告知）'},
+      {w:'advice', p:'ad-', s:'-ice', m:'建议（名词）'},
+      {w:'advisor', p:'ad-', s:'-or', m:'顾问'},
+      {w:'improvise', p:'im-', s:'', m:'即兴创作（没提前看→临时发挥）'},
+      {w:'visa', p:'', s:'-a', m:'签证（看过的证明）'},
+      {w:'vista', p:'', s:'-a', m:'远景，展望'},
+      {w:'envision', p:'en-', s:'-ion', m:'想象，展望（在心里看到）'},
+    ]
   },
   'graph': {
-    meaning: '写，画',
-    prefixes: ['photo-','bio-','auto-','geo-','calli-'],
-    suffixes: ['-er','-ic','-y','-ite','-ology']
+    meaning: '写，画，记录', origin: '希腊语 graphein（to write/draw）',
+    words: [
+      {w:'photograph', p:'photo-', s:'', m:'照片（用光来画）'},
+      {w:'photographer', p:'photo-', s:'-er', m:'摄影师'},
+      {w:'photography', p:'photo-', s:'-y', m:'摄影术'},
+      {w:'biography', p:'bio-', s:'-y', m:'传记（写生命→人生记录）'},
+      {w:'biographer', p:'bio-', s:'-er', m:'传记作者'},
+      {w:'autobiography', p:'auto-', s:'-y', m:'自传（自己写自己）'},
+      {w:'autograph', p:'auto-', s:'', m:'亲笔签名（自己写）'},
+      {w:'geography', p:'geo-', s:'-y', m:'地理学（描绘地球）'},
+      {w:'geographer', p:'geo-', s:'-er', m:'地理学家'},
+      {w:'calligraphy', p:'calli-', s:'-y', m:'书法（美丽的书写）'},
+      {w:'orthography', p:'ortho-', s:'-y', m:'正字法，拼写（正确书写）'},
+      {w:'paragraph', p:'para-', s:'', m:'段落（在旁边写→分段）'},
+      {w:'telegraph', p:'tele-', s:'', m:'电报（远距离书写）'},
+      {w:'phonograph', p:'phono-', s:'', m:'留声机（记录声音）'},
+      {w:'graph', p:'', s:'', m:'图表，曲线图'},
+      {w:'graphic', p:'', s:'-ic', m:'图形的，生动的'},
+      {w:'graphics', p:'', s:'-ics', m:'图形学，制图'},
+      {w:'graphite', p:'', s:'-ite', m:'石墨（用来写的材料）'},
+      {w:'graphology', p:'', s:'-ology', m:'笔迹学，字体学'},
+      {w:'monograph', p:'mono-', s:'', m:'专题论文（单一主题的著作）'},
+      {w:'epigraph', p:'epi-', s:'', m:'铭文，题词（刻在上面的字）'},
+      {w:'digraph', p:'di-', s:'', m:'二合字母（两个字母写一起）'},
+      {w:'cartography', p:'carto-', s:'-y', m:'制图学（画地图）'},
+      {w:'typography', p:'typo-', s:'-y', m:'排版，印刷术'},
+      {w:'holograph', p:'holo-', s:'', m:'亲笔信，全息图（全部手写）'},
+      {w:'seismograph', p:'seismo-', s:'', m:'地震仪（记录地震）'},
+    ]
   },
   'phon': {
-    meaning: '声音',
-    prefixes: ['tele-','micro-','sym-','eu-','caco-'],
-    suffixes: ['-ic','-ics','-y','-eme','-ology']
+    meaning: '声音', origin: '希腊语 phone（sound/voice）',
+    words: [
+      {w:'telephone', p:'tele-', s:'', m:'电话（远距离声音）'},
+      {w:'microphone', p:'micro-', s:'', m:'麦克风（放大微小声音）'},
+      {w:'symphony', p:'sym-', s:'-y', m:'交响乐（声音一起响）'},
+      {w:'symphonic', p:'sym-', s:'-ic', m:'交响乐的'},
+      {w:'euphony', p:'eu-', s:'-y', m:'悦耳的声音（好声音）'},
+      {w:'euphonious', p:'eu-', s:'-ious', m:'悦耳的'},
+      {w:'cacophony', p:'caco-', s:'-y', m:'刺耳的声音（坏声音）'},
+      {w:'cacophonous', p:'caco-', s:'-ous', m:'刺耳的'},
+      {w:'homophone', p:'homo-', s:'', m:'同音异义词（相同声音）'},
+      {w:'phonetic', p:'', s:'-etic', m:'语音的，音标'},
+      {w:'phonetics', p:'', s:'-etics', m:'语音学'},
+      {w:'phoneme', p:'', s:'-eme', m:'音素（最小语音单位）'},
+      {w:'phonemic', p:'', s:'-emic', m:'音素的'},
+      {w:'phonology', p:'', s:'-ology', m:'音系学，音韵学'},
+      {w:'phonological', p:'', s:'-ological', m:'音系学的'},
+      {w:'phonics', p:'', s:'-ics', m:'自然拼读法'},
+      {w:'saxophone', p:'saxo-', s:'', m:'萨克斯管（Sax 发明的声音乐器）'},
+      {w:'xylophone', p:'xylo-', s:'', m:'木琴（木头声音）'},
+      {w:'gramophone', p:'gramo-', s:'', m:'留声机（记录声音）'},
+      {w:'megaphone', p:'mega-', s:'', m:'扩音器，喊话筒（大声音）'},
+      {w:'earphone', p:'ear-', s:'', m:'耳机（耳朵上的声音）'},
+      {w:'headphone', p:'head-', s:'', m:'头戴式耳机'},
+      {w:'interphone', p:'inter-', s:'', m:'内部电话，对讲机'},
+      {w:'microphonic', p:'micro-', s:'-ic', m:'麦克风的'},
+      {w:'phonate', p:'', s:'-ate', m:'发声，发音'},
+      {w:'phonation', p:'', s:'-ation', m:'发声（名词）'},
+    ]
   },
   'bio': {
-    meaning: '生命',
-    prefixes: ['micro-','sym-','geo-','astro-','macro-'],
-    suffixes: ['-logy','-logist','-tic','-sphere']
-  }
+    meaning: '生命，生物', origin: '希腊语 bios（life）',
+    words: [
+      {w:'biology', p:'', s:'-logy', m:'生物学（研究生命）'},
+      {w:'biologist', p:'', s:'-logist', m:'生物学家'},
+      {w:'biological', p:'', s:'-logical', m:'生物学的'},
+      {w:'biography', p:'', s:'-graphy', m:'传记（书写生命）'},
+      {w:'biosphere', p:'', s:'-sphere', m:'生物圈（生命的范围）'},
+      {w:'biotic', p:'', s:'-tic', m:'生物的，生命的'},
+      {w:'antibiotic', p:'anti-', s:'-tic', m:'抗生素（对抗生命→杀菌）'},
+      {w:'biochemistry', p:'bio-', s:'-chemistry', m:'生物化学'},
+      {w:'biodiversity', p:'bio-', s:'-diversity', m:'生物多样性'},
+      {w:'biodegradable', p:'bio-', s:'-gradable', m:'可生物降解的'},
+      {w:'microbiology', p:'micro-', s:'-logy', m:'微生物学'},
+      {w:'microbiologist', p:'micro-', s:'-logist', m:'微生物学家'},
+      {w:'symbiosis', p:'sym-', s:'-osis', m:'共生（共同生活）'},
+      {w:'symbiotic', p:'sym-', s:'-otic', m:'共生的'},
+      {w:'geobiology', p:'geo-', s:'-logy', m:'地球生物学'},
+      {w:'astrobiology', p:'astro-', s:'-logy', m:'天体生物学'},
+      {w:'macrobiotics', p:'macro-', s:'-otics', m:'长寿饮食法（大生命观）'},
+      {w:'neobiology', p:'neo-', s:'-logy', m:'新生物学'},
+      {w:'paleobiology', p:'paleo-', s:'-logy', m:'古生物学'},
+      {w:'biopsy', p:'', s:'-opsy', m:'活检（看生命组织）'},
+      {w:'autobiography', p:'auto-', s:'-graphy', m:'自传（自己写生命）'},
+      {w:'bionics', p:'', s:'-ics', m:'仿生学'},
+      {w:'bionic', p:'', s:'-ic', m:'仿生的'},
+      {w:'biometry', p:'', s:'-metry', m:'生物统计学（测量生命）'},
+      {w:'biogenesis', p:'', s:'-genesis', m:'生物起源，生物发生'},
+      {w:'bioluminescence', p:'', s:'-luminescence', m:'生物发光'},
+    ]
+  },
+  'script': {
+    meaning: '写，书写', origin: '拉丁语 scribere（to write）',
+    words: [
+      {w:'describe', p:'de-', s:'', m:'描述，描写（写下来）'},
+      {w:'description', p:'de-', s:'-ion', m:'描述（名词）'},
+      {w:'descriptive', p:'de-', s:'-ive', m:'描述性的'},
+      {w:'prescribe', p:'pre-', s:'', m:'开处方，规定（提前写好）'},
+      {w:'prescription', p:'pre-', s:'-ion', m:'处方，规定'},
+      {w:'subscribe', p:'sub-', s:'', m:'订阅，签署（在下面写签名）'},
+      {w:'subscription', p:'sub-', s:'-ion', m:'订阅（名词）'},
+      {w:'subscriber', p:'sub-', s:'-er', m:'订阅者'},
+      {w:'transcribe', p:'trans-', s:'', m:'抄写，转录（转写）'},
+      {w:'transcription', p:'trans-', s:'-ion', m:'抄写，转录'},
+      {w:'conscribe', p:'con-', s:'', m:'征兵，招募（一起登记写入）'},
+      {w:'conscription', p:'con-', s:'-ion', m:'征兵（名词）'},
+      {w:'inscribe', p:'in-', s:'', m:'题写，铭刻（写在里面/上面）'},
+      {w:'inscription', p:'in-', s:'-ion', m:'铭文，题词'},
+      {w:'proscribe', p:'pro-', s:'', m:'禁止，排斥（公开写出来→宣布禁止）'},
+      {w:'proscription', p:'pro-', s:'-ion', m:'禁止（名词）'},
+      {w:'manuscript', p:'manu-', s:'', m:'手稿（手写的）'},
+      {w:'script', p:'', s:'', m:'剧本，脚本，笔迹'},
+      {w:'scripture', p:'', s:'-ure', m:'经文，圣典（写下的文字）'},
+      {w:'scriptural', p:'', s:'-ural', m:'经文的'},
+      {w:'scribble', p:'', s:'-le', m:'潦草书写，涂鸦'},
+      {w:'scribe', p:'', s:'', m:'抄写员，作家'},
+      {w:'ascribe', p:'a-', s:'', m:'归因于，归咎于（写在…上）'},
+      {w:'ascription', p:'a-', s:'-ion', m:'归因（名词）'},
+      {w:'circumscribe', p:'circum-', s:'', m:'限制，画圈（在周围画线→限定范围）'},
+      {w:'circumscription', p:'circum-', s:'-ion', m:'限制（名词）'},
+    ]
+  },
+  'mit': {
+    meaning: '发送，送', origin: '拉丁语 mittere（to send）',
+    words: [
+      {w:'transmit', p:'trans-', s:'', m:'传输，传送（跨越发送）'},
+      {w:'transmission', p:'trans-', s:'-ion', m:'传输（名词）'},
+      {w:'transmitter', p:'trans-', s:'-er', m:'发射机，传播者'},
+      {w:'submit', p:'sub-', s:'', m:'提交，屈服（从下面送上去）'},
+      {w:'submission', p:'sub-', s:'-ion', m:'提交，屈服'},
+      {w:'submissive', p:'sub-', s:'-ive', m:'顺从的'},
+      {w:'commit', p:'com-', s:'', m:'承诺，犯罪，提交（一起送→投入）'},
+      {w:'commitment', p:'com-', s:'-ment', m:'承诺，投入'},
+      {w:'commission', p:'com-', s:'-ion', m:'委员会，佣金，委托'},
+      {w:'committee', p:'com-', s:'-ee', m:'委员会（被委托的人）'},
+      {w:'admit', p:'ad-', s:'', m:'承认，准许进入（送进来）'},
+      {w:'admission', p:'ad-', s:'-ion', m:'承认，入场费'},
+      {w:'admittance', p:'ad-', s:'-ance', m:'进入权，入场'},
+      {w:'emit', p:'e-', s:'', m:'发出，发射（送出去）'},
+      {w:'emission', p:'e-', s:'-ion', m:'排放，发射'},
+      {w:'permit', p:'per-', s:'', m:'允许，许可证（完全送过去→放行）'},
+      {w:'permission', p:'per-', s:'-ion', m:'允许，许可'},
+      {w:'permissive', p:'per-', s:'-ive', m:'宽容的，放任的'},
+      {w:'remit', p:'re-', s:'', m:'汇款，缓解（送回→减轻）'},
+      {w:'remittance', p:'re-', s:'-ance', m:'汇款'},
+      {w:'dismiss', p:'dis-', s:'', m:'解散，解雇（分开送走）'},
+      {w:'dismissal', p:'dis-', s:'-al', m:'解雇，解散'},
+      {w:'mission', p:'', s:'-ion', m:'任务，使命（被派送的）'},
+      {w:'missionary', p:'', s:'-ary', m:'传教士'},
+      {w:'missile', p:'', s:'-ile', m:'导弹，投射物（被发送的）'},
+      {w:'intermittent', p:'inter-', s:'-ent', m:'间歇的（在中间发送→断断续续）'},
+      {w:'unremitting', p:'un-', s:'-ing', m:'不懈的，不停的'},
+    ]
+  },
+  'vert': {
+    meaning: '转，转动', origin: '拉丁语 vertere（to turn）',
+    words: [
+      {w:'convert', p:'con-', s:'', m:'转变，转换（一起转→改变）'},
+      {w:'conversion', p:'con-', s:'-ion', m:'转变（名词）'},
+      {w:'converter', p:'con-', s:'-er', m:'转换器'},
+      {w:'revert', p:'re-', s:'', m:'恢复，回复（转回去）'},
+      {w:'reversion', p:'re-', s:'-ion', m:'恢复（名词）'},
+      {w:'divert', p:'di-', s:'', m:'转移，使分心（转开→分散）'},
+      {w:'diversion', p:'di-', s:'-ion', m:'转移，消遣'},
+      {w:'invert', p:'in-', s:'', m:'颠倒，倒置（向内转→翻转）'},
+      {w:'inversion', p:'in-', s:'-ion', m:'颠倒（名词）'},
+      {w:'inverse', p:'in-', s:'-e', m:'相反的，逆的'},
+      {w:'advert', p:'ad-', s:'', m:'注意，提及（转向→注意）'},
+      {w:'advertise', p:'ad-', s:'-ise', m:'做广告（引起注意→转向）'},
+      {w:'advertisement', p:'ad-', s:'-ment', m:'广告'},
+      {w:'pervert', p:'per-', s:'', m:'使堕落，滥用（完全转歪→扭曲）'},
+      {w:'perversion', p:'per-', s:'-ion', m:'堕落，反常'},
+      {w:'subvert', p:'sub-', s:'', m:'颠覆，破坏（从下面转→推翻）'},
+      {w:'subversion', p:'sub-', s:'-ion', m:'颠覆（名词）'},
+      {w:'transverse', p:'trans-', s:'-e', m:'横向的，横断的（转过去→横穿）'},
+      {w:'extrovert', p:'extro-', s:'', m:'外向的人（向外转→外向）'},
+      {w:'introvert', p:'intro-', s:'', m:'内向的人（向内转→内向）'},
+      {w:'version', p:'', s:'-ion', m:'版本，说法（转译→版本）'},
+      {w:'versatile', p:'', s:'-atile', m:'多才多艺的，通用的（能转的→灵活）'},
+      {w:'vertex', p:'', s:'-ex', m:'顶点，头顶（转的最高点）'},
+      {w:'vertical', p:'', s:'-ical', m:'垂直的，顶点的'},
+      {w:'controversy', p:'contro-', s:'-y', m:'争议，争论（反着转→对立）'},
+      {w:'controversial', p:'contro-', s:'-ial', m:'有争议的'},
+      {w:'universe', p:'uni-', s:'-e', m:'宇宙（转成一体→万物）'},
+      {w:'universal', p:'uni-', s:'-al', m:'普遍的，宇宙的'},
+    ]
+  },
 };
+
 
 // ==================== 导航切换 ====================
 document.querySelectorAll('.nav-tab, .module-card').forEach(el => {
@@ -579,121 +1029,109 @@ document.querySelectorAll('.nav-tab, .module-card').forEach(el => {
 let selectedPrefix = null;
 let selectedSuffix = null;
 
+
+// ==================== Word Matrix v3.0 ====================
+let currentRoot = 'port';
+let selectedWord = null;
+
 function initMatrix() {
   const select = document.getElementById('rootSelect');
   select.innerHTML = '';
   Object.keys(matrixData).forEach(root => {
     const opt = document.createElement('option');
     opt.value = root;
-    opt.textContent = `${root} (${matrixData[root].meaning})`;
+    opt.textContent = root + '（' + matrixData[root].meaning + '）';
     select.appendChild(opt);
   });
-  select.addEventListener('change', () => loadMatrix(select.value));
-  loadMatrix(select.value);
+  select.value = currentRoot;
+  select.addEventListener('change', () => {
+    currentRoot = select.value;
+    selectedWord = null;
+    renderMatrix();
+  });
+  renderMatrix();
 }
 
-function loadMatrix(root) {
-  const data = matrixData[root];
-  selectedPrefix = null;
-  selectedSuffix = null;
-
-  document.getElementById('rootText').textContent = root;
+function renderMatrix() {
+  const data = matrixData[currentRoot];
+  document.getElementById('rootText').textContent = currentRoot;
   document.getElementById('rootMeaning').textContent = data.meaning;
+  document.getElementById('rootOrigin').textContent = data.origin || '';
 
-  const prefixList = document.getElementById('prefixList');
-  prefixList.innerHTML = '';
-  data.prefixes.forEach(p => {
-    const card = document.createElement('div');
-    card.className = 'morpheme-card prefix-card';
-    card.innerHTML = `${p}<span class="meaning">${getMorphemeMeaning(p, 'prefix')}</span>`;
-    card.onclick = () => {
-      selectedPrefix = selectedPrefix === p ? null : p;
-      updateMatrixSelection();
-    };
-    prefixList.appendChild(card);
+  // 收集所有前缀和后缀（从 words 中提取，去重，保持顺序）
+  const prefixes = [];
+  const suffixes = [];
+  data.words.forEach(w => {
+    if (w.p && !prefixes.includes(w.p)) prefixes.push(w.p);
+    if (w.s && !suffixes.includes(w.s)) suffixes.push(w.s);
   });
+  // 无前缀行（纯词根+后缀）
+  prefixes.unshift('');
 
-  const suffixList = document.getElementById('suffixList');
-  suffixList.innerHTML = '';
-  data.suffixes.forEach(s => {
-    const card = document.createElement('div');
-    card.className = 'morpheme-card suffix-card';
-    card.innerHTML = `${s}<span class="meaning">${getMorphemeMeaning(s, 'suffix')}</span>`;
-    card.onclick = () => {
-      selectedSuffix = selectedSuffix === s ? null : s;
-      updateMatrixSelection();
-    };
-    suffixList.appendChild(card);
+  // 表头
+  const thead = document.getElementById('matrixHead');
+  let headHtml = '<tr><th class="corner">前缀 \\ 后缀</th>';
+  suffixes.forEach(s => { headHtml += '<th>' + (s || '—') + '</th>'; });
+  headHtml += '</tr>';
+  thead.innerHTML = headHtml;
+
+  // 表体
+  const tbody = document.getElementById('matrixBody');
+  let bodyHtml = '';
+  prefixes.forEach(p => {
+    const pLabel = p || '（无前缀）';
+    bodyHtml += '<tr><th>' + pLabel + '</th>';
+    suffixes.forEach(s => {
+      const found = data.words.find(w => w.p === p && w.s === s);
+      if (found) {
+        const sel = selectedWord === found.w ? 'selected' : '';
+        bodyHtml += '<td class="word-cell"><button class="word-btn ' + sel + '" onclick="selectWord(\'' + found.w + '\')">' + found.w + '</button></td>';
+      } else {
+        bodyHtml += '<td class="empty-cell">—</td>';
+      }
+    });
+    bodyHtml += '</tr>';
   });
+  tbody.innerHTML = bodyHtml;
 
-  updateMatrixResult();
-}
-
-function getMorphemeMeaning(morph, type) {
-  const list = type === 'prefix' ? prefixes : suffixes;
-  const found = list.find(m => m.morph.replace(/-/g,'') === morph.replace(/-/g,''));
-  return found ? found.meaning : '';
-}
-
-function updateMatrixSelection() {
-  document.querySelectorAll('#prefixList .morpheme-card').forEach((card, i) => {
-    const p = matrixData[document.getElementById('rootSelect').value].prefixes[i];
-    card.classList.toggle('selected', selectedPrefix === p);
-  });
-  document.querySelectorAll('#suffixList .morpheme-card').forEach((card, i) => {
-    const s = matrixData[document.getElementById('rootSelect').value].suffixes[i];
-    card.classList.toggle('selected', selectedSuffix === s);
-  });
-  updateMatrixResult();
-}
-
-function updateMatrixResult() {
-  const root = document.getElementById('rootSelect').value;
-  let word = root;
-  let sum = root;
-  if (selectedPrefix) {
-    word = selectedPrefix.replace(/-/g,'') + word;
-    sum = selectedPrefix + ' + ' + sum;
+  // 详情区
+  const detail = document.getElementById('matrixDetail');
+  if (selectedWord) {
+    showDetail(selectedWord);
+  } else {
+    detail.hidden = true;
   }
-  if (selectedSuffix) {
-    word = word + selectedSuffix.replace(/-/g,'');
-    sum = sum + ' + ' + selectedSuffix;
-  }
-  // 简单的拼写调整
-  word = word.replace(/tiontion/g,'tion').replace(/ssion/g,'ssion');
-  document.getElementById('matrixWord').textContent = word;
-  document.getElementById('matrixSum').textContent = sum;
-  // 词义推导（Word Sum 可视化：每个词素含义）
+}
+
+function selectWord(word) {
+  selectedWord = word;
+  renderMatrix();
+  showDetail(word);
+}
+
+function showDetail(word) {
+  const data = matrixData[currentRoot];
+  const found = data.words.find(w => w.w === word);
+  if (!found) return;
+  const detail = document.getElementById('matrixDetail');
+  detail.hidden = false;
+  document.getElementById('detailWord').textContent = found.w;
   const parts = [];
-  if (selectedPrefix) parts.push(selectedPrefix.replace(/-/g,'') + '(' + (morphMeaning(selectedPrefix) || '…') + ')');
-  parts.push(root + '(' + (matrixData[root] ? matrixData[root].meaning : '…') + ')');
-  if (selectedSuffix) parts.push(selectedSuffix.replace(/-/g,'') + '(' + (morphMeaning(selectedSuffix) || '…') + ')');
-  document.getElementById('matrixDerive').textContent = parts.join(' + ');
+  if (found.p) parts.push(found.p);
+  parts.push(currentRoot);
+  if (found.s) parts.push(found.s);
+  document.getElementById('detailSum').textContent = parts.join(' + ') + ' = ' + found.w;
+  document.getElementById('detailMeaning').textContent = found.m;
 }
 
-// 从词素库查词素含义（前缀/后缀/词根通用）
-function morphMeaning(text) {
-  const t = String(text || '').replace(/-/g, '');
-  if (!t) return '';
-  const matchIn = list => list.find(m => {
-    const parts = String(m.morph).split('/');
-    return parts.some(x => x.replace(/-/g,'') === t);
-  });
-  let f = matchIn(prefixes);
-  if (f) return f.meaning;
-  f = matchIn(suffixes);
-  if (f) return f.meaning;
-  f = matchIn(roots);
-  if (f) return f.meaning;
-  return '';
+function speakRoot() {
+  playYoudaoSound(currentRoot);
 }
 
-function playMatrixWord() {
-  const word = document.getElementById('matrixWord').textContent;
-  playYoudaoSound(word);
+function speakDetailWord() {
+  if (selectedWord) playYoudaoSound(selectedWord);
 }
 
-// ==================== 词素库 ====================
 function initLibrary() {
   const prefixLib = document.getElementById('prefixLibrary');
   prefixLib.innerHTML = '';
@@ -826,7 +1264,53 @@ const quizData = [
   {target:'development', answer:{prefix:'', root:'develop', suffix:'-ment'}, meaning:'发展'},
   {target:'submarine', answer:{prefix:'sub-', root:'marine', suffix:''}, meaning:'潜水艇'},
   {target:'automatic', answer:{prefix:'auto-', root:'mat', suffix:'-ic'}, meaning:'自动的'},
+  {target:'export', answer:{prefix:'ex-', root:'port', suffix:''}, meaning:'出口'},
+  {target:'import', answer:{prefix:'im-', root:'port', suffix:''}, meaning:'进口'},
+  {target:'portable', answer:{prefix:'', root:'port', suffix:'-able'}, meaning:'便携的'},
+  {target:'important', answer:{prefix:'im-', root:'port', suffix:'-ant'}, meaning:'重要的'},
+  {target:'inspect', answer:{prefix:'in-', root:'spect', suffix:''}, meaning:'检查'},
+  {target:'respect', answer:{prefix:'re-', root:'spect', suffix:''}, meaning:'尊重'},
+  {target:'spectator', answer:{prefix:'', root:'spect', suffix:'-or'}, meaning:'观众'},
+  {target:'produce', answer:{prefix:'pro-', root:'duct', suffix:''}, meaning:'生产'},
+  {target:'reduce', answer:{prefix:'re-', root:'duct', suffix:''}, meaning:'减少'},
+  {target:'introduce', answer:{prefix:'intro-', root:'duct', suffix:''}, meaning:'介绍'},
+  {target:'project', answer:{prefix:'pro-', root:'ject', suffix:''}, meaning:'项目，投射'},
+  {target:'reject', answer:{prefix:'re-', root:'ject', suffix:''}, meaning:'拒绝'},
+  {target:'inject', answer:{prefix:'in-', root:'ject', suffix:''}, meaning:'注射'},
+  {target:'subject', answer:{prefix:'sub-', root:'ject', suffix:''}, meaning:'主题，臣民'},
+  {target:'object', answer:{prefix:'ob-', root:'ject', suffix:''}, meaning:'物体，目标'},
+  {target:'structure', answer:{prefix:'', root:'struct', suffix:'-ure'}, meaning:'结构'},
+  {target:'destructive', answer:{prefix:'de-', root:'struct', suffix:'-ive'}, meaning:'破坏性的'},
+  {target:'instructor', answer:{prefix:'in-', root:'struct', suffix:'-or'}, meaning:'教练'},
+  {target:'transform', answer:{prefix:'trans-', root:'form', suffix:''}, meaning:'转变'},
+  {target:'information', answer:{prefix:'in-', root:'form', suffix:'-ation'}, meaning:'信息'},
+  {target:'uniform', answer:{prefix:'uni-', root:'form', suffix:''}, meaning:'制服，统一的'},
+  {target:'attract', answer:{prefix:'at-', root:'tract', suffix:''}, meaning:'吸引'},
+  {target:'extract', answer:{prefix:'ex-', root:'tract', suffix:''}, meaning:'提取'},
+  {target:'contract', answer:{prefix:'con-', root:'tract', suffix:''}, meaning:'合同，收缩'},
+  {target:'telephone', answer:{prefix:'tele-', root:'phon', suffix:''}, meaning:'电话'},
+  {target:'microphone', answer:{prefix:'micro-', root:'phon', suffix:''}, meaning:'麦克风'},
+  {target:'symphony', answer:{prefix:'sym-', root:'phon', suffix:'-y'}, meaning:'交响乐'},
+  {target:'biology', answer:{prefix:'', root:'bio', suffix:'-logy'}, meaning:'生物学'},
+  {target:'biography', answer:{prefix:'bio-', root:'graph', suffix:'-y'}, meaning:'传记'},
+  {target:'geography', answer:{prefix:'geo-', root:'graph', suffix:'-y'}, meaning:'地理学'},
+  {target:'describe', answer:{prefix:'de-', root:'script', suffix:''}, meaning:'描述'},
+  {target:'prescribe', answer:{prefix:'pre-', root:'script', suffix:''}, meaning:'开处方'},
+  {target:'subscribe', answer:{prefix:'sub-', root:'script', suffix:''}, meaning:'订阅'},
+  {target:'transmit', answer:{prefix:'trans-', root:'mit', suffix:''}, meaning:'传输'},
+  {target:'submit', answer:{prefix:'sub-', root:'mit', suffix:''}, meaning:'提交'},
+  {target:'admit', answer:{prefix:'ad-', root:'mit', suffix:''}, meaning:'承认，准许进入'},
+  {target:'commit', answer:{prefix:'con-', root:'mit', suffix:''}, meaning:'承诺，犯罪'},
+  {target:'permit', answer:{prefix:'per-', root:'mit', suffix:''}, meaning:'允许'},
+  {target:'convert', answer:{prefix:'con-', root:'vert', suffix:''}, meaning:'转变'},
+  {target:'divert', answer:{prefix:'di-', root:'vert', suffix:''}, meaning:'转移'},
+  {target:'invert', answer:{prefix:'in-', root:'vert', suffix:''}, meaning:'颠倒'},
+  {target:'advertise', answer:{prefix:'ad-', root:'vert', suffix:'-ise'}, meaning:'做广告'},
+  {target:'universe', answer:{prefix:'uni-', root:'vert', suffix:'-e'}, meaning:'宇宙'},
+  {target:'version', answer:{prefix:'', root:'vert', suffix:'-ion'}, meaning:'版本'},
 ];
+
+
 
 let quizIndex = 0;
 let quizScore = 0;

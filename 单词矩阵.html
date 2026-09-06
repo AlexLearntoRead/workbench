@@ -658,11 +658,15 @@ main{padding:2px 12px!important}
 .wm-col-header-v49{padding:6px 8px;font-size:12px;font-weight:700;text-align:center;color:#fff;letter-spacing:1px}
 .wm-prefix-col-v49{border-right:2px solid #1e3a5f}
 .wm-prefix-header-v49{background:#2B7FD8}
-.wm-prefix-list-v49{flex:1;overflow-y:auto;display:flex;flex-direction:column}
-.wm-prefix-item-v49{padding:5px 8px;border-bottom:1px solid #dbeafe;font-size:12px;cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:space-between;gap:4px}
+.wm-prefix-list-v49{flex:1;overflow-y:hidden;display:grid;grid-template-columns:1fr 1fr;gap:0;align-content:start;border:1px solid #1e3a5f}
+.wm-prefix-item-v49{padding:6px 8px;border-bottom:1px solid #1e3a5f;border-right:1px solid #1e3a5f;font-size:12px;cursor:pointer;transition:all .15s;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-height:42px;text-align:center;background:#fff}
+.wm-prefix-item-v49:nth-child(2n){border-right:1px solid #1e3a5f}
 .wm-prefix-item-v49:hover{background:#eff6ff}
 .wm-prefix-item-v49.selected{background:#2B7FD8;color:#fff}
 .wm-prefix-item-v49.selected .wm-prefix-meaning-v49{color:#bfdbfe}
+.wm-prefix-item-v49.wm-empty-option{grid-column:1/-1;background:#fff;color:#1e3a5f;border-bottom:2px solid #1e3a5f;font-weight:600}
+.wm-prefix-item-v49.wm-empty-option:hover{background:#f0f7ff}
+.wm-prefix-item-v49.wm-empty-option.selected{background:#fff;color:#1e3a5f;border:2px solid #2B7FD8;font-weight:700}
 .wm-prefix-text-v49{font-weight:700;font-size:13px}
 .wm-prefix-meaning-v49{font-size:10px;color:#6b7280}
 .wm-root-col-v49{background:#f8fafc}
@@ -684,12 +688,15 @@ main{padding:2px 12px!important}
 .wm-result-meaning-v49{font-size:12px;color:#78350f;margin-top:4px;font-weight:600}
 .wm-suffix-col-v49{border-left:2px solid #1e3a5f}
 .wm-suffix-header-v49{background:#059669}
-.wm-suffix-list-v49{flex:1;overflow-y:auto;display:grid;grid-template-columns:1fr 1fr;gap:0;align-content:start}
-.wm-suffix-item-v49{padding:5px 6px;border-bottom:1px solid #d1fae5;border-right:1px solid #d1fae5;font-size:11px;cursor:pointer;transition:all .15s;text-align:center}
-.wm-suffix-item-v49:nth-child(2n){border-right:none}
+.wm-suffix-list-v49{flex:1;overflow-y:hidden;display:grid;grid-template-columns:1fr 1fr;gap:0;align-content:start;border:1px solid #1e3a5f}
+.wm-suffix-item-v49{padding:6px 6px;border-bottom:1px solid #1e3a5f;border-right:1px solid #1e3a5f;font-size:11px;cursor:pointer;transition:all .15s;text-align:center;min-height:42px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;background:#fff}
+.wm-suffix-item-v49:nth-child(2n){border-right:1px solid #1e3a5f}
 .wm-suffix-item-v49:hover{background:#ecfdf5}
 .wm-suffix-item-v49.selected{background:#059669;color:#fff}
 .wm-suffix-item-v49.selected .wm-suffix-meaning-v49{color:#a7f3d0}
+.wm-suffix-item-v49.wm-empty-option{grid-column:1/-1;background:#fff;color:#1e3a5f;border-bottom:2px solid #1e3a5f;font-weight:600}
+.wm-suffix-item-v49.wm-empty-option:hover{background:#f0fdf4}
+.wm-suffix-item-v49.wm-empty-option.selected{background:#fff;color:#1e3a5f;border:2px solid #059669;font-weight:700}
 .wm-suffix-text-v49{font-weight:700;font-size:12px;display:block}
 .wm-suffix-meaning-v49{font-size:9px;color:#6b7280;display:block}
 </style>
@@ -4657,7 +4664,7 @@ function renderMatrixV49() {
     if (w.p && prefixes.indexOf(w.p) === -1) prefixes.push(w.p);
   });
   var prefixList = document.getElementById('prefixListV49');
-  var prefixHtml = '<div class="wm-prefix-item-v49' + (selectedPrefixV49 === '' ? ' selected' : '') + '" onclick="selectPrefixV49(\'\')"><span class="wm-prefix-text-v49">(无前缀)</span><span class="wm-prefix-meaning-v49"></span></div>';
+  var prefixHtml = '<div class="wm-prefix-item-v49 wm-empty-option' + (selectedPrefixV49 === '' ? ' selected' : '') + '" onclick="selectPrefixV49(\'\')"><span class="wm-prefix-text-v49">∅ 无前缀</span><span class="wm-prefix-meaning-v49">直接加词根</span></div>';
   prefixes.forEach(function(p) {
     prefixHtml += '<div class="wm-prefix-item-v49' + (selectedPrefixV49 === p ? ' selected' : '') + '" onclick="selectPrefixV49(\'' + p + '\')"><span class="wm-prefix-text-v49">' + p + '</span><span class="wm-prefix-meaning-v49">' + getMorphMeaning(p) + '</span></div>';
   });
@@ -4668,7 +4675,7 @@ function renderMatrixV49() {
     if (w.s && suffixes.indexOf(w.s) === -1) suffixes.push(w.s);
   });
   var suffixList = document.getElementById('suffixListV49');
-  var suffixHtml = '<div class="wm-suffix-item-v49' + (selectedSuffixV49 === '' ? ' selected' : '') + '" onclick="selectSuffixV49(\'\')"><span class="wm-suffix-text-v49">(无后缀)</span><span class="wm-suffix-meaning-v49"></span></div>';
+  var suffixHtml = '<div class="wm-suffix-item-v49 wm-empty-option' + (selectedSuffixV49 === '' ? ' selected' : '') + '" onclick="selectSuffixV49(\'\')"><span class="wm-suffix-text-v49">∅ 无后缀</span><span class="wm-suffix-meaning-v49">词根单独成词</span></div>';
   suffixes.forEach(function(s) {
     suffixHtml += '<div class="wm-suffix-item-v49' + (selectedSuffixV49 === s ? ' selected' : '') + '" onclick="selectSuffixV49(\'' + s + '\')"><span class="wm-suffix-text-v49">' + s + '</span><span class="wm-suffix-meaning-v49">' + getMorphMeaning(s) + '</span></div>';
   });

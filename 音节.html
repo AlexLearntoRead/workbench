@@ -239,6 +239,34 @@
     }
     .complete-btn:hover { background: var(--blue-dark); }
 
+    /* ===== v2.1 拍手可视化 / 纠错反馈 / 音效 ===== */
+    .clap-strip {
+        display: flex; justify-content: center; gap: 14px;
+        margin: 10px 0 18px; min-height: 26px; align-items: center;
+    }
+    .clap-dot {
+        width: 20px; height: 20px; border-radius: 50%;
+        background: #cbd5e1; transition: all .18s;
+        box-shadow: none;
+    }
+    .clap-dot.active {
+        background: var(--blue);
+        transform: scale(1.45);
+        box-shadow: 0 0 14px rgba(43,127,216,.6);
+    }
+    .clap-dot:nth-child(odd).active { background: var(--red); box-shadow: 0 0 14px rgba(255,92,92,.6); }
+    .answer-feedback {
+        max-width: 700px; margin: 14px auto 0;
+        padding: 12px 18px; border-radius: 12px;
+        font-size: 15px; font-weight: 700; text-align: center;
+        border: 2px solid var(--green); background: rgba(92,184,92,.08);
+        color: #1f7a3d;
+    }
+    .answer-feedback.wrong {
+        border-color: var(--red); background: rgba(255,92,92,.08); color: #c0392b;
+    }
+    .complete-rating { font-size: 30px; margin-top: 6px; }
+
     @media (max-width: 900px) {
         .module-grid { grid-template-columns: 1fr; }
         .syllable-types { grid-template-columns: 1fr; }
@@ -341,8 +369,10 @@ body{background:#fefcf6!important;}
             </div>
             <div class="division-display" id="division-display" hidden></div>
             <div class="word-display" id="training-word"></div>
+            <div class="clap-strip" id="clap-strip"></div>
             <button class="play-btn" id="training-play-btn">🔊 播放发音</button>
             <div class="options-grid" id="options-grid"></div>
+            <div class="answer-feedback" id="answer-feedback" hidden></div>
         </div>
     </div>
 
@@ -351,6 +381,7 @@ body{background:#fefcf6!important;}
         <div class="complete-page">
             <div class="complete-icon">🎉</div>
             <div class="complete-title">训练完成！</div>
+            <div class="complete-rating" id="complete-rating"></div>
             <div class="complete-score" id="complete-score"></div>
             <button class="complete-btn" id="retry-btn">再练一次</button>
             <button class="complete-btn" id="home-btn">返回首页</button>
@@ -612,6 +643,10 @@ function showQuestion() {
     const q = currentQuestions[currentQuestion];
     document.getElementById('score-display').textContent = `得分：${score} / ${currentQuestion}`;
     document.getElementById('progress-fill').style.width = `${(currentQuestion / currentQuestions.length) * 100}%`;
+    document.getElementById('clap-strip').innerHTML = '';
+    const fb = document.getElementById('answer-feedback');
+    fb.hidden = true; fb.className = 'answer-feedback';
+    fb.innerHTML = '';
 
     if (currentModule === 'division') {
         document.getElementById('training-title').textContent = `第 ${currentQuestion + 1} 题：请选择正确的音节划分方式（${q.rule}）`;
@@ -667,29 +702,111 @@ function checkAnswer(selected, correct, btn) {
         if (i === selected && selected !== correct) b.classList.add('wrong');
     });
 
-    if (selected === correct) score++;
+    const isCorrect = selected === correct;
+    if (isCorrect) score++;
 
-    // 播放单词发音
+    // 答题音效
+    playTone(isCorrect ? 880 : 220, isCorrect ? .22 : .3, isCorrect ? 'sine' : 'square');
+
+    // 纠错反馈 + 拍手节奏
     const q = currentQuestions[currentQuestion];
+    const fb = document.getElementById('answer-feedback');
+    if (isCorrect) {
+        fb.hidden = true;
+    } else {
+        fb.hidden = false;
+        fb.className = 'answer-feedback wrong';
+        if (currentModule === 'division') {
+            const correctDiv = q.options[q.answer];
+            fb.innerHTML = `✂️ 正确划分：<b>${correctDiv}</b>（规则：${q.rule}）`;
+        } else {
+            fb.innerHTML = `⭐ 重读音节是第 <b>${q.answer + 1}</b> 个：<b>${q.syllables[q.answer]}</b>`;
+        }
+    }
+    // 拍手可视化：播放时圆点按音节节拍跳动
+    let sylCount = 1;
+    if (currentModule === 'division') {
+        sylCount = q.options[q.answer].split('-').length;
+    } else if (currentModule === 'stress' || currentModule === 'blend') {
+        sylCount = q.syllables.length;
+    }
     playYoudaoSound(q.word);
+    clapStrip(sylCount);
 
     setTimeout(() => {
         currentQuestion++;
         showQuestion();
-    }, 1500);
+    }, 2000);
 }
 
 // 训练播放发音
 document.getElementById('training-play-btn').addEventListener('click', () => {
     const q = currentQuestions[currentQuestion];
     playYoudaoSound(q.word);
+    let sylCount = 1;
+    if (currentModule === 'division') {
+        sylCount = q.options[q.answer].split('-').length;
+    } else if (currentModule === 'stress' || currentModule === 'blend') {
+        sylCount = q.syllables.length;
+    }
+    clapStrip(sylCount);
 });
+
+// 拍手可视化：音节圆点随节拍依次亮起跳动
+function clapStrip(syllableCount) {
+    const strip = document.getElementById('clap-strip');
+    if (!strip) return;
+    strip.innerHTML = '';
+    const n = Math.max(1, syllableCount || 1);
+    for (let i = 0; i < n; i++) {
+        const d = document.createElement('div');
+        d.className = 'clap-dot';
+        strip.appendChild(d);
+    }
+    const dots = strip.querySelectorAll('.clap-dot');
+    let idx = 0;
+    clearInterval(strip._timer);
+    strip._timer = setInterval(() => {
+        dots.forEach(d => d.classList.remove('active'));
+        dots[idx % dots.length].classList.add('active');
+        idx++;
+        if (idx >= dots.length * 2) {
+            clearInterval(strip._timer);
+            dots.forEach(d => d.classList.remove('active'));
+        }
+    }, 380);
+}
+
+// WebAudio 答题音效（轻量，失败静默）
+function playTone(freq, dur, type) {
+    try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const o = ctx.createOscillator();
+        const g = ctx.createGain();
+        o.type = type; o.frequency.value = freq;
+        g.gain.setValueAtTime(0.12, ctx.currentTime);
+        o.connect(g); g.connect(ctx.destination);
+        o.start();
+        o.stop(ctx.currentTime + dur);
+        o.onended = () => { try { ctx.close(); } catch (e) {} };
+    } catch (e) {}
+}
 
 // 显示完成页
 function showComplete() {
     trainingPage.hidden = true;
     completePage.hidden = false;
-    document.getElementById('complete-score').textContent = `正确率：${currentQuestions.length > 0 ? Math.round(score / currentQuestions.length * 100) : 0}%（${score}/${currentQuestions.length}）`;
+    const pct = currentQuestions.length > 0 ? Math.round(score / currentQuestions.length * 100) : 0;
+    document.getElementById('complete-score').textContent = `正确率：${pct}%（${score}/${currentQuestions.length}）`;
+    // 评级徽章 + 最佳成绩存档
+    const rating = pct >= 90 ? '🏆 音节小达人！' : pct >= 70 ? '🌟 很棒，继续加油！' : pct >= 50 ? '💪 不错，再练一次更熟！' : '📖 再练一次，你会更棒！';
+    document.getElementById('complete-rating').textContent = rating;
+    try {
+        const key = 'syllable_best_' + currentModule;
+        const best = parseInt(localStorage.getItem(key) || '0', 10);
+        if (pct > best) localStorage.setItem(key, String(pct));
+        if (best > 0) document.getElementById('complete-score').textContent += `　📈 历史最佳：${Math.max(best, pct)}%`;
+    } catch (e) {}
 }
 
 // 再练一次

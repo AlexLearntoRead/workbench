@@ -240,6 +240,19 @@ body{background:#fefcf6!important;}
 .back-to-workbench,.back-btn{display:none!important;}
 @media(max-width:560px){.wb-title b{font-size:.92rem;}.wb-title i{display:none;}.wb-topbar{gap:10px;padding:8px 10px;}}
 
+/* 打印按钮 + 打印样式 */
+.print-btn{
+  padding:7px 16px;background:#fff;border:2px solid #2B7FD8;color:#2B7FD8;
+  border-radius:10px;cursor:pointer;font-size:13px;font-weight:700;font-family:inherit;
+  transition:all .15s;
+}
+.print-btn:hover{background:#2B7FD8;color:#fff}
+@media print{
+  .wb-topbar, .nav-tabs, .print-btn, .back-to-workbench{display:none!important;}
+  main{max-width:100%;padding:0;}
+  body{background:#fff!important;}
+}
+
 </style>
 </head>
 <body>
@@ -319,6 +332,9 @@ body{background:#fefcf6!important;}
         从最简单的"主语+谓语"开始，逐步增加难度。
       </p>
       <div class="lesson-nav" id="lessonNav"></div>
+      <div style="display:flex;justify-content:flex-end;margin:8px 0">
+        <button onclick="window.print()" class="print-btn">🖨️ 打印本课</button>
+      </div>
       <div class="lesson-content" id="lessonContent"></div>
     </div>
   </div>
@@ -512,6 +528,18 @@ function testSentence(s) {
   analyzeSentence();
 }
 
+function speakSentence() {
+  const s = document.getElementById('sentenceInput').value.trim();
+  if (!s) return;
+  if ('speechSynthesis' in window) {
+    speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(s);
+    u.lang = 'en-US';
+    u.rate = 0.85;
+    speechSynthesis.speak(u);
+  }
+}
+
 function analyzeSentence() {
   const input = document.getElementById('sentenceInput').value.trim();
   if (!input) return;
@@ -526,7 +554,10 @@ function analyzeSentence() {
   };
   const p = patternNames[result.type];
   let html = `<div class="analysis-result">
-    <span class="pattern-label ${p.cls}">${p.label} · ${p.name}</span>
+    <div style="display:flex;justify-content:center;align-items:center;gap:10px;flex-wrap:wrap">
+      <span class="pattern-label ${p.cls}">${p.label} · ${p.name}</span>
+      <button onclick="speakSentence()" class="tpl-btn">🔊 朗读</button>
+    </div>
     <div class="sentence-display">`;
   result.tokens.forEach(t => {
     html += `<span class="word-token word-${t.type}" title="${t.label}">${t.word}</span>`;

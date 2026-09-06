@@ -136,6 +136,10 @@ main{max-width:1400px;margin:0 auto;padding:0 20px 40px}
 .matrix-result .word-sum{
   font-size:13px;color:#64748b;margin-top:6px;
 }
+.word-derive{
+  font-size:12px;color:#2B7FD8;font-weight:700;margin-top:6px;
+  background:rgba(43,127,216,.06);border-radius:8px;padding:4px 10px;
+}
 .matrix-result .play-btn{
   margin-top:10px;padding:6px 16px;background:#2B7FD8;color:#fff;
   border:none;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;
@@ -252,6 +256,12 @@ main{max-width:1400px;margin:0 auto;padding:0 20px 40px}
 .quiz-score{
   text-align:center;margin-top:20px;font-size:14px;color:#64748b;
 }
+.quiz-feedback{
+  margin-top:16px;padding:12px 16px;border-radius:12px;
+  font-size:14px;line-height:1.9;text-align:center;font-weight:600;
+}
+.quiz-feedback.ok{background:rgba(92,184,92,.1);border:2px solid #5cb85c;color:#1f7a3d}
+.quiz-feedback.bad{background:rgba(255,92,92,.08);border:2px solid #ff5c5c;color:#c0392b}
 .quiz-next{
   display:block;margin:16px auto 0;padding:10px 28px;
   background:#2B7FD8;color:#fff;border:none;border-radius:10px;
@@ -353,6 +363,7 @@ body{background:#fefcf6!important;}
           <div class="matrix-result">
             <div class="word" id="matrixWord">port</div>
             <div class="word-sum" id="matrixSum">port</div>
+            <div class="word-derive" id="matrixDerive"></div>
             <button class="play-btn" onclick="playMatrixWord()">🔊 发音</button>
           </div>
         </div>
@@ -407,6 +418,7 @@ international"></textarea>
       </div>
       <div class="quiz-slots" id="quizSlots"></div>
       <div class="quiz-options" id="quizOptions"></div>
+      <div class="quiz-feedback" id="quizFeedback" hidden></div>
       <div class="quiz-score" id="quizScore">得分：0 / 0</div>
       <button class="quiz-next" id="quizNext" hidden onclick="nextQuiz()">下一题 →</button>
     </div>
@@ -535,6 +547,16 @@ const matrixData = {
     meaning: '写，画',
     prefixes: ['photo-','bio-','auto-','geo-','calli-'],
     suffixes: ['-er','-ic','-y','-ite','-ology']
+  },
+  'phon': {
+    meaning: '声音',
+    prefixes: ['tele-','micro-','sym-','eu-','caco-'],
+    suffixes: ['-ic','-ics','-y','-eme','-ology']
+  },
+  'bio': {
+    meaning: '生命',
+    prefixes: ['micro-','sym-','geo-','astro-','macro-'],
+    suffixes: ['-logy','-logist','-tic','-sphere']
   }
 };
 
@@ -641,6 +663,29 @@ function updateMatrixResult() {
   word = word.replace(/tiontion/g,'tion').replace(/ssion/g,'ssion');
   document.getElementById('matrixWord').textContent = word;
   document.getElementById('matrixSum').textContent = sum;
+  // 词义推导（Word Sum 可视化：每个词素含义）
+  const parts = [];
+  if (selectedPrefix) parts.push(selectedPrefix.replace(/-/g,'') + '(' + (morphMeaning(selectedPrefix) || '…') + ')');
+  parts.push(root + '(' + (matrixData[root] ? matrixData[root].meaning : '…') + ')');
+  if (selectedSuffix) parts.push(selectedSuffix.replace(/-/g,'') + '(' + (morphMeaning(selectedSuffix) || '…') + ')');
+  document.getElementById('matrixDerive').textContent = parts.join(' + ');
+}
+
+// 从词素库查词素含义（前缀/后缀/词根通用）
+function morphMeaning(text) {
+  const t = String(text || '').replace(/-/g, '');
+  if (!t) return '';
+  const matchIn = list => list.find(m => {
+    const parts = String(m.morph).split('/');
+    return parts.some(x => x.replace(/-/g,'') === t);
+  });
+  let f = matchIn(prefixes);
+  if (f) return f.meaning;
+  f = matchIn(suffixes);
+  if (f) return f.meaning;
+  f = matchIn(roots);
+  if (f) return f.meaning;
+  return '';
 }
 
 function playMatrixWord() {
@@ -809,6 +854,7 @@ function loadQuiz() {
   quizAnswered = false;
   currentSlot = 'prefix';
   const q = quizData[quizIndex];
+  document.getElementById('quizFeedback').hidden = true;
   document.getElementById('quizTarget').textContent = `"${q.target}" (${q.meaning})`;
   document.getElementById('quizScore').textContent = `得分：${quizScore} / ${quizIndex}`;
   document.getElementById('quizNext').hidden = true;
@@ -895,6 +941,15 @@ function checkQuizAnswer(q) {
   } else {
     document.querySelectorAll('.quiz-option').forEach(b => b.disabled = true);
   }
+
+  // Word Sum 求和式 + 词义拆解反馈
+  const fb = document.getElementById('quizFeedback');
+  fb.hidden = false;
+  fb.className = 'quiz-feedback ' + (correct ? 'ok' : 'bad');
+  const sum = [q.answer.prefix, q.answer.root, q.answer.suffix].filter(Boolean).join(' + ');
+  const parts = [q.answer.prefix, q.answer.root, q.answer.suffix].filter(Boolean)
+    .map(m => m.replace(/-/g,'') + '(' + (morphMeaning(m) || '…') + ')');
+  fb.innerHTML = (correct ? '✅ ' : '❌ 正确组合：') + `<b>${sum}</b> = ${q.target}<br>` + parts.join(' + ') + ` → <b>${q.meaning}</b>`;
 
   document.getElementById('quizScore').textContent = `得分：${quizScore} / ${quizIndex + 1}`;
   document.getElementById('quizNext').hidden = false;

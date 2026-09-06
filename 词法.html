@@ -152,9 +152,15 @@ main{max-width:1100px;margin:0 auto;padding:0 16px 50px}
   background:#fff;border-radius:8px;padding:10px;
   display:flex;align-items:center;gap:8px;border:1px solid #f1f5f9;
 }
-.irregular-base{font-weight:700;color:#1e40af;min-width:60px}
+.irregular-base{font-weight:700;color:#1e40af;min-width:60px;cursor:pointer}
+.irregular-base:hover{color:#2B7FD8}
 .irregular-arrow{color:#94a3b8}
 .irregular-form{color:#166534;font-weight:600}
+.irregular-play{
+  margin-left:auto;cursor:pointer;font-size:14px;
+  background:#f0f7fc;border-radius:6px;padding:2px 8px;
+}
+.irregular-play:hover{background:#dbeafe}
 
 @media(max-width:768px){
   .pos-cards{grid-template-columns:repeat(2,1fr)}
@@ -196,6 +202,7 @@ body{background:#fefcf6!important;}
   <button class="nav-tab" data-page="adjective">形容词</button>
   <button class="nav-tab" data-page="adverb">副词</button>
   <button class="nav-tab" data-page="pronoun">代词</button>
+  <button class="nav-tab" data-page="irregular">高频不规则词</button>
 </div>
 
 <main>
@@ -502,6 +509,29 @@ body{background:#fefcf6!important;}
       </div>
     </div>
   </div>
+
+  <!-- 高频不规则词 -->
+  <div id="page-irregular" hidden>
+    <div class="rules-section">
+      <h3>高频不规则动词 · 过去式 / 过去分词</h3>
+      <div class="irregular-list" id="irregularVerbList"></div>
+    </div>
+    <div class="rules-section">
+      <h3>不规则名词复数</h3>
+      <div class="irregular-list" id="irregularNounList"></div>
+    </div>
+    <div class="rules-section">
+      <h3>特殊比较级 / 最高级</h3>
+      <div class="irregular-list">
+        <div class="irregular-item"><span class="irregular-base">good / well</span><span class="irregular-form">→ <b>better</b> · <b>best</b></span></div>
+        <div class="irregular-item"><span class="irregular-base">bad</span><span class="irregular-form">→ <b>worse</b> · <b>worst</b></span></div>
+        <div class="irregular-item"><span class="irregular-base">many / much</span><span class="irregular-form">→ <b>more</b> · <b>most</b></span></div>
+        <div class="irregular-item"><span class="irregular-base">little</span><span class="irregular-form">→ <b>less</b> · <b>least</b></span></div>
+        <div class="irregular-item"><span class="irregular-base">far</span><span class="irregular-form">→ <b>farther / further</b> · <b>farthest / furthest</b></span></div>
+        <div class="irregular-item"><span class="irregular-base">old</span><span class="irregular-form">→ <b>older / elder</b> · <b>oldest / eldest</b></span></div>
+      </div>
+    </div>
+  </div>
 </main>
 
 <script>
@@ -515,6 +545,32 @@ function switchPage(page) {
   document.querySelector(`.nav-tab[data-page="${page}"]`)?.classList.add('active');
   document.querySelectorAll('[id^="page-"]').forEach(p => p.hidden = true);
   document.getElementById(`page-${page}`).hidden = false;
+  if (page === 'irregular') initIrregular();
+}
+
+// 高频不规则词渲染（复用分析仪数据）
+function initIrregular() {
+  const vList = document.getElementById('irregularVerbList');
+  if (!vList) return;
+  vList.innerHTML = '';
+  Object.entries(irregularVerbs).forEach(([base, v]) => {
+    const item = document.createElement('div');
+    item.className = 'irregular-item';
+    item.innerHTML = `<span class="irregular-base" onclick="playWord('${base}')">${base}</span>
+      <span class="irregular-form">→ <b>${v.past}</b> · <b>${v.pp}</b></span>
+      <span class="irregular-play" onclick="playWord('${v.past.split('/')[0]}')">🔊</span>`;
+    vList.appendChild(item);
+  });
+  const nList = document.getElementById('irregularNounList');
+  nList.innerHTML = '';
+  Object.entries(irregularNouns).forEach(([base, plural]) => {
+    const item = document.createElement('div');
+    item.className = 'irregular-item';
+    item.innerHTML = `<span class="irregular-base" onclick="playWord('${base}')">${base}</span>
+      <span class="irregular-form">→ <b>${plural}</b></span>
+      <span class="irregular-play" onclick="playWord('${plural.split('/')[0]}')">🔊</span>`;
+    nList.appendChild(item);
+  });
 }
 
 // 变化分析仪

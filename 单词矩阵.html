@@ -621,6 +621,26 @@ main{padding:2px 12px!important}
 #page-library .library-section h3{font-size:12px!important;margin:2px 0!important}
 #page-library .library-grid{gap:3px!important;grid-template-columns:repeat(4,1fr)!important}
 #page-library .library-item{padding:3px 6px!important;font-size:10px!important;border-radius:4px!important}
+
+/* v4.7 矩阵自适应宽度居中 */
+.wm-container{max-width:1000px!important;margin:0 auto!important}
+.wm-matrix{max-width:960px!important;margin:0 auto!important;grid-template-columns:1fr 200px 1fr!important;min-height:360px!important;height:360px!important}
+.wm-toolbar{max-width:960px!important;margin:0 auto!important}
+.wm-result-top{max-width:960px!important;margin:4px auto!important}
+.wm-result-empty-top{max-width:960px!important;margin:2px auto!important}
+.wm-prefix-list{padding:3px!important;gap:1px!important}
+.wm-prefix-item{padding:3px 6px!important;font-size:11px!important;margin:1px 0!important}
+.wm-prefix-item .wm-morph-text{font-size:12px!important}
+.wm-prefix-item .wm-morph-meaning{font-size:9px!important}
+.wm-suffix-grid{padding:3px!important;gap:2px!important;grid-template-columns:repeat(2,1fr)!important}
+.wm-suffix-item{padding:3px 5px!important;font-size:10px!important;margin:0!important}
+.wm-suffix-item .wm-morph-text{font-size:11px!important}
+.wm-suffix-item .wm-morph-meaning{font-size:8px!important}
+.wm-root-card{max-width:160px!important;padding:8px!important}
+.wm-root-text{font-size:26px!important}
+.wm-root-meaning{font-size:11px!important}
+.wm-root-origin{font-size:9px!important}
+.wm-selected-info{font-size:10px!important;padding:2px 6px!important}
 </style>
 </head>
 <body>
@@ -3759,8 +3779,8 @@ function initMatrix() {
   const select = document.getElementById('rootSelect');
   select.innerHTML = '';
   // 按当前级别过滤词根
-  const levelOrder = {primary: 0, junior: 1, senior: 2};
-  const roots = Object.keys(matrixData).filter(r => levelOrder[matrixData[r].level] <= levelOrder[currentLevel]);
+  // 级别互斥：只显示当前级别的词根
+  const roots = Object.keys(matrixData).filter(r => matrixData[r].level === currentLevel);
   roots.forEach(root => {
     const opt = document.createElement('option');
     opt.value = root;

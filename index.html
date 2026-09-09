@@ -2762,6 +2762,7 @@ button{font-family:inherit;}
     finance:{file:'data/finance.json', local:'alex_finance_v1', wrap:function(d){return {items:d&&d.items?d.items:[]};}},
     saving: {file:'data/saving.json',  local:'alex_saving_v1',  wrap:function(d){return d;}},
     todo:   {file:'data/todo.json',    local:'alex_quad_todo_v2',wrap:function(d){return d;}},
+    content:{file:'data/content.json', local:'alex_content_tasks_v1',wrap:function(d){return d&&Array.isArray(d)?d:[];}},
     daily:  {file:'data/daily.json',   local:'',                 wrap:function(d){return d;}}
   };
 
@@ -2790,7 +2791,10 @@ button{font-family:inherit;}
     if(!r.ok){var e=await r.json().catch(function(){return{};});throw new Error((e.message||('HTTP '+r.status)));}
     var j=await r.json();
     var bin='';
-    try{bin=atob(j.content.replace(/\n/g,''));}catch(err){bin='';}
+    try{
+      var bytes=Uint8Array.from(atob(j.content.replace(/\n/g,'')),function(c){return c.charCodeAt(0);});
+      bin=new TextDecoder('utf-8').decode(bytes);
+    }catch(err){bin='';}
     return {content:bin,sha:j.sha};
   }
   async function ghPut(path,content){
@@ -2862,6 +2866,8 @@ button{font-family:inherit;}
     try{var s=parseFloat(localStorage.getItem('alex_saving_v1'))||0;await pushModule('saving',s);}catch(e){}
     /* 待办 */
     try{var t=JSON.parse(localStorage.getItem('alex_quad_todo_v2')||'{}');await pushModule('todo',t);}catch(e){}
+    /* 内容创作 */
+    try{var c=JSON.parse(localStorage.getItem('alex_content_tasks_v1')||'[]');await pushModule('content',Array.isArray(c)?c:[]);}catch(e){}
     /* 每日必做（今天） */
     try{
       var today=dayKey();
@@ -3875,7 +3881,8 @@ document.querySelectorAll('.nav-item').forEach(item=>{
     state=JSON.parse(JSON.stringify(SEED));
     save();
   }
-  function save(){localStorage.setItem(KEY,JSON.stringify(state));}
+  function save(){localStorage.setItem(KEY,JSON.stringify(state));
+    if(window.CloudSync&&CloudSync.isConnected())CloudSync.push('content',state);}
   state.forEach(function(it){
     if(!it.stepDone||!Array.isArray(it.stepDone)){
       it.stepDone=[false,false,false,false,false,false];

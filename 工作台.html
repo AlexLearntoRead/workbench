@@ -53,10 +53,24 @@ button{font-family:inherit;}
 .app-header{
   position:sticky;top:0;z-index:100;height:64px;
   background:#fff;border-bottom:1px solid var(--border);
-  display:grid;grid-template-columns:var(--sidebar-w) 1fr;align-items:center;
+  display:grid;grid-template-columns:var(--sidebar-w) 1fr auto;align-items:center;
   padding:0 clamp(1rem,3vw,2rem) 0 0;
   transition:padding-right .25s ease;
 }
+/* 云同步按钮 */
+.sync-box{display:flex;align-items:center;gap:10px;justify-content:flex-end;}
+.cloud-btn{
+  display:inline-flex;align-items:center;gap:7px;padding:8px 15px;border-radius:999px;
+  border:1.5px solid var(--border);background:#fff;color:var(--ink-light);
+  font-size:.82rem;font-weight:600;cursor:pointer;transition:all .2s;white-space:nowrap;
+}
+.cloud-btn:hover{border-color:var(--blue);color:var(--blue);background:rgba(43,127,216,.04);}
+.cloud-btn.on{background:rgba(43,127,216,.09);border-color:var(--blue);color:var(--blue);}
+.cloud-dot{width:8px;height:8px;border-radius:50%;background:#c4c4cc;flex:none;}
+.cloud-btn.on .cloud-dot{background:var(--blue);}
+.cloud-btn.syncing .cloud-dot{background:var(--yellow);animation:cloudPulse .9s infinite;}
+.cloud-btn.err .cloud-dot{background:var(--red);}
+@keyframes cloudPulse{50%{opacity:.25;}}
 .brand{display:flex;align-items:center;gap:14px;justify-content:flex-end;margin-right:10px;}
 .brand .brand-alex{
   height:58px;width:auto;display:block;
@@ -1949,6 +1963,9 @@ button{font-family:inherit;}
     <span class="date-strong" id="todayDate">—</span>
     <span id="todayWeek">—</span>
   </div>
+  <div class="sync-box">
+    <button class="cloud-btn" id="cloudBtn" type="button"><span class="cloud-dot"></span><span id="cloudTxt">未连接云端</span></button>
+  </div>
 </header>
 
 <!-- ============================================================
@@ -2729,6 +2746,220 @@ button{font-family:inherit;}
 
 <script>
 /* ============================================================
+   云端同步 · GitHub 数据文件（收支/待办/每日必做/存款）
+   数据存于仓库 data/*.json，任何设备打开都读写同一份数据
+   ============================================================ */
+(function(){
+  'use strict';
+  var REPO='AlexLearntoRead/workbench';
+  var TOKEN_KEY='alex_github_token_v1';
+  var RELOAD_KEY='alex_cloud_reloaded';
+  var token='';
+  try{token=localStorage.getItem(TOKEN_KEY)||'';}catch(e){}
+
+  /* 模块 → 数据文件 与 本地存储键 */
+  var MODULES={
+    finance:{file:'data/finance.json', local:'alex_finance_v1', wrap:function(d){return {items:d&&d.items?d.items:[]};}},
+    saving: {file:'data/saving.json',  local:'alex_saving_v1',  wrap:function(d){return d;}},
+    todo:   {file:'data/todo.json',    local:'alex_quad_todo_v2',wrap:function(d){return d;}},
+    daily:  {file:'data/daily.json',   local:'',                 wrap:function(d){return d;}}
+  };
+
+  var busy=false;
+
+  function isConnected(){return !!token;}
+  function btn(){return document.getElementById('cloudBtn');}
+  function txt(){return document.getElementById('cloudTxt');}
+  function setUI(state,text){
+    var b=btn();
+    if(!b)return;
+    b.classList.remove('syncing','err','on');
+    if(state==='on')b.classList.add('on');
+    if(state==='syncing')b.classList.add('syncing');
+    if(state==='err')b.classList.add('err');
+    if(text!==undefined&&txt())txt().textContent=text;
+  }
+
+  /* ---- GitHub API ---- */
+  function ghHeaders(){
+    return {'Authorization':'Bearer '+token,'Accept':'application/vnd.github+json','X-GitHub-Api-Version':'2022-11-28'};
+  }
+  async function ghGet(path){
+    var r=await fetch('https://api.github.com/repos/'+REPO+'/contents/'+path,{headers:ghHeaders()});
+    if(r.status===404)return null;
+    if(!r.ok){var e=await r.json().catch(function(){return{};});throw new Error((e.message||('HTTP '+r.status)));}
+    var j=await r.json();
+    var bin='';
+    try{bin=atob(j.content.replace(/\n/g,''));}catch(err){bin='';}
+    return {content:bin,sha:j.sha};
+  }
+  async function ghPut(path,content){
+    var cur=await ghGet(path);
+    var body={message:'workbench sync '+new Date().toISOString(),content:btoa(unescape(encodeURIComponent(content)))};
+    if(cur&&cur.sha)body.sha=cur.sha;
+    var r=await fetch('https://api.github.com/repos/'+REPO+'/contents/'+path,{
+      method:'PUT',headers:ghHeaders(),body:JSON.stringify(body)
+    });
+    if(!r.ok){var e=await r.json().catch(function(){return{};});throw new Error((e.message||('HTTP '+r.status)));}
+    return r.json();
+  }
+
+  /* ---- 单模块同步 ---- */
+  async function pushModule(name,data){
+    if(!isConnected()||busy)return false;
+    busy=true;
+    setUI('syncing','同步中…');
+    try{
+      await ghPut(MODULES[name].file,JSON.stringify(data));
+      return true;
+    }catch(e){
+      console.warn('云同步失败['+name+']:',e);
+      return false;
+    }finally{
+      busy=false;
+    }
+  }
+  async function pullModule(name){
+    if(!isConnected())return null;
+    var f=await ghGet(MODULES[name].file);
+    if(!f)return null;
+    try{return JSON.parse(f.content);}catch(e){return null;}
+  }
+
+  /* ---- 从云端拉取并写入本地（页面加载时） ---- */
+  async function pullAll(){
+    if(!isConnected())return;
+    var ok=true,names=Object.keys(MODULES);
+    for(var i=0;i<names.length;i++){
+      var name=names[i],m=MODULES[name];
+      try{
+        var data=await pullModule(name);
+        if(data===null)continue;
+        if(name==='daily'){
+          /* 每日必做：按日期存多份，覆盖今天（同时写模块旧键以便其读取） */
+          var today=dayKey();
+          var store={};
+          try{store=JSON.parse(localStorage.getItem('alex_daily_store_v1')||'{}');}catch(e2){}
+          store[today]=(data&&data.items)||{};
+          localStorage.setItem('alex_daily_store_v1',JSON.stringify(store));
+          localStorage.setItem('alex_daily_must_'+today,JSON.stringify(store[today]));
+        }else{
+          localStorage.setItem(m.local,JSON.stringify(m.wrap(data)));
+        }
+      }catch(e){ok=false;console.warn('拉取失败['+name+']:',e);}
+    }
+    if(ok)setUI('on','云端已同步');
+    else setUI('on','已连接（部分同步）');
+  }
+
+  /* ---- 推送所有模块（首次连接时） ---- */
+  async function pushAll(){
+    if(!isConnected())return;
+    setUI('syncing','同步中…');
+    /* 收支 */
+    try{var f=JSON.parse(localStorage.getItem('alex_finance_v1')||'{"items":[]}');await pushModule('finance',{items:f.items||[]});}catch(e){}
+    /* 存款 */
+    try{var s=parseFloat(localStorage.getItem('alex_saving_v1'))||0;await pushModule('saving',s);}catch(e){}
+    /* 待办 */
+    try{var t=JSON.parse(localStorage.getItem('alex_quad_todo_v2')||'{}');await pushModule('todo',t);}catch(e){}
+    /* 每日必做（今天） */
+    try{
+      var today=dayKey();
+      var store={};
+      try{store=JSON.parse(localStorage.getItem('alex_daily_store_v1')||'{}');}catch(e2){}
+      var items=store[today]||{};
+      /* 兼容旧版按日期键存储 */
+      var legacy={};
+      try{legacy=JSON.parse(localStorage.getItem('alex_daily_must_'+today)||'{}');}catch(e3){}
+      for(var k in legacy){if(!(k in items))items[k]=legacy[k];}
+      await pushModule('daily',{date:today,items:items});
+    }catch(e){}
+    setUI('on','云端已同步');
+  }
+
+  function dayKey(){
+    var d=new Date();
+    return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+  }
+
+  /* ---- 连接：验证 token 并首次推送 ---- */
+  async function connect(newToken){
+    token=newToken;
+    try{localStorage.setItem(TOKEN_KEY,token);}catch(e){}
+    setUI('syncing','验证中…');
+    try{
+      var r=await fetch('https://api.github.com/user',{headers:ghHeaders()});
+      if(!r.ok)throw new Error('token无效');
+      await pushAll();
+      setUI('on','云端已同步');
+      return true;
+    }catch(e){
+      token='';
+      try{localStorage.removeItem(TOKEN_KEY);}catch(e2){}
+      setUI('err','连接失败');
+      return false;
+    }
+  }
+
+  function disconnect(){
+    token='';
+    try{localStorage.removeItem(TOKEN_KEY);}catch(e){}
+    setUI('','未连接云端');
+  }
+
+  /* ---- 按钮交互 ---- */
+  function init(){
+    if(!btn())return;
+    btn().addEventListener('click',function(){
+      if(isConnected()){
+        if(confirm('已连接云端。要断开云端同步吗？（本地数据会保留）')){
+          disconnect();
+        }
+        return;
+      }
+      var v=prompt('粘贴你的 GitHub 访问令牌（github_pat_...）：\n\n还没创建？见桌面教程：\ngithub.com/settings/tokens?type=beta\n→ Generate new token → Only select repositories → 勾选 AlexLearntoRead/workbench → Contents: Read and write');
+      if(v&&v.trim())connect(v.trim());
+    });
+    if(isConnected()){
+      setUI('on','已连接，加载云端…');
+      pullAll().then(function(){
+        /* 云端数据已写入本地 → 刷新页面让各模块以云端数据渲染 */
+        try{
+          if(!sessionStorage.getItem(RELOAD_KEY)){
+            sessionStorage.setItem(RELOAD_KEY,'1');
+            location.reload();
+          }else{
+            sessionStorage.removeItem(RELOAD_KEY);
+            setUI('on','云端已同步');
+          }
+        }catch(e){setUI('on','云端已同步');}
+      }).catch(function(){
+        setUI('err','同步异常');
+      });
+    }
+  }
+
+  if(document.readyState==='loading'){
+    document.addEventListener('DOMContentLoaded',init);
+  }else{
+    init();
+  }
+
+  /* ---- 对外接口（供各模块 save 后调用） ---- */
+  window.CloudSync={
+    isConnected:isConnected,
+    push:pushModule,
+    pushAll:pushAll,
+    pullAll:pullAll,
+    connect:connect,
+    disconnect:disconnect,
+    dayKey:dayKey
+  };
+})();
+</script>
+
+<script>
+/* ============================================================
    收支管理 · Alex Finance v1.2（日周月年统计 + 净收入）
    ============================================================ */
 (function(){
@@ -2739,7 +2970,8 @@ button{font-family:inherit;}
     var raw=localStorage.getItem(KEY);
     if(raw){state=JSON.parse(raw);if(!state.items)state.items=[];}
   }catch(e){}
-  function save(){try{localStorage.setItem(KEY,JSON.stringify(state));}catch(e){}}
+  function save(){try{localStorage.setItem(KEY,JSON.stringify(state));}catch(e){}
+    if(window.CloudSync&&CloudSync.isConnected())CloudSync.push('finance',state);}
 
   var curType='in';
   var statPeriod='month';
@@ -3036,6 +3268,7 @@ button{font-family:inherit;}
     if(isNaN(n)||n<0){alert('请输入有效金额');return;}
     saved=n;
     try{localStorage.setItem(KEY,String(n));}catch(e){}
+    if(window.CloudSync&&CloudSync.isConnected())CloudSync.push('saving',saved);
     renderGoal();
   });
   renderGoal();
@@ -3057,11 +3290,11 @@ const WPS_LINKS = {
   todoFollow:    "",  // 学员跟进
   todoPost:      "",  // 内容分发
   /* 了解 LTR */
-  ltrIntro:      "了解LTR.html",  // 家长介绍页（完整落地页）
+  ltrIntro:      "file:///C:/Users/Lenovo/Doubao/chats/2026-08-28/new-chat/了解LTR.html",  // 家长介绍页（完整落地页）
   belief:        "",  // 我的教学理念
   method:        "",  // 教学方法介绍
   route:         "",  // 英语学习路线
-  langFramework: "english-language-framework.html",  // 英语语言框架页
+  langFramework: "file:///C:/Users/Lenovo/WorkBuddy/2026-08-26-17-00-34/english-language-framework.html",  // 英语语言框架页
   /* 我的产品 */
   assessment:    "",  // 能力测评表
   campsMap:      "",  // 通关地图（七大学习营，WPS 知识库）
@@ -3290,6 +3523,15 @@ document.querySelectorAll('.nav-item').forEach(item=>{
       state[item.dataset.key] = item.classList.contains('done');
     });
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    /* 云端同步：按日期聚合存储 + 推送 */
+    try{
+      const today = STORAGE_KEY.replace('alex_daily_must_','');
+      let store = {};
+      try{ store = JSON.parse(localStorage.getItem('alex_daily_store_v1') || '{}'); }catch(e){}
+      store[today] = state;
+      localStorage.setItem('alex_daily_store_v1', JSON.stringify(store));
+      if(window.CloudSync && CloudSync.isConnected()) CloudSync.push('daily', {date:today, items:state});
+    }catch(e){}
   }
   
   function updateCount(){
@@ -3452,7 +3694,8 @@ document.querySelectorAll('.nav-item').forEach(item=>{
     });
   });
 
-  function save(){localStorage.setItem(KEY,JSON.stringify(state));}
+  function save(){localStorage.setItem(KEY,JSON.stringify(state));
+    if(window.CloudSync&&CloudSync.isConnected())CloudSync.push('todo',state);}
   function esc(s){
     return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   }
@@ -3633,7 +3876,6 @@ document.querySelectorAll('.nav-item').forEach(item=>{
     save();
   }
   function save(){localStorage.setItem(KEY,JSON.stringify(state));}
-  /* 迁移：补全 stepDone 和 date */
   state.forEach(function(it){
     if(!it.stepDone||!Array.isArray(it.stepDone)){
       it.stepDone=[false,false,false,false,false,false];

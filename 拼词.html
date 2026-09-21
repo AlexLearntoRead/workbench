@@ -1870,5 +1870,141 @@ function finishCh(){
 <button class="rail-fab" id="fabFamily" onclick="toggleFamilyRail()">📚</button>
 <button class="rail-fab fab-right" id="fabTool" onclick="toggleToolRail()">🎮</button>
 
+<!-- ============ 自动录屏 · 导出 MP4 ============ -->
+<style>
+#recToolbar{position:fixed;top:14px;right:14px;z-index:99998;display:flex;align-items:center;gap:8px;
+  background:rgba(255,255,255,.94);border:2px solid #2B7FD8;border-radius:999px;padding:6px 12px;
+  box-shadow:0 4px 16px rgba(26,26,46,.14);backdrop-filter:blur(4px);font-family:'Noto Sans SC','PingFang SC',sans-serif;}
+.rec-btn{border:none;border-radius:999px;padding:7px 14px;font-size:13px;font-weight:700;cursor:pointer;
+  font-family:inherit;display:inline-flex;align-items:center;gap:7px;transition:all .2s;line-height:1;}
+.rec-start{background:#2B7FD8;color:#fff;}
+.rec-start:hover{background:#1f6cbd;transform:translateY(-1px);}
+.rec-dot{width:9px;height:9px;border-radius:50%;background:#fff;flex:none;}
+.rec-running{display:inline-flex;align-items:center;gap:8px;}
+.rec-pulse{width:11px;height:11px;border-radius:50%;background:#E84A5F;flex:none;animation:recPulse 1s infinite;}
+@keyframes recPulse{0%,100%{box-shadow:0 0 0 0 rgba(232,74,95,.5)}50%{box-shadow:0 0 0 7px rgba(232,74,95,0)}}
+.rec-time{font-size:14px;font-weight:700;color:#E84A5F;font-variant-numeric:tabular-nums;}
+.rec-stop{background:#E84A5F;color:#fff;}
+.rec-stop:hover{background:#d33c50;}
+.rec-toast{position:fixed;bottom:26px;left:50%;transform:translateX(-50%);z-index:99999;
+  background:rgba(26,26,46,.92);color:#fff;font-size:13px;padding:10px 18px;border-radius:12px;
+  font-family:'Noto Sans SC',sans-serif;opacity:0;transition:opacity .3s;pointer-events:none;
+  box-shadow:0 6px 20px rgba(0,0,0,.2);}
+.rec-toast.show{opacity:1;}
+</style>
+<div id="recToolbar">
+  <button id="recStart" class="rec-btn rec-start" type="button"><span class="rec-dot"></span><span id="recStartTxt">开始录屏</span></button>
+  <div id="recRunning" class="rec-running" style="display:none">
+    <span class="rec-pulse"></span>
+    <span class="rec-time" id="recTime">00:00</span>
+    <button id="recStop" class="rec-btn rec-stop" type="button">停止并导出</button>
+  </div>
+</div>
+<div id="recToast" class="rec-toast"></div>
+<script>
+/* ============ 自动录屏 · 导出 MP4 ============ */
+(function(){
+  'use strict';
+  var startBtn=document.getElementById('recStart');
+  var runningBox=document.getElementById('recRunning');
+  var timeEl=document.getElementById('recTime');
+  var stopBtn=document.getElementById('recStop');
+  var startTxt=document.getElementById('recStartTxt');
+  var toastEl=document.getElementById('recToast');
+  var stream=null, recorder=null, chunks=[], timer=null, startAt=0;
+
+  function toast(msg,ms){
+    toastEl.textContent=msg;
+    toastEl.classList.add('show');
+    clearTimeout(toastEl._t);
+    toastEl._t=setTimeout(function(){toastEl.classList.remove('show');}, ms||3200);
+  }
+  function pickMime(){
+    if(!window.MediaRecorder) return '';
+    var list=[
+      'video/mp4;codecs=avc1.42E01E,mp4a.40.2',
+      'video/mp4',
+      'video/webm;codecs=vp9,opus',
+      'video/webm;codecs=vp8,opus',
+      'video/webm'
+    ];
+    for(var i=0;i<list.length;i++){
+      try{ if(MediaRecorder.isTypeSupported(list[i])) return list[i]; }catch(e){}
+    }
+    return '';
+  }
+  function pad(n){return n<10?'0'+n:''+n;}
+  function stamp(){
+    var d=new Date();
+    return d.getFullYear()+pad(d.getMonth()+1)+pad(d.getDate())+'_'+pad(d.getHours())+pad(d.getMinutes());
+  }
+  function setUI(rec){
+    startBtn.style.display=rec?'none':'inline-flex';
+    runningBox.style.display=rec?'inline-flex':'none';
+    if(!rec) startTxt.textContent='开始录屏';
+  }
+  function tick(){
+    var s=Math.floor((Date.now()-startAt)/1000);
+    timeEl.textContent=pad(Math.floor(s/60))+':'+pad(s%60);
+  }
+
+  async function start(){
+    if(!navigator.mediaDevices || !navigator.mediaDevices.getDisplayMedia){
+      toast('当前浏览器不支持屏幕录制，请用电脑版 Chrome/Edge 打开'); return;
+    }
+    if(!window.MediaRecorder){ toast('当前浏览器不支持录制，请用电脑版 Chrome/Edge 打开'); return; }
+    try{
+      stream=await navigator.mediaDevices.getDisplayMedia({video:true,audio:true});
+    }catch(e){
+      toast('已取消录屏');
+      return;
+    }
+    var mime=pickMime();
+    chunks=[];
+    try{
+      recorder=new MediaRecorder(stream, mime?{mimeType:mime}:undefined);
+    }catch(e){
+      try{ recorder=new MediaRecorder(stream); mime=''; }
+      catch(e2){ stream.getTracks().forEach(function(t){t.stop();}); toast('录制启动失败，请重试'); return; }
+    }
+    recorder.ondataavailable=function(e){ if(e.data&&e.data.size) chunks.push(e.data); };
+    recorder.onstop=function(){
+      var isMp4 = mime && mime.indexOf('mp4')!==-1;
+      var type = isMp4 ? 'video/mp4' : 'video/webm';
+      var blob=new Blob(chunks,{type:type});
+      var url=URL.createObjectURL(blob);
+      var a=document.createElement('a');
+      a.href=url;
+      a.download='拼词录屏_'+stamp()+(isMp4?'.mp4':'.webm');
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(function(){ URL.revokeObjectURL(url); a.remove(); },1500);
+      setUI(false);
+      toast(isMp4?('已导出 MP4：'+a.download):('浏览器不支持 MP4，已导出 WebM：'+a.download));
+      stream=null; recorder=null; chunks=[];
+      clearInterval(timer); timer=null;
+    };
+    recorder.start(1000);
+    startAt=Date.now();
+    timeEl.textContent='00:00';
+    setUI(true);
+    clearInterval(timer);
+    timer=setInterval(tick,500);
+    if(stream.getVideoTracks().length){
+      stream.getVideoTracks()[0].addEventListener('ended',function(){
+        if(recorder && recorder.state!=='inactive'){ try{recorder.stop();}catch(e){} }
+      });
+    }
+  }
+  function stop(){
+    if(recorder && recorder.state!=='inactive'){ recorder.stop(); }
+    if(stream){ stream.getTracks().forEach(function(t){ t.stop(); }); }
+    startTxt.textContent='导出中…';
+  }
+
+  startBtn.addEventListener('click',start);
+  stopBtn.addEventListener('click',stop);
+})();
+</script>
 </body>
 </html>

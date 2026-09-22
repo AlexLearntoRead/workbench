@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LTR 英语听学台 · 电台 + 播客</title>
+<style>
+  :root{
+    --bg:#eef5ff; --card:#ffffff; --ink:#1e293b; --muted:#64748b;
+    --brand:#1565c0; --brand2:#3b82f6; --line:#d3e2f5; --star:#3b82f6;
+    --good:#3b82f6; --shadow:0 4px 18px rgba(60,90,160,.12);
+  }
+  .backbar{max-width:1100px;margin:0 auto;padding:10px 16px 0}
+  .backbar a{display:inline-flex;align-items:center;gap:6px;color:var(--brand);
+    text-decoration:none;font-size:14px;font-weight:600;padding:6px 12px;border:1px solid var(--line);
+    border-radius:999px;background:#fff;transition:.15s}
+  .backbar a:hover{border-color:var(--brand2);box-shadow:0 4px 12px rgba(59,130,246,.18)}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+    background:var(--bg);color:var(--ink);padding-bottom:140px}
+  header{background:linear-gradient(120deg,var(--brand),var(--brand2));color:#fff;
+    padding:18px 22px;box-shadow:var(--shadow)}
+  header h1{margin:0;font-size:20px;letter-spacing:.5px}
+  header p{margin:6px 0 0;font-size:13px;opacity:.92}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 16px}
+  .tabs{display:flex;gap:6px;padding:14px 16px 0}
+  .tab{cursor:pointer;border:1px solid var(--line);background:var(--card);padding:10px 22px;
+    border-radius:12px 12px 0 0;font-size:15px;font-weight:600;color:var(--muted)}
+  .tab.on{background:var(--brand);color:#fff;border-color:var(--brand)}
+  .toolbar{position:sticky;top:0;z-index:20;background:rgba(238,244,255,.96);
+    backdrop-filter:blur(6px);padding:14px 0;border-bottom:1px solid var(--line);margin-bottom:14px}
+  .row{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:10px}
+  input,select,button{font-family:inherit;font-size:14px;border:1px solid var(--line);
+    border-radius:10px;padding:9px 12px;background:var(--card);color:var(--ink);outline:none}
+  input:focus,select:focus{border-color:var(--brand)}
+  #q,#pq{flex:1;min-width:180px}
+  .tags{display:flex;flex-wrap:wrap;gap:7px}
+  .tag{cursor:pointer;border:1px solid var(--line);background:var(--card);padding:6px 12px;
+    border-radius:20px;font-size:13px;transition:.15s}
+  .tag:hover{border-color:var(--star)}
+  .tag.on{background:var(--brand);color:#fff;border-color:var(--brand)}
+  .hint{font-size:12px;color:var(--muted)}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px;align-items:start}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;
+    box-shadow:var(--shadow);display:flex;flex-direction:column;gap:8px;position:relative}
+  .card h3{margin:0;font-size:15px;line-height:1.35;padding-right:24px}
+  .meta{font-size:12px;color:var(--muted);display:flex;flex-wrap:wrap;gap:6px}
+  .badge{background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:2px 7px}
+  .play{padding:9px;border:none;border-radius:10px;background:var(--brand);color:#fff;
+    cursor:pointer;font-size:14px;font-weight:600;margin-top:2px}
+  .play:hover{filter:brightness(1.05)}
+  .play:disabled{background:#c7d6ea;cursor:not-allowed}
+  .tbtn{padding:7px 10px;border:1px solid var(--brand2);border-radius:10px;background:#fff;
+    color:#1e40af;cursor:pointer;font-size:13px;font-weight:600;margin-top:2px}
+  .tbtn:hover{background:#eaf2ff}
+  .star{position:absolute;top:10px;right:10px;font-size:20px;cursor:pointer;color:#cbd5e1;
+    background:none;border:none;line-height:1;z-index:2}
+  .star.on{color:var(--star)}
+  .status{padding:30px;text-align:center;color:var(--muted);font-size:14px}
+  .more{display:block;margin:20px auto;padding:11px 26px;border:none;border-radius:24px;
+    background:var(--card);border:1px solid var(--line);cursor:pointer;font-size:14px}
+  .more:hover{border-color:var(--brand)}
+  .thumb{display:flex;align-items:center;justify-content:center;font-size:46px;min-height:118px;
+    background:linear-gradient(135deg,var(--brand2),#93c5fd);border-radius:10px;color:#fff;overflow:hidden}
+  .thumb img{width:100%;height:auto;display:block}
+  .eps{margin-top:2px;border-top:1px dashed var(--line);padding-top:8px;display:flex;flex-direction:column;gap:6px}
+  .ep{display:flex;align-items:center;gap:8px;font-size:13px}
+  .ep .ept{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--ink)}
+  .ep .epm{color:var(--muted);font-size:11px;white-space:nowrap}
+  .ep .epp{border:none;background:var(--brand2);color:#fff;border-radius:8px;padding:5px 11px;cursor:pointer;font-size:12px}
+  .ep .epp:hover{filter:brightness(1.05)}
+  /* player */
+  .player{position:fixed;left:0;right:0;bottom:0;background:#fff;
+    border-top:2px solid var(--brand);box-shadow:0 -6px 24px rgba(60,90,160,.18);
+    padding:10px 16px;z-index:50;display:flex;align-items:center;gap:14px}
+  .player .now{flex:1;min-width:0}
+  .player .now .t{font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .player .now .s{font-size:12px;color:var(--muted)}
+  .player audio{flex:2;min-width:160px;height:38px}
+  .player .pstar{font-size:22px;cursor:pointer;color:#cbd5e1;background:none;border:none}
+  .player .pstar.on{color:var(--star)}
+  .player .vol{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted)}
+  .player .vol input{width:90px}
+  @media(max-width:640px){.player audio{flex:1}.player .vol{display:none}}
+  /* 字幕面板 */
+  .subsPanel{position:fixed;left:0;right:0;bottom:74px;max-height:42vh;background:#fff;
+    border-top:2px solid var(--brand2);box-shadow:0 -6px 24px rgba(60,90,160,.18);z-index:45;
+    display:flex;flex-direction:column}
+  .subsHead{padding:8px 16px;font-size:13px;font-weight:700;color:var(--ink);
+    border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}
+  .subsHead .x{cursor:pointer;color:var(--muted);font-weight:400}
+  .subsHead .x:hover{color:var(--brand)}
+  .subsBody{overflow:auto;padding:6px 14px 14px}
+  .sub{display:flex;gap:10px;padding:7px 8px;border-radius:8px;cursor:pointer;font-size:14px;line-height:1.5}
+  .sub:hover{background:var(--bg)}
+  .sub .ts{color:var(--brand2);font-variant-numeric:tabular-nums;white-space:nowrap;font-size:12px;padding-top:2px}
+  .sub.cur{background:#e8f1ff}
+  .sub.cur .ts{color:var(--brand);font-weight:700}
+</style>
+</head>
+<body>
+<div class="backbar"><a href="../index.html">← 返回工作台</a></div>
+<header>
+  <div class="wrap">
+    <h1>📻 LTR 英语听学台</h1>
+    <p>radio-browser 开源电台 5.9 万+ 真实台 · 全球英语教学播客 · 纯前端、免登录、收藏本地保存</p>
+  </div>
+</header>
+
+<div class="tabs wrap">
+  <button class="tab on" data-mode="radio">📻 电台</button>
+  <button class="tab" data-mode="podcast">🎙️ 播客</button>
+</div>
+
+<!-- 电台 -->
+<div id="radioView" class="wrap">
+  <div class="toolbar">
+    <div class="row">
+      <input id="q" placeholder="🔍 搜电台名，如 BBC / Jazz / Kids">
+      <select id="country"><option value="">🌍 全部国家</option></select>
+      <select id="sort">
+        <option value="clickcount">🔥 按人气</option>
+        <option value="votes">⭐ 按好评</option>
+        <option value="recentclickcount">🕒 最近在听</option>
+        <option value="random">🎲 随机</option>
+        <option value="name">🔤 按名称</option>
+      </select>
+      <select id="minbitrate">
+        <option value="0">码率不限</option>
+        <option value="64">≥64 kbps</option>
+        <option value="96">≥96 kbps</option>
+        <option value="128">≥128 kbps</option>
+      </select>
+      <label class="hint"><input type="checkbox" id="engOnly" checked> 仅英语</label>
+      <label class="hint"><input type="checkbox" id="favOnly"> 仅看收藏</label>
+      <button id="favtab">⭐ 收藏夹</button>
+    </div>
+    <div class="tags" id="tags">
+      <span class="tag on" data-tag="">全部</span>
+      <span class="tag" data-tag="news">📰 新闻</span>
+      <span class="tag" data-tag="talk">💬 谈话</span>
+      <span class="tag" data-tag="kids">🧒 儿童</span>
+      <span class="tag" data-tag="education">🎓 教育</span>
+      <span class="tag" data-tag="easy listening">🌿 慢速</span>
+      <span class="tag" data-tag="jazz">🎷 爵士</span>
+      <span class="tag" data-tag="classical">🎻 古典</span>
+      <span class="tag" data-tag="pop">🎤 流行</span>
+      <span class="tag" data-tag="rock">🎸 摇滚</span>
+      <span class="tag" data-tag="country">🤠 乡村</span>
+      <span class="tag" data-tag="oldies">📼 怀旧</span>
+      <span class="tag" data-tag="dance">💃 电音</span>
+      <span class="tag" data-tag="blues">🎺 蓝调</span>
+      <span class="tag" data-tag="reggae">🌴 雷鬼</span>
+      <span class="tag" data-tag="latin">💃 拉丁</span>
+      <span class="tag" data-tag="sports">⚽ 体育</span>
+    </div>
+  </div>
+  <div id="status" class="status">正在加载电台…</div>
+  <div class="grid" id="grid"></div>
+  <button class="more" id="more" style="display:none">加载更多 ▾</button>
+</div>
+
+<!-- 播客 -->
+<div id="podcastView" class="wrap" style="display:none">
+  <div class="toolbar">
+    <div class="row">
+      <input id="pq" placeholder="🔍 搜播客，如 english / VOA / BBC / ESL">
+      <button id="impBtn" title="导入本地 .srt/.vtt 字幕文件显示并跟读">📂 导入字幕</button>
+      <input type="file" id="srtFile" accept=".srt,.vtt" style="display:none">
+    </div>
+    <div class="tags" id="presets">
+      <span class="tag on" data-term="english learning">🔥 精选</span>
+      <span class="tag" data-term="All Ears English">💬 All Ears English</span>
+      <span class="tag" data-term="6 minute english">🇬🇧 BBC 6 Minute</span>
+      <span class="tag" data-term="VOA Learning English">🇺🇸 VOA Learning</span>
+      <span class="tag" data-term="ESL Pod">📚 ESL Pod</span>
+      <span class="tag" data-term="Luke's English Podcast">🎭 Luke's English</span>
+      <span class="tag" data-term="The English We Speak">🗣️ English We Speak</span>
+      <span class="tag" data-term="Culips ESL Podcast">🇨🇦 Culips</span>
+      <span class="tag" data-term="News in Slow English">🐌 News in Slow</span>
+      <span class="tag" data-term="Business English Pod">💼 Business English</span>
+      <span class="tag" data-term="The Fluent Show">📝 The Fluent Show</span>
+      <span class="tag" data-term="Learn English">🎓 Learn English</span>
+      <span class="tag" data-term="kids podcast">🧒 儿童英语</span>
+      <span class="tag" data-term="Storynory">📖 Storynory</span>
+      <span class="tag" data-term="Circle Round">🦊 Circle Round</span>
+      <span class="tag" data-term="Wow in the World">🔬 Wow in the World</span>
+      <span class="tag" data-term="Brains On">🧠 Brains On</span>
+      <span class="tag" data-term="Lingokids">🐛 Lingokids</span>
+    </div>
+  </div>
+  <div id="pstatus" class="status">正在加载精选播客…</div>
+  <div class="grid" id="pgrid"></div>
+</div>
+
+<div class="player" id="player" style="display:none">
+  <div class="now">
+    <div class="t" id="pTitle">未在播放</div>
+    <div class="s" id="pSub"></div>
+  </div>
+  <audio id="audio" controls preload="none"></audio>
+  <span class="pstar" id="pStar">☆</span>
+  <div class="vol">🔊<input type="range" id="vol" min="0" max="1" step="0.01" value="0.8"></div>
+</div>
+
+<div class="subsPanel" id="subsPanel" style="display:none">
+  <div class="subsHead"><span id="subsTitle">📝 字幕</span><span class="x" id="subsClose">✕ 关闭</span></div>
+  <div class="subsBody" id="subsBody"></div>
+</div>
+
+<script>
+const HOSTS=['https://de1.api.radio-browser.info','https://de2.api.radio-browser.info','https://at1.api.radio-browser.info'];
+let curHost=HOSTS[0];
+async function api(path,params){
+  const q=new URLSearchParams(params).toString();
+  let lastErr;
+  for(const h of HOSTS){
+    try{
+      const r=await fetch(h+path+(q?'?'+q:''),{headers:{'Accept':'application/json'}});
+      if(!r.ok) throw new Error('HTTP '+r.status);
+      curHost=h; return await r.json();
+    }catch(e){ lastErr=e; }
+  }
+  throw lastErr;
+}
+const $=(s)=>document.querySelector(s);
+const esc=(t)=>(t||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const favs=JSON.parse(localStorage.getItem('ltr_radio_favs')||'[]');
+function saveFavs(){localStorage.setItem('ltr_radio_favs',JSON.stringify(favs));}
+function flag(code){
+  if(!code||code.length!==2) return '🏳️';
+  return String.fromCodePoint(...[...code.toUpperCase()].map(c=>0x1F1E6+c.charCodeAt(0)-65));
+}
+function debounce(fn,ms){let t;return(...a)=>{clearTimeout(t);t=setTimeout(()=>fn(...a),ms);};}
+
+/* ---------- 通用播放器 ---------- */
+const audio=$('#audio');
+function startPlay(o){
+  curSubs=[]; $('#subsPanel').style.display='none';
+  audio.src=o.url; audio.play().catch(()=>{});
+  $('#player').style.display='flex';
+  $('#pTitle').textContent=o.title;
+  $('#pSub').textContent=o.sub||'';
+  const ps=$('#pStar');
+  if(o.star){
+    ps.style.display='';
+    ps.classList.toggle('on',!!o.starOn); ps.textContent=o.starOn?'★':'☆';
+    ps.onclick=o.starToggle;
+  }else{ ps.style.display='none'; }
+}
+
+/* ---------- 电台 ---------- */
+(async()=>{
+  try{
+    const cs=await api('/json/countries',{hidebroken:true,order:'stationcount',reverse:true,limit:90});
+    const sel=$('#country');
+    const pref=['US','GB','CA','AU','IE','NZ','IN','ZA','PH','SG'];
+    const byIso=Object.fromEntries(cs.map(c=>[c.iso_3166_1,c.name]));
+    pref.filter(c=>byIso[c]).forEach(c=>{const o=document.createElement('option');o.value=c;o.textContent=flag(c)+' '+byIso[c];sel.appendChild(o);});
+    cs.filter(c=>!pref.includes(c.iso_3166_1)).forEach(c=>{const o=document.createElement('option');o.value=c.iso_3166_1;o.textContent=flag(c.iso_3166_1)+' '+c.name;sel.appendChild(o);});
+  }catch(e){console.warn('countries load failed',e);}
+  load();
+})();
+
+let offset=0, loading=false, showFavs=false;
+function buildParams(){
+  const p={hidebroken:true,order:$('#sort').value,reverse:true,limit:100,offset:offset};
+  if($('#engOnly').checked) p.language='english';
+  const tag=$('.tag.on')?.dataset.tag;
+  if(tag) p.tag=tag;
+  const c=$('#country').value; if(c) p.countrycode=c;
+  const mb=$('#minbitrate').value; if(mb>0) p.bitrateMin=mb;
+  const q=$('#q').value.trim(); if(q) p.name=q;
+  return p;
+}
+async function load(reset){
+  if(loading) return;
+  if(reset){offset=0;$('#grid').innerHTML='';}
+  $('#status').textContent= showFavs?'你的收藏：':(loading?'加载中…':'');
+  loading=true;$('#more').style.display='none';
+  try{
+    if(showFavs){
+      renderRadio(favs, true);
+      $('#status').textContent= favs.length? '' : '还没有收藏，点卡片右上角的 ☆ 就能收藏。';
+    }else{
+      const data=await api('/json/stations/search',buildParams());
+      $('#status').textContent= data.length? '' : '没有匹配的电台，换个筛选试试。';
+      offset+=data.length;
+      renderRadio(data, false);
+      $('#more').style.display= data.length>=60 ? 'block':'none';
+    }
+  }catch(e){
+    $('#status').textContent='加载失败（节点可能被网络拦截），稍后点"加载更多"或刷新重试。';
+  }finally{loading=false;}
+}
+function renderRadio(list, isFav){
+  const grid=$('#grid');
+  list.forEach(s=>{
+    const card=document.createElement('div');card.className='card';
+    const url=s.url_resolved||s.url;
+    card.innerHTML=`
+      <button class="star ${isFav?'on':''}" title="收藏">${isFav?'★':'☆'}</button>
+      <h3>${esc(s.name||'未命名电台')}</h3>
+      <div class="meta">
+        <span class="badge">${flag(s.countrycode||'')} ${esc(s.country||'—')}</span>
+        <span class="badge">${esc((s.codec||'?').toUpperCase())} ${s.bitrate||'?'}k</span>
+        <span class="badge">👂 ${s.clickcount||0}</span>
+      </div>
+      <button class="play">▶ 播放</button>`;
+    const star=card.querySelector('.star');
+    star.onclick=()=>toggleFav(s,star);
+    card.querySelector('.play').onclick=()=>playRadio(s);
+    grid.appendChild(card);
+  });
+}
+function toggleFav(s,starEl){
+  const url=s.url_resolved||s.url;
+  const i=favs.findIndex(f=>f.url===url);
+  if(i>=0){favs.splice(i,1); if(starEl){starEl.classList.remove('on');starEl.textContent='☆';}}
+  else{favs.push({name:s.name,url,country:s.country,countrycode:s.countrycode,codec:s.codec,bitrate:s.bitrate}); if(starEl){starEl.classList.add('on');starEl.textContent='★';}}
+  saveFavs();
+  if(showFavs) load(true);
+}
+function playRadio(s){
+  const url=s.url_resolved||s.url;
+  const on=favs.some(f=>f.url===url);
+  startPlay({title:s.name||'未命名电台', sub:`${flag(s.countrycode||'')} ${s.country||''} · ${(s.codec||'').toUpperCase()} ${s.bitrate||''}k`, url, star:true, starOn:on,
+    starToggle:()=>{toggleFav(s,null); const on=favs.some(f=>f.url===url); const ps=$('#pStar'); ps.classList.toggle('on',on); ps.textContent=on?'★':'☆';}});
+  fetch(curHost+'/json/url/'+s.stationuuid).catch(()=>{});
+}
+$('#q').addEventListener('input',debounce(()=>load(true),400));
+$('#country').addEventListener('change',()=>load(true));
+$('#sort').addEventListener('change',()=>load(true));
+$('#minbitrate').addEventListener('change',()=>load(true));
+$('#engOnly').addEventListener('change',()=>load(true));
+$('#more').addEventListener('click',()=>load(false));
+$('#favOnly').addEventListener('change',e=>{showFavs=e.target.checked;$('#favtab').textContent=showFavs?'↩ 返回全部':'⭐ 收藏夹';load(true);});
+$('#favtab').addEventListener('click',()=>{$('#favOnly').checked=!showFavs;showFavs=!$('#favOnly').checked;$('#favOnly').dispatchEvent(new Event('change'));});
+document.querySelectorAll('#tags .tag').forEach(t=>t.addEventListener('click',()=>{
+  document.querySelectorAll('#tags .tag').forEach(x=>x.classList.remove('on'));
+  t.classList.add('on');load(true);
+}));
+
+/* ---------- 播客 ---------- */
+const PROXIES=['https://api.codetabs.com/v1/proxy/?quest=','https://api.allorigins.win/raw?url=','https://thingproxy.freeboard.io/fetch/'];
+const podFavs=JSON.parse(localStorage.getItem('ltr_pod_favs')||'[]');
+function savePodFavs(){localStorage.setItem('ltr_pod_favs',JSON.stringify(podFavs));}
+let podcastLoaded=false;
+
+async function fetchFeed(feedUrl){
+  const sources=[feedUrl, ...PROXIES.map(p=>p+encodeURIComponent(feedUrl))];
+  let lastErr;
+  for(const s of sources){
+    try{
+      const r=await fetch(s,{headers:{'Accept':'application/rss+xml, application/xml, text/xml, */*'}});
+      if(!r.ok) continue;
+      const t=await r.text();
+      if(t && /<item|<entry|<rss|<feed/i.test(t)) return t;
+    }catch(e){ lastErr=e; }
+  }
+  throw lastErr||new Error('feed fetch failed');
+}
+function parseFeed(text){
+  const xml=new DOMParser().parseFromString(text,'text/xml');
+  const items=xml.querySelectorAll('item');
+  const out=[];
+  items.forEach(it=>{
+    const title=(it.querySelector('title')?.textContent||'').trim()||'未命名';
+    const enc=it.querySelector('enclosure'); const url=enc?enc.getAttribute('url'):'';
+    const pub=it.querySelector('pubDate')?.textContent||'';
+    let dur=''; const d=it.getElementsByTagName('itunes:duration')[0]; if(d) dur=d.textContent.trim();
+    const date=pub?new Date(pub).toLocaleDateString('zh-CN'):'';
+    if(url) out.push({title,url,date,dur});
+  });
+  return out;
+}
+async function searchPodcasts(term){
+  $('#pstatus').textContent='搜索中…'; $('#pgrid').innerHTML='';
+  try{
+    const u='https://itunes.apple.com/search?media=podcast&entity=podcast&term='+encodeURIComponent(term)+'&limit=50';
+    const r=await fetch(u); const d=await r.json();
+    $('#pstatus').textContent= d.resultCount? '' : '未找到播客，换个关键词试试。';
+    (d.results||[]).forEach(p=>renderProgram(p));
+  }catch(e){ $('#pstatus').textContent='搜索失败（网络限制），稍后重试。'; }
+}
+function hdThumb(p){
+  if(p.artworkUrl600) return p.artworkUrl600;
+  if(p.artworkUrl100) return p.artworkUrl100.replace(/100x100bb/,'600x600bb');
+  return '';
+}
+function officialTranscript(name){
+  const n=(name||'').toLowerCase();
+  if(n.includes('6 minute')) return 'https://www.bbc.co.uk/learningenglish/english/features/6-minute-english';
+  if(n.includes('english we speak')) return 'https://www.bbc.co.uk/learningenglish/english/features/the-english-we-speak';
+  if(n.includes('voa')) return 'https://learningenglish.voanews.com/z/3613';
+  if(n.includes('culips')) return 'https://esl.culips.com/';
+  if(n.includes('esl pod')) return 'https://www.eslpod.com/';
+  return '';
+}
+function renderProgram(p){
+  const card=document.createElement('div'); card.className='card';
+  const feed=p.feedUrl; const on=podFavs.includes(feed);
+  const thumb=hdThumb(p);
+  const offUrl=officialTranscript(p.collectionName||'');
+  card.innerHTML=`
+    <button class="star ${on?'on':''}" title="收藏节目">${on?'★':'☆'}</button>
+    <div class="thumb">${thumb?`<img src="${esc(thumb)}" alt="">`:'🎙️'}</div>
+    <h3>${esc(p.collectionName||'未命名播客')}</h3>
+    <div class="meta"><span class="badge">${esc(p.artistName||'')}</span><span class="badge">🎧 ${p.trackCount||'?'} 集</span></div>
+    ${offUrl?`<button class="tbtn" data-url="${esc(offUrl)}">📝 官方文稿</button>`:''}
+    <button class="play">▶ 查看分集</button>`;
+  const star=card.querySelector('.star');
+  star.onclick=()=>{const i=podFavs.indexOf(feed); if(i>=0){podFavs.splice(i,1);star.classList.remove('on');star.textContent='☆';}else{podFavs.push(feed);star.classList.add('on');star.textContent='★';} savePodFavs();};
+  const tb=card.querySelector('.tbtn'); if(tb) tb.onclick=()=>window.open(tb.dataset.url,'_blank');
+  card.querySelector('.play').onclick=()=>openProgram(card,feed,p.collectionName||'');
+  $('#pgrid').appendChild(card);
+}
+async function openProgram(card,feed,name){
+  let eps=card.querySelector('.eps');
+  if(eps){ eps.remove(); return; }
+  const box=document.createElement('div'); box.className='eps'; box.innerHTML='<div class="status" style="padding:14px">加载分集中…</div>';
+  card.appendChild(box);
+  try{
+    const text=await fetchFeed(feed);
+    const items=parseFeed(text).slice(0,15);
+    if(!items.length){ box.innerHTML='<div class="status" style="padding:14px">这个源没有可播放的单集。</div>'; return; }
+    box.innerHTML='';
+    items.forEach(ep=>{
+      const row=document.createElement('div'); row.className='ep';
+      row.innerHTML=`<span class="ept">${esc(ep.title)}</span><span class="epm">${ep.date}${ep.dur?' · '+ep.dur:''}</span><button class="epp">▶</button>`;
+      row.querySelector('.epp').onclick=()=>startPlay({title:ep.title, sub:name, url:ep.url, star:false});
+      box.appendChild(row);
+    });
+  }catch(e){
+    box.innerHTML='<div class="status" style="padding:14px">分集加载失败（源跨域或网络受限）。可点节目名在 Apple Podcasts 打开收听。</div>';
+  }
+}
+$('#pq').addEventListener('input',debounce(()=>searchPodcasts($('#pq').value.trim()||'english learning'),400));
+document.querySelectorAll('#presets .tag').forEach(t=>t.addEventListener('click',()=>{
+  document.querySelectorAll('#presets .tag').forEach(x=>x.classList.remove('on'));
+  t.classList.add('on'); searchPodcasts(t.dataset.term);
+}));
+
+/* ---------- Tab 切换 ---------- */
+document.querySelectorAll('.tab').forEach(t=>t.onclick=()=>{
+  document.querySelectorAll('.tab').forEach(x=>x.classList.remove('on'));
+  t.classList.add('on');
+  const m=t.dataset.mode;
+  $('#radioView').style.display = m==='radio'?'block':'none';
+  $('#podcastView').style.display = m==='podcast'?'block':'none';
+  if(m==='podcast' && !podcastLoaded){ searchPodcasts('english learning'); podcastLoaded=true; }
+});
+
+// 支持外部通过 hash 指定初始 Tab（被 iframe 嵌入时，如 radio-station.html#podcast）
+(function(){
+  const h=(location.hash||'').replace('#','');
+  if(h==='podcast'){ const b=document.querySelector('.tab[data-mode="podcast"]'); if(b) b.click(); }
+})();
+
+/* ---------- 字幕：导入 .srt/.vtt 并显示、点击跟读 ---------- */
+let curSubs=[];
+function fmtTime(t){const m=Math.floor(t/60),s=Math.floor(t%60);return (m<10?'0':'')+m+':'+(s<10?'0':'')+s;}
+function parseSrt(text){
+  const out=[]; text=text.replace(/\r/g,'');
+  const re=/(\d{1,2}):(\d{2}):(\d{2})[,.](\d{3})\s*-->|(\d{1,2}):(\d{2})[,.](\d{3})\s*-->/;
+  text.split(/\n\s*\n/).forEach(block=>{
+    const lines=block.split('\n').filter(x=>x.trim()!=='');
+    let ti=lines.findIndex(l=>re.test(l));
+    if(ti<0) return;
+    const m=lines[ti].match(/(\d{1,2}):(\d{2})(?::(\d{2}))?[,.](\d{3})\s*-->/);
+    if(!m) return;
+    const t0=+m[1]*60 + (m[3]!==undefined?(+m[2]*60+ +m[3]): +m[2]) + (+m[4])/1000;
+    const txt=lines.slice(ti+1).join(' ').trim();
+    if(txt) out.push({t:t0,text:txt});
+  });
+  return out;
+}
+function parseVtt(text){
+  const out=[]; text=text.replace(/\r/g,'');
+  const re=/(\d{1,2}):(\d{2}):(\d{2})[,.](\d{3})\s*-->/;
+  text.split(/\n\s*\n/).forEach(block=>{
+    const lines=block.split('\n').filter(x=>x.trim()!=='');
+    const li=lines.findIndex(l=>re.test(l));
+    if(li<0) return;
+    const m=lines[li].match(/(\d{1,2}):(\d{2}):(\d{2})[,.](\d{3})/);
+    const t0=+m[1]*3600+ +m[2]*60 + +m[3] + (+m[4])/1000;
+    const txt=lines.slice(li+1).join(' ').trim();
+    if(txt) out.push({t:t0,text:txt});
+  });
+  return out;
+}
+function renderSubs(name){
+  const body=$('#subsBody');
+  $('#subsTitle').textContent='📝 字幕 · '+name+'（'+curSubs.length+' 句）';
+  $('#subsPanel').style.display='flex'; body.innerHTML='';
+  curSubs.forEach((s,i)=>{
+    const d=document.createElement('div'); d.className='sub';
+    d.innerHTML=`<span class="ts">${fmtTime(s.t)}</span><span>${esc(s.text)}</span>`;
+    d.onclick=()=>{ audio.currentTime=s.t; audio.play().catch(()=>{}); };
+    body.appendChild(d);
+  });
+}
+$('#impBtn').onclick=()=>$('#srtFile').click();
+$('#srtFile').addEventListener('change',e=>{
+  const f=e.target.files[0]; if(!f) return;
+  const rd=new FileReader();
+  rd.onload=()=>{ curSubs = f.name.toLowerCase().endsWith('.vtt')?parseVtt(rd.result):parseSrt(rd.result); renderSubs(f.name); };
+  rd.readAsText(f);
+  e.target.value='';
+});
+$('#subsClose').onclick=()=>{ $('#subsPanel').style.display='none'; curSubs=[]; };
+audio.addEventListener('timeupdate',()=>{
+  if(!curSubs.length) return;
+  const t=audio.currentTime; let cur=-1;
+  for(let i=0;i<curSubs.length;i++){ if(curSubs[i].t<=t) cur=i; else break; }
+  const els=document.querySelectorAll('#subsBody .sub');
+  els.forEach((el,i)=>el.classList.toggle('cur',i===cur));
+  if(cur>=0 && els[cur]) els[cur].scrollIntoView({block:'nearest'});
+});
+
+/* ---------- 音量记忆 ---------- */
+$('#vol').addEventListener('input',e=>{audio.volume=e.target.value;localStorage.setItem('ltr_radio_vol',e.target.value);});
+audio.volume=parseFloat(localStorage.getItem('ltr_radio_vol')||'0.8');
+$('#vol').value=audio.volume;
+</script>
+</body>
+</html>

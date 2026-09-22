@@ -1979,9 +1979,11 @@ button{font-family:inherit;}
     <button class="nav-item" data-tab="ltr"><span class="nav-ico">💛</span>了解 LTR</button>
     <button class="nav-item" data-tab="products"><span class="nav-ico">🛍️</span>我的产品</button>
     <button class="nav-item" data-tab="tools"><span class="nav-ico">🔧</span>教学工具</button>
+    <button class="nav-item" data-tab="assessment"><span class="nav-ico">📊</span>能力测评</button>
     <button class="nav-item" data-tab="teaching"><span class="nav-ico">🎓</span>教学管理</button>
     <button class="nav-item" data-tab="students"><span class="nav-ico">👨‍👩‍👧</span>学员管理</button>
     <button class="nav-item" data-tab="finance"><span class="nav-ico">💰</span>收支管理</button>
+    <a class="nav-item" href="media/index.html" style="text-decoration:none"><span class="nav-ico">🎧</span>视听资源</a>
   </nav>
   <div class="sidebar-foot">LTR 家庭英语<br>结构化读写 · 日拱一卒</div>
 </aside>
@@ -2600,10 +2602,30 @@ button{font-family:inherit;}
     <p class="tool-tip"><span class="dot"></span>点击卡片进入对应工具 · 数据保存在本地浏览器中</p>
   </section>
 
+  <!-- ========== 能力测评 ========== -->
+  <section class="tab-panel" id="assessment">
+    <div class="section-head">
+      <span class="sno">08</span>
+      <h2>能力测评</h2>
+      <span class="sub">LTR完整阅读能力诊断体系 · 10大测评模块 · 语音意识到词汇阅读</span>
+    </div>
+    <div class="tool-grid">
+      <a href="能力测评.html" class="tool-card tool-card--yellow">
+        <span class="tool-status status-ready">已完成</span>
+        <div class="tool-icon">📊</div>
+        <div class="tool-name">LTR能力测评</div>
+        <div class="tool-en">Assessing Reading: Multiple Measures</div>
+        <div class="tool-desc">完整英语阅读能力诊断体系，从语音意识到词汇阅读的全面评估</div>
+        <div class="tool-tags"><span class="tool-tag">语音意识</span><span class="tool-tag">拼读</span><span class="tool-tag">阅读流利度</span></div>
+      </a>
+    </div>
+    <p class="tool-tip"><span class="dot"></span>点击卡片进入测评工具 · 10大测评模块全面诊断学生阅读能力</p>
+  </section>
+
   <!-- ========== 收支管理 ========== -->
   <section class="tab-panel" id="finance">
     <div class="section-head">
-      <span class="sno">08</span>
+      <span class="sno">09</span>
       <h2>收支管理</h2>
       <span class="sub">简单记账 · 收入支出一目了然</span>
     </div>
@@ -3478,7 +3500,8 @@ document.querySelectorAll('.nav-item').forEach(item=>{
     document.querySelectorAll('.nav-item').forEach(i=>i.classList.remove('active'));
     document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
     item.classList.add('active');
-    document.getElementById(item.dataset.tab).classList.add('active');
+    const tp=item.dataset.tab&&document.getElementById(item.dataset.tab);
+    if(tp)tp.classList.add('active');
   });
 });
 

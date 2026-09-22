@@ -6031,11 +6031,13 @@ function wbExportReader(){
 // ---------- 内置书快捷直生成（书列表按钮直达，选组即出） ----------
 var wbQuickBook=null,wbQuickGroup=1,wbBackTarget='books';
 function wbGetBook(id){if(id==='wb-favs')return wbFavBook();for(var i=0;i<wbData.books.length;i++){if(wbData.books[i].id===id)return wbData.books[i];}return null;}
+function wbWhenReady(cb,tries){tries=tries||50;try{if(typeof wbLoad==='function'){if(!wbData||!Array.isArray(wbData.books)||!wbData.books.length){wbLoad();}}}catch(e){}if(wbData&&Array.isArray(wbData.books)&&wbData.books.length){cb();return;}if(tries<=0){wbToast('词典数据还在加载，请稍候再试');return;}setTimeout(function(){wbWhenReady(cb,tries-1);},200);}
 function wbBookAct(id,kind){
   if(id==='wb3600'||id==='wb1200'||id==='wb-favs'){wbQuickBook=id;wbQuickGroup=1;
-    if(kind==='reader')wbOpenReaderDirect();else wbOpenCardsDirect();}
+    wbWhenReady(function(){if(kind==='reader')wbOpenReaderDirect();else wbOpenCardsDirect();});}
   else{wbOpenBookGroup(id);}
 }
+
 function wbOpenReaderDirect(){
   wbBackTarget='books';
   switchTab('reader');

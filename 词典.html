@@ -6789,7 +6789,7 @@ const ART = {
 let words=clone(PRESETS), selected=2, stage=-1, playing=false, token=0, cancelPending=null, voices=[], parsed=null, editIndex=-1, draft=null, pendingMedia=0, toastTimer;
 function el(tag,text,cls){const n=document.createElement(tag);if(text!==undefined)n.textContent=text;if(cls)n.className=cls;return n;}
 function toast(text){$('toast').textContent=text;$('toast').hidden=false;clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('toast').hidden=true,5500);}
-function safeMedia(value,type){if(!value)return '';if(typeof value!=='string'||value.length>3e6)throw Error('图片或音频过大');const re=type==='image'?/^data:image\/(?:png|jpeg|webp);base64,[A-Za-z0-9+/=\s]+$/:/^data:audio\/[a-zA-Z0-9.+-]+;base64,[A-Za-z0-9+/=\s]+$/;if(!re.test(value))throw Error('媒体须为本地上传的图片或音频');return value;}
+function safeMedia(value,type){if(!value)return '';if(typeof value!=='string'||value.length>3e6)throw Error('图片或音频过大');const re=type==='image'?/^(?:data:image\/(?:png|jpeg|webp);base64,[A-Za-z0-9+/=\s]+|https?:\/\/[^\s"'<>]+|images\/[^\s"'<>]+|audio\/[^\s"'<>]+)$/:/^(?:data:audio\/[a-zA-Z0-9.+-]+;base64,[A-Za-z0-9+/=\s]+|https?:\/\/[^\s"'<>]+|images\/[^\s"'<>]+|audio\/[^\s"'<>]+)$/;if(!re.test(value))throw Error('媒体须为本地上传的图片或音频');return value;}
 function normalise(raw){
  if(typeof raw==='string')raw={word:raw};if(!raw||typeof raw!=='object')throw Error('词条格式不正确');
  const word=String(raw.word??raw['单词']??'').trim();if(!/^[a-zA-Z]+(?:[ '-][a-zA-Z]+)*$/.test(word)||word.length>40)throw Error('单词须为 1–40 个英文字母，可含空格、连字符或撇号');

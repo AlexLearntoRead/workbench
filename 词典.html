@@ -1802,6 +1802,9 @@ async function renderWordCard(word, prefetchedApi, bookWord) {
     // 3600词内但有道数据缺失的单词
     data = generateWordData(w);
     needFetch = true;
+  } else if (bookWord && (bookWord.meaning || bookWord.ipa)) {
+    // 书数据兜底：不在内置库的单词直接用书数据渲染，避免等待API
+    data = {word: w, phonetic: bookWord.ipa || '', pos: bookWord.pos || '', meaning: bookWord.meaning || '（暂无释义）', icon: '📝'};
   } else {
     // 非3600词，显示加载状态并从API获取
     container.innerHTML = '<div class="empty-state"><div class="icon">⏳</div><h2>正在查询...</h2><p>正在从词典API获取 ' + w + ' 的数据</p></div>';
